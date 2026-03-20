@@ -1,0 +1,71 @@
+/* PR Branch Name Badge */
+.better-github-branch-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--fgColor-accent, var(--color-accent-fg, #0969da));
+  background-color: var(
+    --bgColor-accent-muted,
+    var(--color-accent-subtle, #ddf4ff)
+  );
+  border-radius: 2em;
+  vertical-align: middle;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.better-github-branch-badge:hover {
+  background-color: var(
+    --bgColor-accent-emphasis,
+    var(--color-accent-emphasis, #0969da)
+  );
+  color: var(--fgColor-onEmphasis, var(--color-fg-on-emphasis, #fff));
+}
+
+.better-github-branch-copied {
+  background-color: var(
+    --bgColor-success-muted,
+    var(--color-success-subtle, #dafbe1)
+  ) !important;
+  color: var(--fgColor-success, var(--color-success-fg, #1a7f37)) !important;
+}
+
+/* PR Review Status Badge */
+.better-github-review-status {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  font-size: 12px;
+  line-height: 18px;
+  border-radius: 2em;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.better-github-review-resolved {
+  color: var(--fgColor-success, var(--color-success-fg, #1a7f37));
+  background-color: var(
+    --bgColor-success-muted,
+    var(--color-success-subtle, #dafbe1)
+  );
+}
+
+.better-github-review-unresolved {
+  color: var(--fgColor-attention, var(--color-attention-fg, #9a6700));
+  background-color: var(
+    --bgColor-attention-muted,
+    var(--color-attention-subtle, #fff8c5)
+  );
+}
+
+/* Releases Tab */
+.better-github-releases-tab {
+  /* Inherits styling from cloned tab element */
+}
