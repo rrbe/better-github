@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "build": "node build.mjs",
-    "watch": "node build.mjs --watch"
+    "watch": "node build.mjs --watch",
+    "pack": "node build.mjs && cd dist && zip -r ../better-github.zip . -x '*icon-preview*' && echo 'Packed: better-github.zip'"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.287",
