@@ -9,8 +9,13 @@ Another motivation: Refined GitHub has too many features tightly coupled to GitH
 ## Features
 
 - **PR Branch Names** — Display source branch name next to each PR title. Click to copy.
-- **PR Review Status** — Show review thread resolution status (resolved / unresolved) on the PR list. Requires a GitHub token.
+
+  <img src="docs/screenshots/branch-name-and-resolve-status.png" alt="PR Branch Names & Review Status" width="400" />
+
+- **PR Review Status** — Show review thread resolution status (resolved / unresolved) on the PR list. Only appears on PRs that have review threads; PRs without any review comments won't show a badge. Requires a GitHub token.
 - **Releases Tab** — Add a Releases tab to the repository navigation bar.
+
+   <img src="docs/screenshots/releases-tab.png" alt="Releases Tab" width="600" />
 
 All features can be individually toggled on/off in the extension options.
 
@@ -29,11 +34,5 @@ All features can be individually toggled on/off in the extension options.
 
 Right-click the extension icon → **Options**:
 
-- **GitHub Token** — Personal access token for private repos and review status. Needs `repo` scope. Token is validated on blur.
+- **GitHub Token** — A **classic** personal access token for private repos and review status. Needs `repo` scope. [Create one here](https://github.com/settings/tokens) (fine-grained tokens are not supported). Token is validated on blur.
 - **Feature Toggles** — Enable or disable each feature individually. Changes take effect immediately without refreshing.
-
-## Tech Stack
-
-- TypeScript + esbuild
-- Chrome Extension Manifest V3
-- GitHub REST & GraphQL API

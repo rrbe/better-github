@@ -8,8 +8,13 @@
 ## 功能
 
 - **PR 分支名显示** — 在 PR 标题旁显示源分支名，点击即可复制。
-- **PR Review 状态** — 在 PR 列表展示 review thread 的解决状态（已解决 / 未解决）。需要 GitHub Token。
+
+  <img src="docs/screenshots/branch-name-and-resolve-status.png" alt="PR 分支名与 Review 状态" width="400" />
+
+- **PR Review 状态** — 在 PR 列表展示 review thread 的解决状态（已解决 / 未解决）。仅在 PR 存在 review thread 时显示，没有 review 评论的 PR 不会出现标记，draft pr 也不会。
 - **Releases Tab** — 在仓库导航栏添加 Releases 标签页，快速访问。
+
+   <img src="docs/screenshots/releases-tab.png" alt="Releases Tab" width="600" />
 
 所有功能均可在扩展选项中单独开关。
 
@@ -28,11 +33,5 @@
 
 右键扩展图标 → **选项**：
 
-- **GitHub Token** — 用于访问私有仓库和获取 review 状态。需要 `repo` 权限。输入后失焦自动校验。
-- **功能开关** — 独立控制每个功能的启用/禁用，修改后即时生效，无需刷新页面。
-
-## 技术栈
-
-- TypeScript + esbuild
-- Chrome Extension Manifest V3
-- GitHub REST & GraphQL API
+- **GitHub Token** — 用于访问私有仓库和获取 review 状态。需要 **classic** 类型的 token，勾选 `repo` 权限。[点此创建](https://github.com/settings/tokens)。
+- **功能开关** — 独立控制每个功能的启用/禁用，修改后即时生效。
