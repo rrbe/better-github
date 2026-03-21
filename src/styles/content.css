@@ -65,6 +65,42 @@
   );
 }
 
+/* File Age Color — heat map for recent commits */
+:root {
+  --better-github-heat-color: #c24e00;
+}
+
+[data-better-github-heat="1"] {
+  color: color-mix(in srgb, var(--better-github-heat-color) 100%, var(--fgColor-muted, var(--color-fg-muted, #656d76))) !important;
+}
+[data-better-github-heat="2"] {
+  color: color-mix(in srgb, var(--better-github-heat-color) 90%, var(--fgColor-muted, var(--color-fg-muted, #656d76))) !important;
+}
+[data-better-github-heat="3"] {
+  color: color-mix(in srgb, var(--better-github-heat-color) 80%, var(--fgColor-muted, var(--color-fg-muted, #656d76))) !important;
+}
+[data-better-github-heat="4"] {
+  color: color-mix(in srgb, var(--better-github-heat-color) 70%, var(--fgColor-muted, var(--color-fg-muted, #656d76))) !important;
+}
+[data-better-github-heat="5"] {
+  color: color-mix(in srgb, var(--better-github-heat-color) 60%, var(--fgColor-muted, var(--color-fg-muted, #656d76))) !important;
+}
+[data-better-github-heat="6"] {
+  color: color-mix(in srgb, var(--better-github-heat-color) 50%, var(--fgColor-muted, var(--color-fg-muted, #656d76))) !important;
+}
+[data-better-github-heat="7"] {
+  color: color-mix(in srgb, var(--better-github-heat-color) 40%, var(--fgColor-muted, var(--color-fg-muted, #656d76))) !important;
+}
+[data-better-github-heat="8"] {
+  color: color-mix(in srgb, var(--better-github-heat-color) 30%, var(--fgColor-muted, var(--color-fg-muted, #656d76))) !important;
+}
+[data-better-github-heat="9"] {
+  color: color-mix(in srgb, var(--better-github-heat-color) 20%, var(--fgColor-muted, var(--color-fg-muted, #656d76))) !important;
+}
+[data-better-github-heat="10"] {
+  /* Oldest — stays default muted color, no override needed */
+}
+
 /* Releases Tab */
 .better-github-releases-tab {
   /* Inherits styling from cloned tab element */

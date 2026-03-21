@@ -45,6 +45,14 @@ export function isRepoPage(): boolean {
   return getRepoInfo() !== null;
 }
 
+export function isRepoTree(): boolean {
+  const info = getRepoInfo();
+  if (!info) return false;
+  // Matches repo root, /tree/branch, /tree/branch/path — but not /blob/, /pull/, etc.
+  const path = location.pathname.replace(/^\/[^/]+\/[^/]+/, "");
+  return path === "" || path === "/" || /^\/tree\//.test(path);
+}
+
 export function isReleasesPage(): boolean {
   const info = getRepoInfo();
   if (!info) return false;

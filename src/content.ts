@@ -2,6 +2,7 @@ import { onPageReady, startNavigation } from "./lib/navigation";
 import { injectPRBranchNames } from "./features/pr-branch-names";
 import { injectPRReviewStatus } from "./features/pr-review-status";
 import { injectReleasesTab } from "./features/release-tab";
+import { injectFileAgeColor } from "./features/file-age-color";
 
 const FEATURE_KEYS = [
   "feature-pr-branch-names",
@@ -82,6 +83,10 @@ if (isExtensionValid()) {
 
 // On each navigation, inject enabled features
 onPageReady(async () => {
+  // Always-on features
+  injectFileAgeColor();
+
+  // Toggleable features
   const flags = await getFeatureFlags();
   for (const key of FEATURE_KEYS) {
     if (flags[key]) {
