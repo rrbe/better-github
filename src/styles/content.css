@@ -2,7 +2,7 @@
 .better-github-info-row {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-end;
   gap: 6px;
   margin-top: 4px;
 }
@@ -10,15 +10,16 @@
 /* PR Branch Name Badge */
 .better-github-branch-badge {
   display: inline-block;
-  padding: 2px 8px;
+  padding: 0 7px;
   font-family:
     ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
   font-size: 12px;
+  font-weight: 500;
   line-height: 18px;
   color: var(--fgColor-accent, var(--color-accent-fg, #0969da));
   background-color: var(--bgColor-accent-muted, var(--color-accent-subtle, #ddf4ff));
+  border: 1px solid transparent;
   border-radius: 2em;
-  vertical-align: middle;
   max-width: 300px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -39,11 +40,12 @@
 /* PR Review Status Badge */
 .better-github-review-status {
   display: inline-block;
-  padding: 2px 8px;
+  padding: 0 7px;
   font-size: 12px;
+  font-weight: 500;
   line-height: 18px;
+  border: 1px solid transparent;
   border-radius: 2em;
-  vertical-align: middle;
   white-space: nowrap;
 }
 
