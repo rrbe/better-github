@@ -122,6 +122,23 @@
   /* Oldest — stays default muted color, no override needed */
 }
 
+/* PR Label Position — labels on a separate row below the title */
+.better-github-label-prefix {
+  display: block;
+  margin-top: 4px;
+}
+
+.better-github-label-prefix .IssueLabel {
+  margin-right: 4px;
+  font-size: 12px;
+  line-height: 18px;
+  padding: 0 7px;
+}
+
+.better-github-labels-hidden {
+  display: none !important;
+}
+
 /* Releases Tab */
 .better-github-releases-tab {
   /* Inherits styling from cloned tab element */

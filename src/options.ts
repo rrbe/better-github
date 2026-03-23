@@ -7,6 +7,7 @@ const FEATURE_KEYS = [
   "feature-pr-branch-names",
   "feature-pr-review-status",
   "feature-release-tab",
+  "feature-pr-label-position",
 ] as const;
 
 // --- Load saved settings ---

@@ -2,12 +2,14 @@ import { onPageReady, startNavigation } from "./lib/navigation";
 import { injectPRBranchNames } from "./features/pr-branch-names";
 import { injectPRReviewStatus } from "./features/pr-review-status";
 import { injectReleasesTab } from "./features/release-tab";
+import { injectPRLabelPosition, cleanupPRLabelPosition } from "./features/pr-label-position";
 import { injectFileAgeColor } from "./features/file-age-color";
 
 const FEATURE_KEYS = [
   "feature-pr-branch-names",
   "feature-pr-review-status",
   "feature-release-tab",
+  "feature-pr-label-position",
 ] as const;
 
 type FeatureKey = (typeof FEATURE_KEYS)[number];
@@ -17,6 +19,7 @@ const FEATURE_CLASSES: Record<FeatureKey, string[]> = {
   "feature-pr-branch-names": ["better-github-branch-badge"],
   "feature-pr-review-status": ["better-github-review-status"],
   "feature-release-tab": ["better-github-releases-tab"],
+  "feature-pr-label-position": ["better-github-label-prefix"],
 };
 
 function isExtensionValid(): boolean {
@@ -62,6 +65,9 @@ function injectFeature(key: FeatureKey): void {
     case "feature-release-tab":
       injectReleasesTab();
       break;
+    case "feature-pr-label-position":
+      injectPRLabelPosition();
+      break;
   }
 }
 
@@ -75,6 +81,9 @@ if (isExtensionValid()) {
       if (enabled) {
         injectFeature(key);
       } else {
+        if (key === "feature-pr-label-position") {
+          cleanupPRLabelPosition();
+        }
         removeFeatureElements(key);
       }
     }

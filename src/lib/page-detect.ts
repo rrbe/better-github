@@ -39,6 +39,14 @@ export function isPRListPage(): boolean {
   return /^\/[^/]+\/[^/]+\/pulls(\/)?(\?.*)?$/.test(location.pathname + location.search);
 }
 
+export function isIssueOrPRListPage(): boolean {
+  const info = getRepoInfo();
+  if (!info) return false;
+  return /^\/[^/]+\/[^/]+\/(pulls|issues)(\/)?(\?.*)?$/.test(
+    location.pathname + location.search,
+  );
+}
+
 export function isRepoPage(): boolean {
   return getRepoInfo() !== null;
 }
