@@ -10,18 +10,31 @@ Another motivation: Refined GitHub has too many features tightly coupled to GitH
 
 - **PR Branch Names** — Display source branch name next to each PR title. Click to copy.
 
-  <img src="docs/screenshots/branch-name-and-resolve-status.png" alt="PR Branch Names & Review Status" width="400" />
+   <details>
+      <summary>Screenshot</summary>
+      <img src="docs/screenshots/branch-name-and-resolve-status.png" alt="PR Branch Names & Review Status" width="600" />
+   </details>
 
-- **PR Review Status** — Show review thread resolution status (resolved / unresolved) on the PR list. Only appears on PRs that have review threads; PRs without any review comments won't show a badge. Requires a GitHub token.
-- **Releases Tab** — Add a Releases tab to the repository navigation bar.
+- **PR Review Status** — Show review thread resolution status (resolved / unresolved) on the PR list. Only appears on PRs that have review threads; PRs without any review comments won't show a badge. Draft PRs are also excluded.
+- **Releases Tab** — Add a Releases tab to the repository navigation bar for quick access.
 
-   <img src="docs/screenshots/releases-tab.png" alt="Releases Tab" width="600" />
+   <details>
+      <summary>Screenshot</summary>
+      <img src="docs/screenshots/releases-tab.png" alt="Releases Tab" width="600" />
+   </details>
+
+- **Recent Commit Message Color** — Highlight recent commits with color based on their age, making it easy to spot the latest changes.
+
+   <details>
+      <summary>Screenshot</summary>
+      <img src="docs/screenshots/recent-commit-message-color.png" alt="Recent Commit Message Color" width="600" />
+   </details>
 
 All features can be individually toggled on/off in the extension options.
 
 ## Install
 
-1. Clone the repo and install dependencies:
+1. Clone the repo and build:
 
    ```sh
    pnpm install
@@ -34,5 +47,5 @@ All features can be individually toggled on/off in the extension options.
 
 Right-click the extension icon → **Options**:
 
-- **GitHub Token** — A **classic** personal access token for private repos and review status. Needs `repo` scope. [Create one here](https://github.com/settings/tokens) (fine-grained tokens are not supported). Token is validated on blur.
-- **Feature Toggles** — Enable or disable each feature individually. Changes take effect immediately without refreshing.
+- **GitHub Token** — A **classic** personal access token for private repos and review status. Needs `repo` scope. [Create one here](https://github.com/settings/tokens).
+- **Feature Toggles** — Enable or disable each feature individually. Changes take effect immediately.
