@@ -1,5 +1,6 @@
 import { isPRListPage, getRepoInfo, getPRListParams } from "../lib/page-detect";
 import { fetchPRBranches } from "../lib/github-api";
+import { getOrCreateInfoRow } from "../lib/info-row";
 
 const BADGE_CLASS = "better-github-branch-badge";
 
@@ -31,14 +32,11 @@ export async function injectPRBranchNames(): Promise<void> {
     const branchName = branchMap.get(prNumber);
     if (!branchName) continue;
 
-    // Find the title link area to append badge
-    const titleLink =
-      row.querySelector<HTMLElement>("[id^='issue_'][id$='_link']") ||
-      row.querySelector<HTMLElement>("a.Link--primary");
-    if (!titleLink) continue;
-
     // Don't inject if already present
-    if (titleLink.parentElement?.querySelector(`.${BADGE_CLASS}`)) continue;
+    if (row.querySelector(`.${BADGE_CLASS}`)) continue;
+
+    const infoRow = getOrCreateInfoRow(row);
+    if (!infoRow) continue;
 
     const badge = document.createElement("span");
     badge.className = BADGE_CLASS;
@@ -62,6 +60,6 @@ export async function injectPRBranchNames(): Promise<void> {
       }
     });
 
-    titleLink.insertAdjacentElement("afterend", badge);
+    infoRow.appendChild(badge);
   }
 }

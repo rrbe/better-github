@@ -1,13 +1,14 @@
 import { isIssueOrPRListPage } from "../lib/page-detect";
+import { getOrCreateInfoRow } from "../lib/info-row";
 
-const LABEL_ROW_CLASS = "better-github-label-prefix";
+const LABEL_WRAPPER_CLASS = "better-github-label-prefix";
 const HIDDEN_ORIGINAL_CLASS = "better-github-labels-hidden";
 
 export function injectPRLabelPosition(): void {
 	if (!isIssueOrPRListPage()) return;
 
 	// Skip if already injected
-	if (document.querySelectorAll(`.${LABEL_ROW_CLASS}`).length > 0) return;
+	if (document.querySelectorAll(`.${LABEL_WRAPPER_CLASS}`).length > 0) return;
 
 	const rows = document.querySelectorAll("[id^='issue_']");
 
@@ -15,31 +16,20 @@ export function injectPRLabelPosition(): void {
 		const labels = row.querySelectorAll<HTMLAnchorElement>("a.IssueLabel");
 		if (labels.length === 0) continue;
 
-		const titleLink =
-			row.querySelector<HTMLElement>("[id^='issue_'][id$='_link']") ||
-			row.querySelector<HTMLElement>("a.Link--primary");
-		if (!titleLink) continue;
+		const infoRow = getOrCreateInfoRow(row);
+		if (!infoRow) continue;
 
-		const labelRow = document.createElement("div");
-		labelRow.className = LABEL_ROW_CLASS;
+		const wrapper = document.createElement("span");
+		wrapper.className = LABEL_WRAPPER_CLASS;
 
 		for (const label of labels) {
 			const clone = label.cloneNode(true) as HTMLElement;
-			labelRow.appendChild(clone);
+			wrapper.appendChild(clone);
 			label.classList.add(HIDDEN_ORIGINAL_CLASS);
 		}
 
-		// Find the meta line (contains "opened X ago") using relative-time element
-		const relativeTime = row.querySelector("relative-time");
-		const metaLine = relativeTime?.closest("div");
-
-		if (metaLine && row.contains(metaLine) && metaLine !== row) {
-			// Insert after the meta line — labels become the 3rd line
-			metaLine.insertAdjacentElement("afterend", labelRow);
-		} else {
-			// Fallback: insert after title link
-			titleLink.insertAdjacentElement("afterend", labelRow);
-		}
+		// Insert labels at the beginning of the info row (before branch/review badges)
+		infoRow.insertBefore(wrapper, infoRow.firstChild);
 	}
 }
 

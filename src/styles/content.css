@@ -1,7 +1,15 @@
+/* Shared info row below the meta line */
+.better-github-info-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
 /* PR Branch Name Badge */
 .better-github-branch-badge {
   display: inline-block;
-  margin-left: 8px;
   padding: 2px 8px;
   font-family:
     ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
@@ -31,7 +39,6 @@
 /* PR Review Status Badge */
 .better-github-review-status {
   display: inline-block;
-  margin-left: 8px;
   padding: 2px 8px;
   font-size: 12px;
   line-height: 18px;
@@ -122,18 +129,12 @@
   /* Oldest — stays default muted color, no override needed */
 }
 
-/* PR Label Position — labels on a separate row below the title */
+/* PR Label Position */
 .better-github-label-prefix {
-  display: block;
-  margin-top: 4px;
+  display: inline-flex;
+  gap: 6px;
 }
 
-.better-github-label-prefix .IssueLabel {
-  margin-right: 4px;
-  font-size: 12px;
-  line-height: 18px;
-  padding: 0 7px;
-}
 
 .better-github-labels-hidden {
   display: none !important;

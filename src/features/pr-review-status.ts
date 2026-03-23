@@ -1,5 +1,6 @@
 import { isPRListPage, getRepoInfo } from "../lib/page-detect";
 import { fetchPRReviewStatuses } from "../lib/github-api";
+import { getOrCreateInfoRow } from "../lib/info-row";
 
 const STATUS_CLASS = "better-github-review-status";
 
@@ -37,12 +38,10 @@ export async function injectPRReviewStatus(): Promise<void> {
     const status = statusMap.get(prNumber);
     if (!status || status.totalThreads === 0) continue;
 
-    const titleLink =
-      row.querySelector<HTMLElement>("[id^='issue_'][id$='_link']") ||
-      row.querySelector<HTMLElement>("a.Link--primary");
-    if (!titleLink) continue;
+    if (row.querySelector(`.${STATUS_CLASS}`)) continue;
 
-    if (titleLink.parentElement?.querySelector(`.${STATUS_CLASS}`)) continue;
+    const infoRow = getOrCreateInfoRow(row);
+    if (!infoRow) continue;
 
     const badge = document.createElement("span");
     badge.className = STATUS_CLASS;
@@ -60,9 +59,6 @@ export async function injectPRReviewStatus(): Promise<void> {
       badge.title = `${status.resolvedThreads}/${status.totalThreads} review thread(s) resolved`;
     }
 
-    // Insert after the last badge (branch name badge or title link)
-    const branchBadge = titleLink.parentElement?.querySelector(".better-github-branch-badge");
-    const insertAfter = branchBadge || titleLink;
-    insertAfter.insertAdjacentElement("afterend", badge);
+    infoRow.appendChild(badge);
   }
 }
