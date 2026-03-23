@@ -35,9 +35,10 @@ export function injectReleasesTab(): void {
   releasesTab.classList.add(TAB_CLASS);
 
   // Fix the link
-  const link = releasesTab.tagName === "A"
-    ? releasesTab as HTMLAnchorElement
-    : releasesTab.querySelector("a");
+  const link =
+    releasesTab.tagName === "A"
+      ? (releasesTab as HTMLAnchorElement)
+      : releasesTab.querySelector("a");
 
   if (!link) return;
 
@@ -52,7 +53,9 @@ export function injectReleasesTab(): void {
   });
 
   // Remove counter if cloned
-  releasesTab.querySelectorAll(".Counter, [data-view-component].Counter").forEach((el) => el.remove());
+  releasesTab
+    .querySelectorAll(".Counter, [data-view-component].Counter")
+    .forEach((el) => el.remove());
 
   // Replace SVG icon with tag icon
   const svg = releasesTab.querySelector("svg");

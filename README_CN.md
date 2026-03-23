@@ -9,12 +9,25 @@
 
 - **PR 分支名显示** — 在 PR 标题旁显示源分支名，点击即可复制。
 
-  <img src="docs/screenshots/branch-name-and-resolve-status.png" alt="PR 分支名与 Review 状态" width="400" />
+   <details>
+      <summary>示例截图</summary>
+      <img src="docs/screenshots/branch-name-and-resolve-status.png" alt="PR 分支名与 Review 状态" width="600" />
+   </details>
 
 - **PR Review 状态** — 在 PR 列表展示 review thread 的解决状态（已解决 / 未解决）。仅在 PR 存在 review thread 时显示，没有 review 评论的 PR 不会出现标记，draft pr 也不会。
 - **Releases Tab** — 在仓库导航栏添加 Releases 标签页，快速访问。
 
-   <img src="docs/screenshots/releases-tab.png" alt="Releases Tab" width="600" />
+   <details>
+      <summary>示例截图</summary>
+      <img src="docs/screenshots/releases-tab.png" alt="Releases Tab" width="600" />
+   </details>
+
+- **最近提交 Commit Message 颜色** — 根据提交时间为最近的几个 commit message 添加颜色，帮助快速定位最新提交。
+
+   <details>
+      <summary>示例截图</summary>
+      <img src="docs/screenshots/recent-commit-message-color.png" alt="最近提交 Commit Message 颜色" width="600" />
+   </details>
 
 所有功能均可在扩展选项中单独开关。
 

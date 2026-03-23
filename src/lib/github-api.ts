@@ -10,10 +10,7 @@ export interface PRReviewStatus {
 }
 
 const cache = new Map<string, { data: PRBranchInfo[]; timestamp: number }>();
-const reviewCache = new Map<
-  string,
-  { data: PRReviewStatus[]; timestamp: number }
->();
+const reviewCache = new Map<string, { data: PRReviewStatus[]; timestamp: number }>();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 function getToken(): Promise<string> {
@@ -33,7 +30,7 @@ export async function fetchPRBranches(
   owner: string,
   repo: string,
   state: string = "open",
-  page: number = 1
+  page: number = 1,
 ): Promise<PRBranchInfo[]> {
   const cacheKey = `${owner}/${repo}:${state}:${page}`;
   const cached = cache.get(cacheKey);
@@ -55,14 +52,11 @@ export async function fetchPRBranches(
   const response = await fetch(url, { headers });
 
   if (!response.ok) {
-    console.error(
-      `[Better GitHub] API error: ${response.status} ${response.statusText}`
-    );
+    console.error(`[Better GitHub] API error: ${response.status} ${response.statusText}`);
     return [];
   }
 
-  const pulls: Array<{ number: number; head: { ref: string } }> =
-    await response.json();
+  const pulls: Array<{ number: number; head: { ref: string } }> = await response.json();
   const data = pulls.map((pr) => ({
     number: pr.number,
     headRef: pr.head.ref,
@@ -75,7 +69,7 @@ export async function fetchPRBranches(
 export async function fetchPRReviewStatuses(
   owner: string,
   repo: string,
-  prNumbers: number[]
+  prNumbers: number[],
 ): Promise<PRReviewStatus[]> {
   if (prNumbers.length === 0) return [];
 
@@ -96,7 +90,7 @@ export async function fetchPRReviewStatuses(
         totalCount
         nodes { isResolved }
       }
-    }`
+    }`,
     )
     .join("\n");
 
@@ -120,9 +114,7 @@ ${prQueries}
     });
 
     if (!response.ok) {
-      console.error(
-        `[Better GitHub] GraphQL error: ${response.status} ${response.statusText}`
-      );
+      console.error(`[Better GitHub] GraphQL error: ${response.status} ${response.statusText}`);
       return [];
     }
 
@@ -141,9 +133,9 @@ ${prQueries}
         if (!pr) return null;
         const threads = pr.reviewThreads;
         const totalThreads = threads.totalCount;
-        const resolvedThreads = (
-          threads.nodes as Array<{ isResolved: boolean }>
-        ).filter((t) => t.isResolved).length;
+        const resolvedThreads = (threads.nodes as Array<{ isResolved: boolean }>).filter(
+          (t) => t.isResolved,
+        ).length;
         return { number: n, totalThreads, resolvedThreads };
       })
       .filter((s): s is PRReviewStatus => s !== null);

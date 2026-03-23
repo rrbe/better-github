@@ -1,86 +1,218 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <style>
-    body { width: 360px; padding: 16px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-size: 14px; color: #24292f; }
-    h2 { margin: 0 0 12px; font-size: 16px; }
-    label { display: block; margin-bottom: 4px; font-weight: 600; }
-    input[type="password"] { width: 100%; padding: 6px 8px; border: 1px solid #d0d7de; border-radius: 6px; font-size: 13px; box-sizing: border-box; }
-    input[type="password"]:focus { outline: none; border-color: #0969da; box-shadow: 0 0 0 3px rgba(9,105,218,0.3); }
-    .hint { margin-top: 4px; font-size: 12px; color: #656d76; }
-    .hint a { color: #0969da; text-decoration: none; }
-    .hint a:hover { text-decoration: underline; }
-    .token-status { margin-top: 6px; font-size: 12px; display: none; }
-    .token-status.valid { display: block; color: #1a7f37; }
-    .token-status.invalid { display: block; color: #cf222e; }
-    .token-status.checking { display: block; color: #656d76; }
-    .status { margin-top: 8px; font-size: 13px; color: #1a7f37; display: none; }
-    button { margin-top: 12px; padding: 6px 16px; background: #2da44e; color: #fff; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; }
-    button:hover { background: #218838; }
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        width: 360px;
+        padding: 16px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        font-size: 14px;
+        color: #24292f;
+      }
+      h2 {
+        margin: 0 0 12px;
+        font-size: 16px;
+      }
+      label {
+        display: block;
+        margin-bottom: 4px;
+        font-weight: 600;
+      }
+      input[type="password"] {
+        width: 100%;
+        padding: 6px 8px;
+        border: 1px solid #d0d7de;
+        border-radius: 6px;
+        font-size: 13px;
+        box-sizing: border-box;
+      }
+      input[type="password"]:focus {
+        outline: none;
+        border-color: #0969da;
+        box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.3);
+      }
+      .hint {
+        margin-top: 4px;
+        font-size: 12px;
+        color: #656d76;
+      }
+      .hint a {
+        color: #0969da;
+        text-decoration: none;
+      }
+      .hint a:hover {
+        text-decoration: underline;
+      }
+      .token-status {
+        margin-top: 6px;
+        font-size: 12px;
+        display: none;
+      }
+      .token-status.valid {
+        display: block;
+        color: #1a7f37;
+      }
+      .token-status.invalid {
+        display: block;
+        color: #cf222e;
+      }
+      .token-status.checking {
+        display: block;
+        color: #656d76;
+      }
+      .status {
+        margin-top: 8px;
+        font-size: 13px;
+        color: #1a7f37;
+        display: none;
+      }
+      button {
+        margin-top: 12px;
+        padding: 6px 16px;
+        background: #2da44e;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 13px;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #218838;
+      }
 
-    /* Feature toggles */
-    .section-title { margin: 20px 0 8px; font-size: 14px; font-weight: 600; border-top: 1px solid #d0d7de; padding-top: 16px; }
-    .feature-list { list-style: none; padding: 0; margin: 0; }
-    .feature-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid #d8dee4; }
-    .feature-item:last-child { border-bottom: none; }
-    .feature-info { flex: 1; min-width: 0; }
-    .feature-name { font-size: 13px; font-weight: 600; color: #24292f; }
-    .feature-desc { font-size: 12px; color: #656d76; margin-top: 2px; }
+      /* Feature toggles */
+      .section-title {
+        margin: 20px 0 8px;
+        font-size: 14px;
+        font-weight: 600;
+        border-top: 1px solid #d0d7de;
+        padding-top: 16px;
+      }
+      .feature-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .feature-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 10px 0;
+        border-bottom: 1px solid #d8dee4;
+      }
+      .feature-item:last-child {
+        border-bottom: none;
+      }
+      .feature-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .feature-name {
+        font-size: 13px;
+        font-weight: 600;
+        color: #24292f;
+      }
+      .feature-desc {
+        font-size: 12px;
+        color: #656d76;
+        margin-top: 2px;
+      }
 
-    /* Toggle switch */
-    .toggle { position: relative; width: 40px; height: 22px; flex-shrink: 0; margin-top: 1px; }
-    .toggle input { opacity: 0; width: 0; height: 0; }
-    .toggle .slider { position: absolute; inset: 0; background: #d0d7de; border-radius: 11px; cursor: pointer; transition: background 0.2s; }
-    .toggle .slider::before { content: ""; position: absolute; width: 16px; height: 16px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: transform 0.2s; }
-    .toggle input:checked + .slider { background: #2da44e; }
-    .toggle input:checked + .slider::before { transform: translateX(18px); }
-  </style>
-</head>
-<body>
-  <h2>Better GitHub Settings</h2>
+      /* Toggle switch */
+      .toggle {
+        position: relative;
+        width: 40px;
+        height: 22px;
+        flex-shrink: 0;
+        margin-top: 1px;
+      }
+      .toggle input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .toggle .slider {
+        position: absolute;
+        inset: 0;
+        background: #d0d7de;
+        border-radius: 11px;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      .toggle .slider::before {
+        content: "";
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        left: 3px;
+        top: 3px;
+        background: #fff;
+        border-radius: 50%;
+        transition: transform 0.2s;
+      }
+      .toggle input:checked + .slider {
+        background: #2da44e;
+      }
+      .toggle input:checked + .slider::before {
+        transform: translateX(18px);
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Better GitHub Settings</h2>
 
-  <label for="token">GitHub Personal Access Token</label>
-  <input type="password" id="token" placeholder="ghp_xxxxxxxxxxxx">
-  <div id="tokenStatus" class="token-status"></div>
-  <div class="hint">Required for private repos. Needs <code>repo</code> scope. <a href="https://github.com/settings/tokens" target="_blank">Create a classic token →</a></div>
-  <button id="save">Save</button>
-  <div class="status" id="status">Saved!</div>
+    <label for="token">GitHub Personal Access Token</label>
+    <input type="password" id="token" placeholder="ghp_xxxxxxxxxxxx" />
+    <div id="tokenStatus" class="token-status"></div>
+    <div class="hint">
+      Required for private repos. Needs <code>repo</code> scope.
+      <a href="https://github.com/settings/tokens" target="_blank">Create a classic token →</a>
+    </div>
+    <button id="save">Save</button>
+    <div class="status" id="status">Saved!</div>
 
-  <div class="section-title">Features</div>
-  <ul class="feature-list">
-    <li class="feature-item">
-      <div class="feature-info">
-        <div class="feature-name">PR Branch Names</div>
-        <div class="feature-desc">Display source branch name next to each PR title. Click the badge to copy.</div>
-      </div>
-      <label class="toggle">
-        <input type="checkbox" id="feature-pr-branch-names" checked>
-        <span class="slider"></span>
-      </label>
-    </li>
-    <li class="feature-item">
-      <div class="feature-info">
-        <div class="feature-name">PR Review Status</div>
-        <div class="feature-desc">Show review thread resolution status (resolved / unresolved) on the PR list. Requires a token.</div>
-      </div>
-      <label class="toggle">
-        <input type="checkbox" id="feature-pr-review-status" checked>
-        <span class="slider"></span>
-      </label>
-    </li>
-    <li class="feature-item">
-      <div class="feature-info">
-        <div class="feature-name">Releases Tab</div>
-        <div class="feature-desc">Add a Releases tab to the repository navigation bar for quick access.</div>
-      </div>
-      <label class="toggle">
-        <input type="checkbox" id="feature-release-tab" checked>
-        <span class="slider"></span>
-      </label>
-    </li>
-  </ul>
+    <div class="section-title">Features</div>
+    <ul class="feature-list">
+      <li class="feature-item">
+        <div class="feature-info">
+          <div class="feature-name">PR Branch Names</div>
+          <div class="feature-desc">
+            Display source branch name next to each PR title. Click the badge to copy.
+          </div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="feature-pr-branch-names" checked />
+          <span class="slider"></span>
+        </label>
+      </li>
+      <li class="feature-item">
+        <div class="feature-info">
+          <div class="feature-name">PR Review Status</div>
+          <div class="feature-desc">
+            Show review thread resolution status (resolved / unresolved) on the PR list. Requires a
+            token.
+          </div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="feature-pr-review-status" checked />
+          <span class="slider"></span>
+        </label>
+      </li>
+      <li class="feature-item">
+        <div class="feature-info">
+          <div class="feature-name">Releases Tab</div>
+          <div class="feature-desc">
+            Add a Releases tab to the repository navigation bar for quick access.
+          </div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="feature-release-tab" checked />
+          <span class="slider"></span>
+        </label>
+      </li>
+    </ul>
 
-  <script src="options.js"></script>
-</body>
+    <script src="options.js"></script>
+  </body>
 </html>

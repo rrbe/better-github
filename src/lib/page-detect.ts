@@ -36,9 +36,7 @@ export function isPRListPage(): boolean {
   const info = getRepoInfo();
   if (!info) return false;
   // Match /{owner}/{repo}/pulls or /{owner}/{repo}/pulls?...
-  return /^\/[^/]+\/[^/]+\/pulls(\/)?(\?.*)?$/.test(
-    location.pathname + location.search
-  );
+  return /^\/[^/]+\/[^/]+\/pulls(\/)?(\?.*)?$/.test(location.pathname + location.search);
 }
 
 export function isRepoPage(): boolean {

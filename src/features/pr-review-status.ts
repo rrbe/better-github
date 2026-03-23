@@ -23,11 +23,7 @@ export async function injectPRReviewStatus(): Promise<void> {
 
   if (prNumbers.length === 0) return;
 
-  const statuses = await fetchPRReviewStatuses(
-    info.owner,
-    info.repo,
-    prNumbers
-  );
+  const statuses = await fetchPRReviewStatuses(info.owner, info.repo, prNumbers);
 
   if (statuses.length === 0) return;
 
@@ -65,9 +61,7 @@ export async function injectPRReviewStatus(): Promise<void> {
     }
 
     // Insert after the last badge (branch name badge or title link)
-    const branchBadge = titleLink.parentElement?.querySelector(
-      ".better-github-branch-badge"
-    );
+    const branchBadge = titleLink.parentElement?.querySelector(".better-github-branch-badge");
     const insertAfter = branchBadge || titleLink;
     insertAfter.insertAdjacentElement("afterend", badge);
   }

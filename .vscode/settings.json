@@ -1,0 +1,8 @@
+{
+  "editor.defaultFormatter": "oxc.oxc-vscode",
+  "oxc.enable.oxfmt": true,
+  "editor.formatOnSave": true,
+  "[markdown]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  }
+}

@@ -8,9 +8,7 @@
     "page": "options.html",
     "open_in_tab": false
   },
-  "host_permissions": [
-    "https://api.github.com/*"
-  ],
+  "host_permissions": ["https://api.github.com/*"],
   "content_scripts": [
     {
       "matches": ["https://github.com/*"],

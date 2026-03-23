@@ -10,19 +10,16 @@ const FEATURE_KEYS = [
 ] as const;
 
 // --- Load saved settings ---
-chrome.storage.local.get(
-  ["githubToken", ...FEATURE_KEYS],
-  (result) => {
-    if (result.githubToken) {
-      tokenInput.value = result.githubToken;
-    }
-    for (const key of FEATURE_KEYS) {
-      const checkbox = document.getElementById(key) as HTMLInputElement;
-      // Default to enabled if not explicitly set
-      checkbox.checked = result[key] !== false;
-    }
+chrome.storage.local.get(["githubToken", ...FEATURE_KEYS], (result) => {
+  if (result.githubToken) {
+    tokenInput.value = result.githubToken;
   }
-);
+  for (const key of FEATURE_KEYS) {
+    const checkbox = document.getElementById(key) as HTMLInputElement;
+    // Default to enabled if not explicitly set
+    checkbox.checked = result[key] !== false;
+  }
+});
 
 // --- Token validation on blur ---
 let lastValidatedToken = "";

@@ -13,8 +13,7 @@ function getHeatIndex(dateMs: number): number {
 function colorizeElement(el: HTMLElement): void {
   if (el.dataset.betterGithubHeat) return;
 
-  const datetime =
-    el.getAttribute("datetime") || el.getAttribute("title") || "";
+  const datetime = el.getAttribute("datetime") || el.getAttribute("title") || "";
   const dateMs = new Date(datetime).getTime();
   if (isNaN(dateMs)) return;
 
@@ -23,9 +22,7 @@ function colorizeElement(el: HTMLElement): void {
 
 function colorizeAll(): void {
   document
-    .querySelectorAll<HTMLElement>(
-      ".react-directory-commit-age relative-time"
-    )
+    .querySelectorAll<HTMLElement>(".react-directory-commit-age relative-time")
     .forEach(colorizeElement);
 }
 
@@ -48,19 +45,14 @@ export function injectFileAgeColor(): void {
         if (!(node instanceof HTMLElement)) continue;
 
         // The added node itself might be a relative-time
-        if (
-          node.tagName === "RELATIVE-TIME" &&
-          node.closest(".react-directory-commit-age")
-        ) {
+        if (node.tagName === "RELATIVE-TIME" && node.closest(".react-directory-commit-age")) {
           colorizeElement(node);
           continue;
         }
 
         // Or it might contain relative-time descendants
         node
-          .querySelectorAll<HTMLElement>(
-            ".react-directory-commit-age relative-time"
-          )
+          .querySelectorAll<HTMLElement>(".react-directory-commit-age relative-time")
           .forEach(colorizeElement);
       }
     }

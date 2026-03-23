@@ -10,6 +10,8 @@
   "devDependencies": {
     "@types/chrome": "^0.0.287",
     "esbuild": "^0.24.0",
+    "oxfmt": "^0.41.0",
+    "oxlint": "^1.56.0",
     "typescript": "^5.7.0"
   }
 }
