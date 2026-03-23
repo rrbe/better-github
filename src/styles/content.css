@@ -132,11 +132,20 @@
 }
 
 /* PR Label Position */
+@keyframes better-github-detect-labels {
+  from { }
+  to { }
+}
+
+/* New React DOM: trigger animation when trailing badges container appears */
+[class*="trailingBadgesContainer"]:not(:empty) {
+  animation: better-github-detect-labels 1ms !important;
+}
+
 .better-github-label-prefix {
   display: inline-flex;
   gap: 6px;
 }
-
 
 .better-github-labels-hidden {
   display: none !important;
