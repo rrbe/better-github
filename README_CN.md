@@ -11,25 +11,45 @@
 
    <details>
       <summary>示例截图</summary>
-      <img src="docs/screenshots/branch-name-and-resolve-status.png" alt="PR 分支名与 Review 状态" width="600" />
+      <img src="docs/screenshots/pr-branch-name.png" alt="PR 分支名与 Review 状态" width="600" />
    </details>
 
 - **PR Review 状态** — 在 PR 列表展示 review thread 的解决状态（已解决 / 未解决）。仅在 PR 存在 review thread 时显示，没有 review 评论的 PR 不会出现标记，draft pr 也不会。
+
+   <details>
+      <summary>示例截图</summary>
+      <img src="docs/screenshots/pr-review-status.png" alt="PR Review 状态" width="430" />
+   </details>
+
 - **Releases Tab** — 在仓库导航栏添加 Releases 标签页，快速访问。
 
    <details>
       <summary>示例截图</summary>
-      <img src="docs/screenshots/releases-tab.png" alt="Releases Tab" width="600" />
+      <img src="docs/screenshots/releases-tab.png" alt="Releases Tab" width="800" />
    </details>
 
-- **最近提交 Commit Message 颜色** — 根据提交时间为最近的几个 commit message 添加颜色，帮助快速定位最新提交。
+- **PR Label 前置** — 将 PR 标签移到标题前方，提升可读性和浏览效率。
 
    <details>
       <summary>示例截图</summary>
-      <img src="docs/screenshots/recent-commit-message-color.png" alt="最近提交 Commit Message 颜色" width="600" />
+      <img src="docs/screenshots/pr-label-position.png" alt="PR Label 前置" width="500" />
    </details>
 
-所有功能均可在扩展选项中单独开关。
+- **PR 快速 Approve** — 在 PR 详情页的 Reviewers 侧边栏添加"approve now"快捷按钮，快速通过 PR。需要 token。
+
+   <details>
+      <summary>示例截图</summary>
+      <img src="docs/screenshots/pr-quick-approve.png" alt="PR 快速 Approve" width="300" />
+   </details>
+
+- **最近提交 Commit Message 颜色** — 根据提交时间为最近的几个 commit message 添加颜色，帮助快速定位最新提交。此功能默认开启，不可关闭。
+
+   <details>
+      <summary>示例截图</summary>
+      <img src="docs/screenshots/file-age-color.png" alt="最近修改文件颜色" width="600" />
+   </details>
+
+除"最近提交 Commit Message 颜色"外，所有功能均可在扩展选项中单独开关。
 
 ## 安装
 
