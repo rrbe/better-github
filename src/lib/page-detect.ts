@@ -65,6 +65,17 @@ export function isReleasesPage(): boolean {
   return /^\/[^/]+\/[^/]+\/releases/.test(location.pathname);
 }
 
+export function isPRDetailPage(): boolean {
+  const info = getRepoInfo();
+  if (!info) return false;
+  return /^\/[^/]+\/[^/]+\/pull\/\d+/.test(location.pathname);
+}
+
+export function getPRNumber(): number | null {
+  const match = location.pathname.match(/^\/[^/]+\/[^/]+\/pull\/(\d+)/);
+  return match ? parseInt(match[1], 10) : null;
+}
+
 export function getPRListParams(): {
   state: string;
   page: number;

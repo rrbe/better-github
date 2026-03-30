@@ -151,6 +151,106 @@
   display: none !important;
 }
 
+/* PR Approve Now */
+.better-github-approve-now {
+  font-size: 12px;
+  font-weight: normal;
+  color: var(--fgColor-muted, var(--color-fg-muted, #656d76)) !important;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.better-github-approve-now:hover {
+  color: var(--fgColor-muted, var(--color-fg-muted, #656d76)) !important;
+  text-decoration: underline;
+}
+
+/* Approve Dialog */
+.better-github-approve-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.better-github-approve-dialog {
+  background: var(--bgColor-default, var(--color-canvas-default, #fff));
+  border: 1px solid var(--borderColor-default, var(--color-border-default, #d0d7de));
+  border-radius: 12px;
+  padding: 24px;
+  width: 400px;
+  max-width: 90vw;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.better-github-approve-dialog h3 {
+  margin: 0 0 16px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--fgColor-default, var(--color-fg-default, #24292f));
+}
+
+.better-github-approve-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--borderColor-default, var(--color-border-default, #d0d7de));
+  border-radius: 6px;
+  font-size: 14px;
+  background: var(--bgColor-default, var(--color-canvas-default, #fff));
+  color: var(--fgColor-default, var(--color-fg-default, #24292f));
+  box-sizing: border-box;
+}
+
+.better-github-approve-input:focus {
+  outline: none;
+  border-color: var(--fgColor-accent, var(--color-accent-fg, #0969da));
+  box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.3);
+}
+
+.better-github-approve-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.better-github-approve-cancel {
+  padding: 6px 16px;
+  border: 1px solid var(--borderColor-default, var(--color-border-default, #d0d7de));
+  border-radius: 6px;
+  background: var(--bgColor-default, var(--color-canvas-default, #fff));
+  color: var(--fgColor-default, var(--color-fg-default, #24292f));
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.better-github-approve-cancel:hover {
+  background: var(--bgColor-muted, var(--color-canvas-subtle, #f6f8fa));
+}
+
+.better-github-approve-submit {
+  padding: 6px 16px;
+  border: none;
+  border-radius: 6px;
+  background: #2da44e;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.better-github-approve-submit:hover {
+  background: #218838;
+}
+
+.better-github-approve-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* Releases Tab */
 .better-github-releases-tab {
   /* Inherits styling from cloned tab element */

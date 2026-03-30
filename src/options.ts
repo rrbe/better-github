@@ -8,6 +8,7 @@ const FEATURE_KEYS = [
   "feature-pr-review-status",
   "feature-release-tab",
   "feature-pr-label-position",
+  "feature-pr-approve-now",
 ] as const;
 
 // --- Load saved settings ---

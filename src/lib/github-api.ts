@@ -9,6 +9,11 @@ export interface PRReviewStatus {
   resolvedThreads: number;
 }
 
+export interface PRApproveResult {
+  success: boolean;
+  error?: string;
+}
+
 const cache = new Map<string, { data: PRBranchInfo[]; timestamp: number }>();
 const reviewCache = new Map<string, { data: PRReviewStatus[]; timestamp: number }>();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
@@ -145,5 +150,41 @@ ${prQueries}
   } catch (err) {
     console.error("[Better GitHub] Failed to fetch review statuses:", err);
     return [];
+  }
+}
+
+export async function approvePR(
+  owner: string,
+  repo: string,
+  prNumber: number,
+  body?: string,
+): Promise<PRApproveResult> {
+  const token = await getToken();
+  if (!token) return { success: false, error: "No token configured. Please set a GitHub token in the extension settings." };
+
+  const url = `https://api.github.com/repos/${owner}/${repo}/pulls/${prNumber}/reviews`;
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        event: "APPROVE",
+        body: body || "",
+      }),
+    });
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      const msg = (data as { message?: string }).message || `${response.status} ${response.statusText}`;
+      return { success: false, error: msg };
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.error("[Better GitHub] Failed to approve PR:", err);
+    return { success: false, error: "Network error" };
   }
 }
