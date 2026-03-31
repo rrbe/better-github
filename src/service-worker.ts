@@ -2,6 +2,9 @@ import type { ServiceWorkerRequest, ServiceWorkerResponse, PRBranchInfo, PRRevie
 
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
+// In-memory map of in-flight fetches to coalesce concurrent requests for the same key
+const inflight = new Map<string, Promise<unknown>>();
+
 interface CacheEntry<T> {
   data: T;
   timestamp: number;
@@ -22,6 +25,24 @@ async function setCache<T>(key: string, data: T): Promise<void> {
   await chrome.storage.session.set({ [key]: { data, timestamp: Date.now() } });
 }
 
+async function cachedFetch<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
+  const cached = await getCached<T>(key);
+  if (cached) return cached;
+
+  const existing = inflight.get(key);
+  if (existing) return existing as Promise<T>;
+
+  const promise = fetcher().then(async (data) => {
+    await setCache(key, data);
+    return data;
+  }).finally(() => {
+    inflight.delete(key);
+  });
+
+  inflight.set(key, promise);
+  return promise;
+}
+
 function getToken(): Promise<string> {
   return new Promise((resolve) => {
     chrome.storage.local.get("githubToken", (result) => {
@@ -37,35 +58,31 @@ async function fetchPRBranches(
   page: number,
 ): Promise<PRBranchInfo[]> {
   const cacheKey = `cache:branches:${owner}/${repo}:${state}:${page}`;
-  const cached = await getCached<PRBranchInfo[]>(cacheKey);
-  if (cached) return cached;
+  return cachedFetch<PRBranchInfo[]>(cacheKey, async () => {
+    const perPage = 30;
+    const url = `https://api.github.com/repos/${owner}/${repo}/pulls?state=${state}&page=${page}&per_page=${perPage}`;
 
-  const perPage = 30;
-  const url = `https://api.github.com/repos/${owner}/${repo}/pulls?state=${state}&page=${page}&per_page=${perPage}`;
+    const token = await getToken();
+    const headers: Record<string, string> = {
+      Accept: "application/vnd.github.v3+json",
+    };
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
 
-  const token = await getToken();
-  const headers: Record<string, string> = {
-    Accept: "application/vnd.github.v3+json",
-  };
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
+    const response = await fetch(url, { headers });
 
-  const response = await fetch(url, { headers });
+    if (!response.ok) {
+      console.error(`[Better GitHub] API error: ${response.status} ${response.statusText}`);
+      return [];
+    }
 
-  if (!response.ok) {
-    console.error(`[Better GitHub] API error: ${response.status} ${response.statusText}`);
-    return [];
-  }
-
-  const pulls: Array<{ number: number; head: { ref: string } }> = await response.json();
-  const data = pulls.map((pr) => ({
-    number: pr.number,
-    headRef: pr.head.ref,
-  }));
-
-  await setCache(cacheKey, data);
-  return data;
+    const pulls: Array<{ number: number; head: { ref: string } }> = await response.json();
+    return pulls.map((pr) => ({
+      number: pr.number,
+      headRef: pr.head.ref,
+    }));
+  });
 }
 
 async function fetchPRReviewStatuses(
@@ -79,27 +96,24 @@ async function fetchPRReviewStatuses(
   if (!token) return [];
 
   const cacheKey = `cache:reviews:${owner}/${repo}:${prNumbers.sort().join(",")}`;
-  const cached = await getCached<PRReviewStatus[]>(cacheKey);
-  if (cached) return cached;
-
-  const prQueries = prNumbers
-    .map(
-      (n) => `    pr_${n}: pullRequest(number: ${n}) {
+  return cachedFetch<PRReviewStatus[]>(cacheKey, async () => {
+    const prQueries = prNumbers
+      .map(
+        (n) => `    pr_${n}: pullRequest(number: ${n}) {
       reviewThreads(first: 100) {
         totalCount
         nodes { isResolved }
       }
     }`,
-    )
-    .join("\n");
+      )
+      .join("\n");
 
-  const query = `query($owner: String!, $repo: String!) {
+    const query = `query($owner: String!, $repo: String!) {
   repository(owner: $owner, name: $repo) {
 ${prQueries}
   }
 }`;
 
-  try {
     const response = await fetch("https://api.github.com/graphql", {
       method: "POST",
       headers: {
@@ -126,7 +140,7 @@ ${prQueries}
     const repoData = json.data?.repository;
     if (!repoData) return [];
 
-    const data: PRReviewStatus[] = prNumbers
+    return prNumbers
       .map((n) => {
         const pr = repoData[`pr_${n}`];
         if (!pr) return null;
@@ -138,13 +152,7 @@ ${prQueries}
         return { number: n, totalThreads, resolvedThreads };
       })
       .filter((s): s is PRReviewStatus => s !== null);
-
-    await setCache(cacheKey, data);
-    return data;
-  } catch (err) {
-    console.error("[Better GitHub] Failed to fetch review statuses:", err);
-    return [];
-  }
+  });
 }
 
 async function approvePR(
@@ -176,16 +184,11 @@ async function approvePR(
       return { success: false, error: msg };
     }
 
-    // Best-effort: invalidate review caches for this repo after successful approve
-    try {
-      const allKeys = Object.keys(await chrome.storage.session.get(null));
-      const keysToRemove = allKeys.filter((k) => k.startsWith(`cache:reviews:${owner}/${repo}:`));
-      if (keysToRemove.length > 0) {
-        await chrome.storage.session.remove(keysToRemove);
-      }
-    } catch {
-      // Cache invalidation failure should not affect the approve result
-    }
+    // Fire-and-forget: invalidate review caches for this repo
+    chrome.storage.session.get(null).then((all) => {
+      const keys = Object.keys(all).filter((k) => k.startsWith(`cache:reviews:${owner}/${repo}:`));
+      if (keys.length > 0) chrome.storage.session.remove(keys);
+    }).catch(() => {});
 
     return { success: true };
   } catch (err) {
