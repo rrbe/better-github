@@ -176,11 +176,15 @@ async function approvePR(
       return { success: false, error: msg };
     }
 
-    // Invalidate review caches for this repo after successful approve
-    const allKeys = Object.keys(await chrome.storage.session.get(null));
-    const keysToRemove = allKeys.filter((k) => k.startsWith(`cache:reviews:${owner}/${repo}:`));
-    if (keysToRemove.length > 0) {
-      await chrome.storage.session.remove(keysToRemove);
+    // Best-effort: invalidate review caches for this repo after successful approve
+    try {
+      const allKeys = Object.keys(await chrome.storage.session.get(null));
+      const keysToRemove = allKeys.filter((k) => k.startsWith(`cache:reviews:${owner}/${repo}:`));
+      if (keysToRemove.length > 0) {
+        await chrome.storage.session.remove(keysToRemove);
+      }
+    } catch {
+      // Cache invalidation failure should not affect the approve result
     }
 
     return { success: true };
@@ -208,4 +212,11 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
     .then(sendResponse)
     .catch((err) => sendResponse({ ok: false, error: String(err) }));
   return true;
+});
+
+// Clear all cached API responses when the GitHub token changes
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === "local" && "githubToken" in changes) {
+    chrome.storage.session.clear();
+  }
 });
