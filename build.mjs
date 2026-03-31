@@ -28,11 +28,17 @@ const optionsCtx = await esbuild.context({
   outfile: "dist/options.js",
 });
 
+const swCtx = await esbuild.context({
+  ...sharedOptions,
+  entryPoints: ["src/service-worker.ts"],
+  outfile: "dist/service-worker.js",
+});
+
 if (watch) {
-  await Promise.all([ctx.watch(), optionsCtx.watch()]);
+  await Promise.all([ctx.watch(), optionsCtx.watch(), swCtx.watch()]);
   console.log("Watching for changes...");
 } else {
-  await Promise.all([ctx.rebuild(), optionsCtx.rebuild()]);
-  await Promise.all([ctx.dispose(), optionsCtx.dispose()]);
+  await Promise.all([ctx.rebuild(), optionsCtx.rebuild(), swCtx.rebuild()]);
+  await Promise.all([ctx.dispose(), optionsCtx.dispose(), swCtx.dispose()]);
   console.log("Build complete.");
 }

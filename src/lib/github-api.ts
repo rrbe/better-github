@@ -1,35 +1,31 @@
-interface PRBranchInfo {
-  number: number;
-  headRef: string;
-}
+import type { ServiceWorkerRequest, PRBranchInfo, PRReviewStatus, PRApproveResult } from "./messages";
 
-export interface PRReviewStatus {
-  number: number;
-  totalThreads: number;
-  resolvedThreads: number;
-}
-
-export interface PRApproveResult {
-  success: boolean;
-  error?: string;
-}
-
-const cache = new Map<string, { data: PRBranchInfo[]; timestamp: number }>();
-const reviewCache = new Map<string, { data: PRReviewStatus[]; timestamp: number }>();
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-
-function getToken(): Promise<string> {
-  return new Promise((resolve) => {
+function sendMessage<T>(request: ServiceWorkerRequest): Promise<T> {
+  return new Promise((resolve, reject) => {
     try {
-      if (!chrome.runtime?.id) return resolve("");
+      if (!chrome.runtime?.id) {
+        reject(new Error("Extension context invalidated"));
+        return;
+      }
     } catch {
-      return resolve("");
+      reject(new Error("Extension context invalidated"));
+      return;
     }
-    chrome.storage.local.get("githubToken", (result) => {
-      resolve(result.githubToken || "");
+    chrome.runtime.sendMessage(request, (response) => {
+      if (chrome.runtime.lastError) {
+        reject(new Error(chrome.runtime.lastError.message));
+        return;
+      }
+      if (!response || !response.ok) {
+        reject(new Error(response?.error || "Unknown error"));
+        return;
+      }
+      resolve(response.data as T);
     });
   });
 }
+
+export type { PRReviewStatus, PRApproveResult };
 
 export async function fetchPRBranches(
   owner: string,
@@ -37,38 +33,18 @@ export async function fetchPRBranches(
   state: string = "open",
   page: number = 1,
 ): Promise<PRBranchInfo[]> {
-  const cacheKey = `${owner}/${repo}:${state}:${page}`;
-  const cached = cache.get(cacheKey);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-    return cached.data;
-  }
-
-  const perPage = 30;
-  const url = `https://api.github.com/repos/${owner}/${repo}/pulls?state=${state}&page=${page}&per_page=${perPage}`;
-
-  const token = await getToken();
-  const headers: Record<string, string> = {
-    Accept: "application/vnd.github.v3+json",
-  };
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
-
-  const response = await fetch(url, { headers });
-
-  if (!response.ok) {
-    console.error(`[Better GitHub] API error: ${response.status} ${response.statusText}`);
+  try {
+    return await sendMessage<PRBranchInfo[]>({
+      type: "FETCH_PR_BRANCHES",
+      owner,
+      repo,
+      state,
+      page,
+    });
+  } catch (err) {
+    console.error("[Better GitHub] Failed to fetch PR branches:", err);
     return [];
   }
-
-  const pulls: Array<{ number: number; head: { ref: string } }> = await response.json();
-  const data = pulls.map((pr) => ({
-    number: pr.number,
-    headRef: pr.head.ref,
-  }));
-
-  cache.set(cacheKey, { data, timestamp: Date.now() });
-  return data;
 }
 
 export async function fetchPRReviewStatuses(
@@ -76,77 +52,13 @@ export async function fetchPRReviewStatuses(
   repo: string,
   prNumbers: number[],
 ): Promise<PRReviewStatus[]> {
-  if (prNumbers.length === 0) return [];
-
-  const token = await getToken();
-  if (!token) return []; // GraphQL API requires authentication
-
-  const cacheKey = `review:${owner}/${repo}:${prNumbers.sort().join(",")}`;
-  const cached = reviewCache.get(cacheKey);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-    return cached.data;
-  }
-
-  // Build aliased queries for each PR number
-  const prQueries = prNumbers
-    .map(
-      (n) => `    pr_${n}: pullRequest(number: ${n}) {
-      reviewThreads(first: 100) {
-        totalCount
-        nodes { isResolved }
-      }
-    }`,
-    )
-    .join("\n");
-
-  const query = `query($owner: String!, $repo: String!) {
-  repository(owner: $owner, name: $repo) {
-${prQueries}
-  }
-}`;
-
   try {
-    const response = await fetch("https://api.github.com/graphql", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        query,
-        variables: { owner, repo },
-      }),
+    return await sendMessage<PRReviewStatus[]>({
+      type: "FETCH_PR_REVIEW_STATUSES",
+      owner,
+      repo,
+      prNumbers,
     });
-
-    if (!response.ok) {
-      console.error(`[Better GitHub] GraphQL error: ${response.status} ${response.statusText}`);
-      return [];
-    }
-
-    const json = await response.json();
-    if (json.errors) {
-      console.error("[Better GitHub] GraphQL errors:", json.errors);
-      return [];
-    }
-
-    const repoData = json.data?.repository;
-    if (!repoData) return [];
-
-    const data: PRReviewStatus[] = prNumbers
-      .map((n) => {
-        const pr = repoData[`pr_${n}`];
-        if (!pr) return null;
-        const threads = pr.reviewThreads;
-        const totalThreads = threads.totalCount;
-        const resolvedThreads = (threads.nodes as Array<{ isResolved: boolean }>).filter(
-          (t) => t.isResolved,
-        ).length;
-        return { number: n, totalThreads, resolvedThreads };
-      })
-      .filter((s): s is PRReviewStatus => s !== null);
-
-    reviewCache.set(cacheKey, { data, timestamp: Date.now() });
-    return data;
   } catch (err) {
     console.error("[Better GitHub] Failed to fetch review statuses:", err);
     return [];
@@ -159,32 +71,16 @@ export async function approvePR(
   prNumber: number,
   body?: string,
 ): Promise<PRApproveResult> {
-  const token = await getToken();
-  if (!token) return { success: false, error: "No token configured. Please set a GitHub token in the extension settings." };
-
-  const url = `https://api.github.com/repos/${owner}/${repo}/pulls/${prNumber}/reviews`;
   try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        event: "APPROVE",
-        body: body || "",
-      }),
+    return await sendMessage<PRApproveResult>({
+      type: "APPROVE_PR",
+      owner,
+      repo,
+      prNumber,
+      body,
     });
-
-    if (!response.ok) {
-      const data = await response.json().catch(() => ({}));
-      const msg = (data as { message?: string }).message || `${response.status} ${response.statusText}`;
-      return { success: false, error: msg };
-    }
-
-    return { success: true };
   } catch (err) {
     console.error("[Better GitHub] Failed to approve PR:", err);
-    return { success: false, error: "Network error" };
+    return { success: false, error: "Service worker unavailable" };
   }
 }
