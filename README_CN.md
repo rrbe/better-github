@@ -42,6 +42,13 @@
       <img src="docs/screenshots/pr-quick-approve.png" alt="PR 快速 Approve" width="300" />
    </details>
 
+- **默认按更新时间排序** — PR 和 Issue 列表默认按最近更新排序，而非 GitHub 默认的创建时间。不再错过活跃的 PR。
+
+   <details>
+      <summary>示例截图</summary>
+      <img src="docs/screenshots/pr-issue-default-sort.png" alt="默认按更新时间排序" width="600" />
+   </details>
+
 - **最近提交 Commit Message 颜色** — 根据提交时间为最近的几个 commit message 添加颜色，帮助快速定位最新提交。此功能默认开启，不可关闭。
 
    <details>

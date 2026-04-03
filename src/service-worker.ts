@@ -60,7 +60,7 @@ async function fetchPRBranches(
   const cacheKey = `cache:branches:${owner}/${repo}:${state}:${page}`;
   return cachedFetch<PRBranchInfo[]>(cacheKey, async () => {
     const perPage = 30;
-    const url = `https://api.github.com/repos/${owner}/${repo}/pulls?state=${state}&page=${page}&per_page=${perPage}`;
+    const url = `https://api.github.com/repos/${owner}/${repo}/pulls?state=${state}&sort=updated&direction=desc&page=${page}&per_page=${perPage}`;
 
     const token = await getToken();
     const headers: Record<string, string> = {
