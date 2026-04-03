@@ -34,11 +34,17 @@ const swCtx = await esbuild.context({
   outfile: "dist/service-worker.js",
 });
 
+const earlyCtx = await esbuild.context({
+  ...sharedOptions,
+  entryPoints: ["src/early-sort-redirect.ts"],
+  outfile: "dist/early-sort-redirect.js",
+});
+
 if (watch) {
-  await Promise.all([ctx.watch(), optionsCtx.watch(), swCtx.watch()]);
+  await Promise.all([ctx.watch(), optionsCtx.watch(), swCtx.watch(), earlyCtx.watch()]);
   console.log("Watching for changes...");
 } else {
-  await Promise.all([ctx.rebuild(), optionsCtx.rebuild(), swCtx.rebuild()]);
-  await Promise.all([ctx.dispose(), optionsCtx.dispose(), swCtx.dispose()]);
+  await Promise.all([ctx.rebuild(), optionsCtx.rebuild(), swCtx.rebuild(), earlyCtx.rebuild()]);
+  await Promise.all([ctx.dispose(), optionsCtx.dispose(), swCtx.dispose(), earlyCtx.dispose()]);
   console.log("Build complete.");
 }

@@ -43,6 +43,13 @@ Another motivation: Refined GitHub has too many features tightly coupled to GitH
       <img src="docs/screenshots/pr-quick-approve.png" alt="PR Approve Now" width="300" />
    </details>
 
+- **Default Sort by Updated** — Sort PR and issue lists by recently updated instead of GitHub's default creation time order. No more missing active PRs buried on page 2.
+
+   <details>
+      <summary>Screenshot</summary>
+      <img src="docs/screenshots/pr-issue-default-sort.png" alt="Default Sort by Updated" width="600" />
+   </details>
+
 - **Recent Commit Message Color** — Highlight recent commits with color based on their age, making it easy to spot the latest changes. This feature is always on.
 
    <details>

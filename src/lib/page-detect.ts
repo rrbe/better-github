@@ -82,7 +82,7 @@ export function getPRListParams(): {
   query: string;
 } {
   const params = new URLSearchParams(location.search);
-  const q = params.get("q") || "is:pr is:open";
+  const q = params.get("q") || "is:pr is:open sort:updated-desc";
   const page = parseInt(params.get("page") || "1", 10);
   const state = q.includes("is:closed") ? "closed" : "open";
   return { state, page, query: q };

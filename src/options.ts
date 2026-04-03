@@ -9,6 +9,7 @@ const FEATURE_KEYS = [
   "feature-release-tab",
   "feature-pr-label-position",
   "feature-pr-approve-now",
+  "feature-default-sort",
 ] as const;
 
 // --- Load saved settings ---

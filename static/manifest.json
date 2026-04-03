@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Better GitHub",
   "version": "1.2.0",
-  "description": "Enhance GitHub with PR branch names, review status, label position, quick approve, Releases tab, and commit age color",
+  "description": "Improve usability of GitHub PR, issue, and other pages",
   "permissions": ["storage"],
   "background": {
     "service_worker": "service-worker.js"
@@ -13,6 +13,11 @@
   },
   "host_permissions": ["https://api.github.com/*"],
   "content_scripts": [
+    {
+      "matches": ["https://github.com/*"],
+      "js": ["early-sort-redirect.js"],
+      "run_at": "document_start"
+    },
     {
       "matches": ["https://github.com/*"],
       "js": ["content.js"],
