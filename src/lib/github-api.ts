@@ -97,6 +97,7 @@ export async function approvePR(
     });
   } catch (err) {
     console.error("[Better GitHub] Failed to approve PR:", err);
-    return { success: false, error: "Service worker unavailable" };
+    const message = err instanceof Error ? err.message : "Service worker unavailable";
+    return { success: false, error: message };
   }
 }
