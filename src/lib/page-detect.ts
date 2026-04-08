@@ -76,6 +76,12 @@ export function getPRNumber(): number | null {
   return match ? parseInt(match[1], 10) : null;
 }
 
+export function isCommitsListPage(): boolean {
+  const info = getRepoInfo();
+  if (!info) return false;
+  return /^\/[^/]+\/[^/]+\/commits(\/|$)/.test(location.pathname);
+}
+
 export function getPRListParams(): {
   state: string;
   page: number;

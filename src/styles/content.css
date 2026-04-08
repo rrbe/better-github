@@ -251,6 +251,31 @@
   cursor: not-allowed;
 }
 
+/* Commit Tag Badge */
+.better-github-commit-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0 7px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  color: var(--fgColor-success, var(--color-success-fg, #1a7f37));
+  background-color: var(--bgColor-success-muted, var(--color-success-subtle, #dafbe1));
+  border: 1px solid transparent;
+  border-radius: 2em;
+  white-space: nowrap;
+  text-decoration: none;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+.better-github-commit-tag:hover {
+  background-color: var(--bgColor-success-emphasis, var(--color-success-emphasis, #1a7f37));
+  color: var(--fgColor-onEmphasis, var(--color-fg-on-emphasis, #fff));
+  text-decoration: none;
+}
+
 /* Releases Tab */
 .better-github-releases-tab {
   /* Inherits styling from cloned tab element */

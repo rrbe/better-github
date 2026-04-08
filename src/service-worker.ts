@@ -1,4 +1,4 @@
-import type { ServiceWorkerRequest, ServiceWorkerResponse, PRBranchInfo, PRReviewStatus, PRApproveResult } from "./lib/messages";
+import type { ServiceWorkerRequest, ServiceWorkerResponse, PRBranchInfo, PRReviewStatus, PRApproveResult, TagInfo } from "./lib/messages";
 
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
@@ -197,6 +197,46 @@ async function approvePR(
   }
 }
 
+async function fetchRepoTags(
+  owner: string,
+  repo: string,
+): Promise<TagInfo[]> {
+  const cacheKey = `cache:tags:${owner}/${repo}`;
+  return cachedFetch<TagInfo[]>(cacheKey, async () => {
+    const token = await getToken();
+    const headers: Record<string, string> = {
+      Accept: "application/vnd.github.v3+json",
+    };
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const allTags: TagInfo[] = [];
+    const maxPages = 3;
+
+    for (let page = 1; page <= maxPages; page++) {
+      const url = `https://api.github.com/repos/${owner}/${repo}/tags?per_page=100&page=${page}`;
+      const response = await fetch(url, { headers });
+
+      if (!response.ok) {
+        console.error(`[Better GitHub] Tags API error: ${response.status} ${response.statusText}`);
+        break;
+      }
+
+      const tags: Array<{ name: string; commit: { sha: string } }> = await response.json();
+      if (tags.length === 0) break;
+
+      for (const tag of tags) {
+        allTags.push({ name: tag.name, commitSha: tag.commit.sha });
+      }
+
+      if (tags.length < 100) break;
+    }
+
+    return allTags;
+  });
+}
+
 async function handleMessage(request: ServiceWorkerRequest): Promise<ServiceWorkerResponse<unknown>> {
   switch (request.type) {
     case "FETCH_PR_BRANCHES":
@@ -205,6 +245,8 @@ async function handleMessage(request: ServiceWorkerRequest): Promise<ServiceWork
       return { ok: true, data: await fetchPRReviewStatuses(request.owner, request.repo, request.prNumbers) };
     case "APPROVE_PR":
       return { ok: true, data: await approvePR(request.owner, request.repo, request.prNumber, request.body) };
+    case "FETCH_REPO_TAGS":
+      return { ok: true, data: await fetchRepoTags(request.owner, request.repo) };
     default:
       return { ok: false, error: "Unknown message type" };
   }
