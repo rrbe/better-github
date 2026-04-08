@@ -251,6 +251,15 @@
   cursor: not-allowed;
 }
 
+/* Commit Tag Row */
+.better-github-commit-tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
 /* Commit Tag Badge */
 .better-github-commit-tag {
   display: inline-flex;
@@ -266,8 +275,6 @@
   border-radius: 2em;
   white-space: nowrap;
   text-decoration: none;
-  margin-right: 4px;
-  vertical-align: middle;
 }
 
 .better-github-commit-tag:hover {

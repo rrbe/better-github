@@ -49,6 +49,13 @@
       <img src="docs/screenshots/pr-issue-default-sort.png" alt="默认按更新时间排序" width="600" />
    </details>
 
+- **Commit 标签显示** — 在 commits 列表页展示 git tag 标记，一眼看出哪些 commit 对应了 release 版本。
+
+   <details>
+      <summary>示例截图</summary>
+      <img src="docs/screenshots/commit-tags.png" alt="Commit 标签显示" width="300" />
+   </details>
+
 - **最近提交 Commit Message 颜色** — 根据提交时间为最近的几个 commit message 添加颜色，帮助快速定位最新提交。此功能默认开启，不可关闭。
 
    <details>
