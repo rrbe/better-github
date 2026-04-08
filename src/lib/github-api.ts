@@ -1,4 +1,4 @@
-import type { ServiceWorkerRequest, PRBranchInfo, PRReviewStatus, PRApproveResult } from "./messages";
+import type { ServiceWorkerRequest, PRBranchInfo, PRReviewStatus, PRApproveResult, TagInfo } from "./messages";
 
 function sendMessage<T>(request: ServiceWorkerRequest): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -25,7 +25,7 @@ function sendMessage<T>(request: ServiceWorkerRequest): Promise<T> {
   });
 }
 
-export type { PRReviewStatus, PRApproveResult };
+export type { PRReviewStatus, PRApproveResult, TagInfo };
 
 export async function fetchPRBranches(
   owner: string,
@@ -61,6 +61,22 @@ export async function fetchPRReviewStatuses(
     });
   } catch (err) {
     console.error("[Better GitHub] Failed to fetch review statuses:", err);
+    return [];
+  }
+}
+
+export async function fetchRepoTags(
+  owner: string,
+  repo: string,
+): Promise<TagInfo[]> {
+  try {
+    return await sendMessage<TagInfo[]>({
+      type: "FETCH_REPO_TAGS",
+      owner,
+      repo,
+    });
+  } catch (err) {
+    console.error("[Better GitHub] Failed to fetch repo tags:", err);
     return [];
   }
 }

@@ -10,6 +10,7 @@ const FEATURE_KEYS = [
   "feature-pr-label-position",
   "feature-pr-approve-now",
   "feature-default-sort",
+  "feature-commit-tags",
 ] as const;
 
 // --- Load saved settings ---

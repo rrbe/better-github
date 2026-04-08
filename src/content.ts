@@ -6,6 +6,7 @@ import { injectPRLabelPosition, cleanupPRLabelPosition } from "./features/pr-lab
 import { injectFileAgeColor } from "./features/file-age-color";
 import { injectPRApproveNow } from "./features/pr-approve-now";
 import { applyDefaultSort } from "./features/default-sort";
+import { injectCommitTags } from "./features/commit-tags";
 
 const FEATURE_KEYS = [
   "feature-pr-branch-names",
@@ -14,6 +15,7 @@ const FEATURE_KEYS = [
   "feature-pr-label-position",
   "feature-pr-approve-now",
   "feature-default-sort",
+  "feature-commit-tags",
 ] as const;
 
 type FeatureKey = (typeof FEATURE_KEYS)[number];
@@ -26,6 +28,7 @@ const FEATURE_CLASSES: Record<FeatureKey, string[]> = {
   "feature-pr-label-position": ["better-github-label-prefix"],
   "feature-pr-approve-now": ["better-github-approve-now", "better-github-approve-dialog-overlay"],
   "feature-default-sort": [],
+  "feature-commit-tags": ["better-github-commit-tag"],
 };
 
 function isExtensionValid(): boolean {
@@ -79,6 +82,9 @@ function injectFeature(key: FeatureKey): void {
       break;
     case "feature-default-sort":
       applyDefaultSort();
+      break;
+    case "feature-commit-tags":
+      injectCommitTags();
       break;
   }
 }
