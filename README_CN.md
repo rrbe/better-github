@@ -1,5 +1,9 @@
 # Better GitHub
 
+[English](README.md) | [中文](README_CN.md)
+
+[![Chrome Web Store](https://img.shields.io/chrome-web-store/v/annimelofpkbcphbdikipjlconehbnpb)](https://chromewebstore.google.com/detail/better-github/annimelofpkbcphbdikipjlconehbnpb)
+
 一个增强 GitHub 界面的 Chrome 扩展。
 
 灵感来自 [Refined GitHub](https://github.com/refined-github/refined-github)——功能强大，但部分 bug 长期未修复（如 Releases Tab），一些实用的 feature request 也未被采纳（因为 refined-github 功能已经太多了，要控制复杂度）。Better GitHub 补上了这些缺口。
@@ -65,7 +69,7 @@
 
 除"最近提交 Commit Message 颜色"外，所有功能均可在扩展选项中单独开关。
 
-## 安装
+## 自行打包安装
 
 1. 克隆仓库并构建：
 
@@ -75,6 +79,10 @@
    ```
 
 2. 打开 `chrome://extensions`，开启**开发者模式**，点击**加载已解压的扩展程序**，选择 `dist` 目录。
+
+## Chrome Web Store 中安装
+
+[Chrome Web Store - Better Github](https://chromewebstore.google.com/detail/better-github/annimelofpkbcphbdikipjlconehbnpb)
 
 ## 配置
 

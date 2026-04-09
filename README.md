@@ -1,5 +1,9 @@
 # Better GitHub
 
+[English](README.md) | [中文](README_CN.md)
+
+[![Chrome Web Store](https://img.shields.io/chrome-web-store/v/annimelofpkbcphbdikipjlconehbnpb)](https://chromewebstore.google.com/detail/better-github/annimelofpkbcphbdikipjlconehbnpb)
+
 A Chrome extension that enhances GitHub's UI with practical features.
 
 Inspired by [Refined GitHub](https://github.com/refined-github/refined-github) — a great extension, but some bugs linger unfixed (e.g. the Releases tab) and certain feature requests go unaddressed due to scope control. Better GitHub fills those gaps.
@@ -66,7 +70,7 @@ Another motivation: Refined GitHub has too many features tightly coupled to GitH
 
 All features except Recent Commit Message Color can be individually toggled on/off in the extension options.
 
-## Install
+## Build from Source
 
 1. Clone the repo and build:
 
@@ -76,6 +80,10 @@ All features except Recent Commit Message Color can be individually toggled on/o
    ```
 
 2. Open `chrome://extensions`, enable **Developer mode**, click **Load unpacked**, and select the `dist` folder.
+
+## Install from Chrome Web Store
+
+[Chrome Web Store - Better GitHub](https://chromewebstore.google.com/detail/better-github/annimelofpkbcphbdikipjlconehbnpb)
 
 ## Configuration
 
