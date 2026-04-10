@@ -259,6 +259,10 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
   return true;
 });
 
+chrome.action.onClicked.addListener(() => {
+  chrome.runtime.openOptionsPage();
+});
+
 // Clear all cached API responses when the GitHub token changes
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === "local" && "githubToken" in changes) {
