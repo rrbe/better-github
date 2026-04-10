@@ -1,14 +1,14 @@
 {
   "manifest_version": 3,
   "name": "Better GitHub",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Improve usability of GitHub PR, issue, and other pages",
   "permissions": ["storage"],
   "background": {
     "service_worker": "service-worker.js"
   },
   "action": {
-    "default_title": "Better GitHub settings"
+    "default_title": "Better GitHub - Click to view settings"
   },
   "options_ui": {
     "page": "options.html",
