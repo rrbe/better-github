@@ -1,8 +1,21 @@
 // Runs at document_start — before page renders, so no visible flicker.
-// Redirects PR/issue list pages to include sort:updated-desc when missing.
-// Respects the feature toggle in storage.
+// Handles early redirects that must happen before the page renders.
+// Respects the feature toggles in storage.
 (function () {
   const path = location.pathname;
+
+  // --- Redirect github.com home to /feed when enabled ---
+  if (path === "/" && !location.search && !location.hash) {
+    chrome.storage.local.get("feature-feed-redirect", (result) => {
+      if (result["feature-feed-redirect"] !== true) return;
+      // Re-check after async — page may have navigated
+      if (location.pathname !== "/") return;
+      location.replace("/feed");
+    });
+    return;
+  }
+
+  // --- Default sort for PR/issue lists ---
   if (!/^\/[^/]+\/[^/]+\/(pulls|issues)\/?$/.test(path)) return;
 
   const params = new URLSearchParams(location.search);
