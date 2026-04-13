@@ -11,6 +11,7 @@ const FEATURE_KEYS = [
   "feature-pr-approve-now",
   "feature-default-sort",
   "feature-commit-tags",
+  "feature-dashboard-top-repos",
 ] as const;
 
 // --- Load saved settings ---
