@@ -11,6 +11,24 @@
 
 ## 功能
 
+### 首页
+
+- **首页跳转 Feed** — 首次访问 `github.com` 时自动跳转到 Feed 页面。从 GitHub 站内导航到首页（如点击 Logo）不会触发跳转。默认关闭。
+
+   <details>
+      <summary>示例截图</summary>
+      <img src="docs/screenshots/redirect-home-feed.png" alt="首页跳转 Feed" width="300" />
+   </details>
+
+- **Better Top Repositories** — 自动展开侧边栏 "Top repositories" 列表，并支持将常用仓库置顶。适用于 Dashboard、Feed 页面和导航抽屉。
+
+   <details>
+      <summary>示例截图</summary>
+      <img src="docs/screenshots/better-top-repositories.png" alt="Better Top Repositories" width="300" />
+   </details>
+
+### Pull Requests
+
 - **PR 分支名显示** — 在 PR 标题旁显示源分支名，点击即可复制。
 
    <details>
@@ -18,18 +36,11 @@
       <img src="docs/screenshots/pr-branch-name.png" alt="PR 分支名与 Review 状态" width="600" />
    </details>
 
-- **PR Review 状态** — 在 PR 列表展示 review thread 的解决状态（已解决 / 未解决）。仅在 PR 存在 review thread 时显示，没有 review 评论的 PR 不会出现标记，draft pr 也不会。
+- **PR Review 状态** — 在 PR 列表展示 review thread 的解决状态（已解决 / 未解决）。仅在 PR 存在 review thread 时显示，没有 review 评论的 PR 不会出现标记，draft PR 也不会。
 
    <details>
       <summary>示例截图</summary>
       <img src="docs/screenshots/pr-review-status.png" alt="PR Review 状态" width="430" />
-   </details>
-
-- **Releases Tab** — 在仓库导航栏添加 Releases 标签页，快速访问。
-
-   <details>
-      <summary>示例截图</summary>
-      <img src="docs/screenshots/releases-tab.png" alt="Releases Tab" width="800" />
    </details>
 
 - **PR Label 前置** — 将 PR 标签移到标题前方，提升可读性和浏览效率。
@@ -46,11 +57,22 @@
       <img src="docs/screenshots/pr-quick-approve.png" alt="PR 快速 Approve" width="300" />
    </details>
 
+### PR & Issue 列表
+
 - **默认按更新时间排序** — PR 和 Issue 列表默认按最近更新排序，而非 GitHub 默认的创建时间。不再错过活跃的 PR。
 
    <details>
       <summary>示例截图</summary>
       <img src="docs/screenshots/pr-issue-default-sort.png" alt="默认按更新时间排序" width="600" />
+   </details>
+
+### 仓库页面
+
+- **Releases Tab** — 在仓库导航栏添加 Releases 标签页，快速访问。
+
+   <details>
+      <summary>示例截图</summary>
+      <img src="docs/screenshots/releases-tab.png" alt="Releases Tab" width="800" />
    </details>
 
 - **Commit 标签显示** — 在 commits 列表页展示 git tag 标记，一眼看出哪些 commit 对应了 release 版本。
@@ -60,21 +82,7 @@
       <img src="docs/screenshots/commit-tags.png" alt="Commit 标签显示" width="300" />
    </details>
 
-- **首页跳转 Feed** — 首次访问 `github.com` 时自动跳转到 Feed 页面。从 GitHub 站内导航到首页（如点击 Logo）不会触发跳转。默认关闭。
-
-   <details>
-      <summary>示例截图</summary>
-      <img src="docs/screenshots/redirect-home-feed.png" alt="首页跳转 Feed" width="300" />
-   </details>
-
-- **Better Top Repositories** — 自动展开侧边栏 "Top repositories" 列表，并支持将常用仓库置顶。适用于 Dashboard、Feed 页面和导航抽屉。
-
-   <details>
-      <summary>示例截图</summary>
-      <img src="docs/screenshots/better-top-repositories.png" alt="Better Top Repositories" width="300" />
-   </details>
-
-- **最近提交 Commit Message 颜色** — 根据提交时间为最近的几个 commit message 添加颜色，帮助快速定位最新提交。此功能默认开启，不可关闭。
+- **最近提交 Commit Message 颜色** — 根据提交时间为最近的几个 commit message 添加颜色，帮助快速定位最新提交。常驻开启。
 
    <details>
       <summary>示例截图</summary>
