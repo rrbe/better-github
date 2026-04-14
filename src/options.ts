@@ -4,6 +4,7 @@ const saveBtn = document.getElementById("save") as HTMLButtonElement;
 const status = document.getElementById("status") as HTMLDivElement;
 
 const FEATURE_KEYS = [
+  "feature-feed-redirect",
   "feature-pr-branch-names",
   "feature-pr-review-status",
   "feature-release-tab",
@@ -14,6 +15,9 @@ const FEATURE_KEYS = [
   "feature-better-top-repos",
 ] as const;
 
+// Features that default to off (must be explicitly enabled)
+const DEFAULT_OFF_FEATURES: ReadonlySet<string> = new Set(["feature-feed-redirect"]);
+
 // --- Load saved settings ---
 chrome.storage.local.get(["githubToken", ...FEATURE_KEYS], (result) => {
   if (result.githubToken) {
@@ -21,8 +25,11 @@ chrome.storage.local.get(["githubToken", ...FEATURE_KEYS], (result) => {
   }
   for (const key of FEATURE_KEYS) {
     const checkbox = document.getElementById(key) as HTMLInputElement;
-    // Default to enabled if not explicitly set
-    checkbox.checked = result[key] !== false;
+    if (DEFAULT_OFF_FEATURES.has(key)) {
+      checkbox.checked = result[key] === true;
+    } else {
+      checkbox.checked = result[key] !== false;
+    }
   }
 });
 
