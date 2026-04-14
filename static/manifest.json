@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Better GitHub",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "Improve usability of GitHub PR, issue, and other pages",
   "permissions": ["storage"],
   "background": {
