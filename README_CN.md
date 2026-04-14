@@ -60,6 +60,8 @@
       <img src="docs/screenshots/commit-tags.png" alt="Commit 标签显示" width="300" />
    </details>
 
+- **首页跳转 Feed** — 首次访问 `github.com` 时自动跳转到 Feed 页面。从 GitHub 站内导航到首页（如点击 Logo）不会触发跳转。默认关闭。
+
 - **Better Top Repositories** — 自动展开侧边栏 "Top repositories" 列表，并支持将常用仓库置顶。适用于 Dashboard、Feed 页面和导航抽屉。
 
    <details>
