@@ -12,6 +12,7 @@ const FEATURE_KEYS = [
   "feature-pr-approve-now",
   "feature-default-sort",
   "feature-commit-tags",
+  "feature-better-top-repos",
 ] as const;
 
 // Features that default to off (must be explicitly enabled)

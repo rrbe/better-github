@@ -60,6 +60,13 @@
       <img src="docs/screenshots/commit-tags.png" alt="Commit 标签显示" width="300" />
    </details>
 
+- **Better Top Repositories** — 自动展开侧边栏 "Top repositories" 列表，并支持将常用仓库置顶。适用于 Dashboard、Feed 页面和导航抽屉。
+
+   <details>
+      <summary>示例截图</summary>
+      <img src="docs/screenshots/better-top-repositories.png" alt="Better Top Repositories" width="300" />
+   </details>
+
 - **最近提交 Commit Message 颜色** — 根据提交时间为最近的几个 commit message 添加颜色，帮助快速定位最新提交。此功能默认开启，不可关闭。
 
    <details>

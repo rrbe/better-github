@@ -61,6 +61,13 @@ Another motivation: Refined GitHub has too many features tightly coupled to GitH
       <img src="docs/screenshots/commit-tags.png" alt="Commit Tags" width="300" />
    </details>
 
+- **Better Top Repositories** — Auto-expand the "Top repositories" sidebar list and pin your favorite repos to the top. Works on the dashboard, feed page, and navigation drawer.
+
+   <details>
+      <summary>Screenshot</summary>
+      <img src="docs/screenshots/better-top-repositories.png" alt="Better Top Repositories" width="300" />
+   </details>
+
 - **Recent Commit Message Color** — Highlight recent commits with color based on their age, making it easy to spot the latest changes. This feature is always on.
 
    <details>
