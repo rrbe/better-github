@@ -167,7 +167,7 @@ function createDiffToggleButton(): HTMLButtonElement {
 
 function updateDiffButtonLabel(btn: HTMLButtonElement): void {
   const shouldExpand = getMajorityCollapsed();
-  btn.textContent = shouldExpand ? "Expand all" : "Collapse all";
+  btn.textContent = shouldExpand ? "Expand all files" : "Collapse all files";
   btn.title = shouldExpand
     ? "Expand all file diffs"
     : "Collapse all file diffs";
