@@ -292,6 +292,7 @@
 .better-github-toggle-tree {
   display: inline-flex;
   align-items: center;
+  gap: 4px;
   padding: 2px 8px;
   margin: 0 12px 4px;
   font-size: 12px;
@@ -311,6 +312,7 @@
 .better-github-collapse-expand {
   display: inline-flex;
   align-items: center;
+  gap: 4px;
   padding: 3px 8px;
   font-size: 12px;
   font-weight: 500;

@@ -3,6 +3,20 @@ import { isDiffPage, isPRFilesChangedPage } from "../lib/page-detect";
 const TREE_BTN_CLASS = "better-github-toggle-tree";
 const DIFF_BTN_CLASS = "better-github-collapse-expand";
 
+// 16x16 Octicon SVG paths
+const ICON_FOLD_DOWN =
+  '<path d="m8.177 14.323 2.896-2.896a.25.25 0 0 0-.177-.427H8.75V7.764a.75.75 0 1 0-1.5 0V11H5.104a.25.25 0 0 0-.177.427l2.896 2.896a.25.25 0 0 0 .354 0ZM2.25 5a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM6 4.25a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5a.75.75 0 0 1 .75.75ZM8.25 5a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM12 4.25a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5a.75.75 0 0 1 .75.75Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5Z"></path>';
+const ICON_UNFOLD =
+  '<path d="m8.177.677 2.896 2.896a.25.25 0 0 1-.177.427H8.75v1.25a.75.75 0 0 1-1.5 0V4H5.104a.25.25 0 0 1-.177-.427L7.823.677a.25.25 0 0 1 .354 0ZM7.25 10.75a.75.75 0 0 1 1.5 0V12h2.146a.25.25 0 0 1 .177.427l-2.896 2.896a.25.25 0 0 1-.354 0l-2.896-2.896A.25.25 0 0 1 5.104 12H7.25v-1.25Zm-5-2a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM6 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 6 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM12 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 12 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5Z"></path>';
+const ICON_CHEVRON_DOWN =
+  '<path d="M12.78 5.22a.749.749 0 0 1 0 1.06l-4.25 4.25a.749.749 0 0 1-1.06 0L3.22 6.28a.749.749 0 1 1 1.06-1.06L8 8.94l3.72-3.72a.749.749 0 0 1 1.06 0Z"></path>';
+const ICON_CHEVRON_RIGHT =
+  '<path d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06Z"></path>';
+
+function makeIcon(pathHTML: string): string {
+  return `<svg aria-hidden="true" focusable="false" viewBox="0 0 16 16" width="16" height="16" fill="currentColor" style="display:inline-block;vertical-align:text-bottom">${pathHTML}</svg>`;
+}
+
 export function injectPRCollapseExpand(): void {
   if (!isDiffPage()) return;
 
@@ -21,10 +35,7 @@ function injectTreeToggle(): void {
   );
   if (!sidebar) return;
 
-  // Insert between the filter area and the scrollable tree
-  const scrollable = sidebar.querySelector(
-    '[class*="FileTreeScrollable"]'
-  );
+  const scrollable = sidebar.querySelector('[class*="FileTreeScrollable"]');
   if (!scrollable) return;
 
   const btn = document.createElement("button");
@@ -48,7 +59,9 @@ function injectTreeToggle(): void {
 
   function updateLabel(): void {
     const expanded = areMajorityExpanded();
-    btn.textContent = expanded ? "Collapse tree" : "Expand tree";
+    btn.innerHTML = expanded
+      ? `${makeIcon(ICON_CHEVRON_DOWN)} Collapse tree`
+      : `${makeIcon(ICON_CHEVRON_RIGHT)} Expand tree`;
     btn.title = expanded
       ? "Collapse all folders in file tree"
       : "Expand all folders in file tree";
@@ -63,15 +76,13 @@ function injectTreeToggle(): void {
     for (const folder of folders) {
       const isExpanded = folder.getAttribute("aria-expanded") === "true";
       if (shouldCollapse && isExpanded) {
-        const content = folder.querySelector<HTMLElement>(
-          '[class*="TreeViewItemContent"]'
-        );
-        content?.click();
+        folder
+          .querySelector<HTMLElement>('[class*="TreeViewItemContent"]')
+          ?.click();
       } else if (!shouldCollapse && !isExpanded) {
-        const content = folder.querySelector<HTMLElement>(
-          '[class*="TreeViewItemContent"]'
-        );
-        content?.click();
+        folder
+          .querySelector<HTMLElement>('[class*="TreeViewItemContent"]')
+          ?.click();
       }
     }
 
@@ -94,7 +105,6 @@ function injectDiffToggle(): void {
 }
 
 function findDiffControlsArea(): Element | null {
-  // PR Files Changed: right controls area of the sticky toolbar
   const prToolbar = document.querySelector(
     'section[class*="PullRequestFilesToolbar-module__toolbar"]'
   );
@@ -103,7 +113,6 @@ function findDiffControlsArea(): Element | null {
     return rightControls ?? null;
   }
 
-  // Commit / Compare: right side of the sticky bar
   const diffContentParent = document.getElementById("diff-content-parent");
   if (diffContentParent) {
     const stickyBar = diffContentParent.querySelector(".position-sticky");
@@ -167,7 +176,9 @@ function createDiffToggleButton(): HTMLButtonElement {
 
 function updateDiffButtonLabel(btn: HTMLButtonElement): void {
   const shouldExpand = getMajorityCollapsed();
-  btn.textContent = shouldExpand ? "Expand all files" : "Collapse all files";
+  btn.innerHTML = shouldExpand
+    ? `${makeIcon(ICON_UNFOLD)} Expand all files`
+    : `${makeIcon(ICON_FOLD_DOWN)} Collapse all files`;
   btn.title = shouldExpand
     ? "Expand all file diffs"
     : "Collapse all file diffs";
