@@ -1,4 +1,4 @@
-import type { ServiceWorkerRequest, PRBranchInfo, PRReviewStatus, PRApproveResult, TagInfo } from "./messages";
+import type { ServiceWorkerRequest, PRBranchInfo, PRReviewStatus, PRApproveResult, TagInfo, StargazerInfo, WatcherInfo, ForkInfo } from "./messages";
 
 function sendMessage<T>(request: ServiceWorkerRequest): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -25,7 +25,7 @@ function sendMessage<T>(request: ServiceWorkerRequest): Promise<T> {
   });
 }
 
-export type { PRReviewStatus, PRApproveResult, TagInfo };
+export type { PRReviewStatus, PRApproveResult, TagInfo, StargazerInfo, WatcherInfo, ForkInfo };
 
 export async function fetchPRBranches(
   owner: string,
@@ -99,5 +99,53 @@ export async function approvePR(
     console.error("[Better GitHub] Failed to approve PR:", err);
     const message = err instanceof Error ? err.message : "Service worker unavailable";
     return { success: false, error: message };
+  }
+}
+
+export async function fetchStargazers(
+  owner: string,
+  repo: string,
+): Promise<StargazerInfo[]> {
+  try {
+    return await sendMessage<StargazerInfo[]>({
+      type: "FETCH_STARGAZERS",
+      owner,
+      repo,
+    });
+  } catch (err) {
+    console.error("[Better GitHub] Failed to fetch stargazers:", err);
+    return [];
+  }
+}
+
+export async function fetchWatchers(
+  owner: string,
+  repo: string,
+): Promise<WatcherInfo[]> {
+  try {
+    return await sendMessage<WatcherInfo[]>({
+      type: "FETCH_WATCHERS",
+      owner,
+      repo,
+    });
+  } catch (err) {
+    console.error("[Better GitHub] Failed to fetch watchers:", err);
+    return [];
+  }
+}
+
+export async function fetchForks(
+  owner: string,
+  repo: string,
+): Promise<ForkInfo[]> {
+  try {
+    return await sendMessage<ForkInfo[]>({
+      type: "FETCH_FORKS",
+      owner,
+      repo,
+    });
+  } catch (err) {
+    console.error("[Better GitHub] Failed to fetch forks:", err);
+    return [];
   }
 }

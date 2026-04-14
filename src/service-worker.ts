@@ -1,4 +1,4 @@
-import type { ServiceWorkerRequest, ServiceWorkerResponse, PRBranchInfo, PRReviewStatus, PRApproveResult, TagInfo } from "./lib/messages";
+import type { ServiceWorkerRequest, ServiceWorkerResponse, PRBranchInfo, PRReviewStatus, PRApproveResult, TagInfo, StargazerInfo, WatcherInfo, ForkInfo } from "./lib/messages";
 
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
@@ -237,6 +237,102 @@ async function fetchRepoTags(
   });
 }
 
+async function fetchStargazers(
+  owner: string,
+  repo: string,
+): Promise<StargazerInfo[]> {
+  const cacheKey = `cache:stargazers:${owner}/${repo}`;
+  return cachedFetch<StargazerInfo[]>(cacheKey, async () => {
+    const token = await getToken();
+    const headers: Record<string, string> = {
+      Accept: "application/vnd.github.star+json",
+    };
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const url = `https://api.github.com/repos/${owner}/${repo}/stargazers?per_page=30`;
+    const response = await fetch(url, { headers });
+
+    if (!response.ok) {
+      console.error(`[Better GitHub] Stargazers API error: ${response.status} ${response.statusText}`);
+      return [];
+    }
+
+    const data: Array<{ user: { login: string; avatar_url: string; name?: string | null }; starred_at: string }> = await response.json();
+    return data.map((item) => ({
+      login: item.user.login,
+      avatarUrl: item.user.avatar_url,
+      name: item.user.name || null,
+      starredAt: item.starred_at,
+    }));
+  });
+}
+
+async function fetchWatchers(
+  owner: string,
+  repo: string,
+): Promise<WatcherInfo[]> {
+  const cacheKey = `cache:watchers:${owner}/${repo}`;
+  return cachedFetch<WatcherInfo[]>(cacheKey, async () => {
+    const token = await getToken();
+    const headers: Record<string, string> = {
+      Accept: "application/vnd.github.v3+json",
+    };
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const url = `https://api.github.com/repos/${owner}/${repo}/subscribers?per_page=30`;
+    const response = await fetch(url, { headers });
+
+    if (!response.ok) {
+      console.error(`[Better GitHub] Watchers API error: ${response.status} ${response.statusText}`);
+      return [];
+    }
+
+    const data: Array<{ login: string; avatar_url: string; name?: string | null }> = await response.json();
+    return data.map((user) => ({
+      login: user.login,
+      avatarUrl: user.avatar_url,
+      name: user.name || null,
+    }));
+  });
+}
+
+async function fetchForks(
+  owner: string,
+  repo: string,
+): Promise<ForkInfo[]> {
+  const cacheKey = `cache:forks:${owner}/${repo}`;
+  return cachedFetch<ForkInfo[]>(cacheKey, async () => {
+    const token = await getToken();
+    const headers: Record<string, string> = {
+      Accept: "application/vnd.github.v3+json",
+    };
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const url = `https://api.github.com/repos/${owner}/${repo}/forks?sort=newest&per_page=30`;
+    const response = await fetch(url, { headers });
+
+    if (!response.ok) {
+      console.error(`[Better GitHub] Forks API error: ${response.status} ${response.statusText}`);
+      return [];
+    }
+
+    const data: Array<{ owner: { login: string; avatar_url: string }; full_name: string; description: string | null; stargazers_count: number }> = await response.json();
+    return data.map((fork) => ({
+      owner: fork.owner.login,
+      ownerAvatarUrl: fork.owner.avatar_url,
+      fullName: fork.full_name,
+      description: fork.description,
+      stargazersCount: fork.stargazers_count,
+    }));
+  });
+}
+
 async function handleMessage(request: ServiceWorkerRequest): Promise<ServiceWorkerResponse<unknown>> {
   switch (request.type) {
     case "FETCH_PR_BRANCHES":
@@ -247,6 +343,12 @@ async function handleMessage(request: ServiceWorkerRequest): Promise<ServiceWork
       return { ok: true, data: await approvePR(request.owner, request.repo, request.prNumber, request.body) };
     case "FETCH_REPO_TAGS":
       return { ok: true, data: await fetchRepoTags(request.owner, request.repo) };
+    case "FETCH_STARGAZERS":
+      return { ok: true, data: await fetchStargazers(request.owner, request.repo) };
+    case "FETCH_WATCHERS":
+      return { ok: true, data: await fetchWatchers(request.owner, request.repo) };
+    case "FETCH_FORKS":
+      return { ok: true, data: await fetchForks(request.owner, request.repo) };
     default:
       return { ok: false, error: "Unknown message type" };
   }

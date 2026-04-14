@@ -8,6 +8,7 @@ import { injectPRApproveNow } from "./features/pr-approve-now";
 import { applyDefaultSort } from "./features/default-sort";
 import { injectCommitTags } from "./features/commit-tags";
 import { injectBetterTopRepos } from "./features/better-top-repos";
+import { injectWatchForkStarPopup } from "./features/watch-fork-star-popup";
 
 const FEATURE_KEYS = [
   "feature-pr-branch-names",
@@ -18,6 +19,7 @@ const FEATURE_KEYS = [
   "feature-default-sort",
   "feature-commit-tags",
   "feature-better-top-repos",
+  "feature-watch-fork-star-popup",
 ] as const;
 
 type FeatureKey = (typeof FEATURE_KEYS)[number];
@@ -32,6 +34,7 @@ const FEATURE_CLASSES: Record<FeatureKey, string[]> = {
   "feature-default-sort": [],
   "feature-commit-tags": ["better-github-commit-tag"],
   "feature-better-top-repos": [],
+  "feature-watch-fork-star-popup": ["bg-wfs-counter-wrap"],
 };
 
 function isExtensionValid(): boolean {
@@ -91,6 +94,9 @@ function injectFeature(key: FeatureKey): void {
       break;
     case "feature-better-top-repos":
       injectBetterTopRepos();
+      break;
+    case "feature-watch-fork-star-popup":
+      injectWatchForkStarPopup();
       break;
   }
 }

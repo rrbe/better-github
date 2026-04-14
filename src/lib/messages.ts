@@ -19,11 +19,35 @@ export interface TagInfo {
   commitSha: string;
 }
 
+export interface StargazerInfo {
+  login: string;
+  avatarUrl: string;
+  name: string | null;
+  starredAt: string;
+}
+
+export interface WatcherInfo {
+  login: string;
+  avatarUrl: string;
+  name: string | null;
+}
+
+export interface ForkInfo {
+  owner: string;
+  ownerAvatarUrl: string;
+  fullName: string;
+  description: string | null;
+  stargazersCount: number;
+}
+
 export type ServiceWorkerRequest =
   | { type: "FETCH_PR_BRANCHES"; owner: string; repo: string; state: string; page: number }
   | { type: "FETCH_PR_REVIEW_STATUSES"; owner: string; repo: string; prNumbers: number[] }
   | { type: "APPROVE_PR"; owner: string; repo: string; prNumber: number; body?: string }
-  | { type: "FETCH_REPO_TAGS"; owner: string; repo: string };
+  | { type: "FETCH_REPO_TAGS"; owner: string; repo: string }
+  | { type: "FETCH_STARGAZERS"; owner: string; repo: string }
+  | { type: "FETCH_WATCHERS"; owner: string; repo: string }
+  | { type: "FETCH_FORKS"; owner: string; repo: string };
 
 export type ServiceWorkerResponse<T> =
   | { ok: true; data: T }
