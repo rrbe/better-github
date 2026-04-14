@@ -4,11 +4,11 @@ const CLICKED_ATTR = "data-better-github-expanded";
 const PIN_INJECTED_ATTR = "data-better-github-pin-injected";
 const STORAGE_KEY = "pinned-repos";
 
-// SVG pin icons (16x16) — outline for default, filled for pinned
-const PIN_SVG_OUTLINE = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2">
+// SVG pin icons (12x12) — outline for default, filled for pinned
+const PIN_SVG_OUTLINE = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
   <path d="M4.456.734a1.75 1.75 0 0 1 2.826.504l.613 1.327a3.08 3.08 0 0 0 2.084 1.707l2.454.584c1.332.317 1.8 1.972.832 2.94L11.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06L10 11.06l-2.204 2.205c-.968.968-2.623.5-2.94-.832l-.584-2.454a3.08 3.08 0 0 0-1.707-2.084l-1.327-.613a1.75 1.75 0 0 1-.504-2.826Z"/>
 </svg>`;
-const PIN_SVG_FILLED = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+const PIN_SVG_FILLED = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
   <path d="M4.456.734a1.75 1.75 0 0 1 2.826.504l.613 1.327a3.08 3.08 0 0 0 2.084 1.707l2.454.584c1.332.317 1.8 1.972.832 2.94L11.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06L10 11.06l-2.204 2.205c-.968.968-2.623.5-2.94-.832l-.584-2.454a3.08 3.08 0 0 0-1.707-2.084l-1.327-.613a1.75 1.75 0 0 1-.504-2.826Z"/>
 </svg>`;
 
@@ -81,20 +81,24 @@ function injectPinIcons(): void {
   const list = getRepoList();
   if (!list) return;
 
-  // Skip if already injected
-  if (list.ul.hasAttribute(PIN_INJECTED_ATTR)) return;
-  list.ul.setAttribute(PIN_INJECTED_ATTR, "true");
-
   // Inject styles once
   injectStyles();
 
   getPinnedRepos().then((pinned) => {
+    let hasNew = false;
+
     for (const li of list.items) {
+      // Skip already-injected items
+      if (li.hasAttribute(PIN_INJECTED_ATTR)) continue;
+
       const repoName = getRepoName(li);
       if (!repoName) continue;
 
       // Skip "Show more" button item
       if (li.querySelector('[data-testid="dynamic-side-panel-items-show-more"]')) continue;
+
+      li.setAttribute(PIN_INJECTED_ATTR, "true");
+      hasNew = true;
 
       const isPinned = pinned.includes(repoName);
       const btn = createPinButton(isPinned);
@@ -109,8 +113,10 @@ function injectPinIcons(): void {
       li.appendChild(btn);
     }
 
-    // Initial reorder
-    reorderPinnedRepos(list.ul, pinned);
+    // Reorder if there are new items or on first run
+    if (hasNew) {
+      reorderPinnedRepos(list.ul, pinned);
+    }
   });
 }
 
@@ -179,23 +185,30 @@ function injectStyles(): void {
       right: 8px;
       top: 50%;
       transform: translateY(-50%);
-      background: none;
+      background: transparent;
       border: none;
       cursor: pointer;
-      padding: 2px;
+      padding: 4px;
+      border-radius: 4px;
       color: var(--fgColor-muted, #656d76);
       opacity: 0;
       transition: opacity 0.15s, color 0.15s;
       display: flex;
       align-items: center;
-      z-index: 1;
+      z-index: 2;
+      line-height: 0;
     }
     .better-github-pin-btn:hover {
       color: var(--fgColor-default, #1f2328);
+      background: var(--bgColor-neutral-muted, rgba(175,184,193,0.2));
     }
     .better-github-pin-btn.pinned {
       opacity: 1;
       color: var(--fgColor-accent, #0969da);
+    }
+    .better-github-pin-btn.pinned:hover {
+      color: var(--fgColor-accent, #0969da);
+      background: var(--bgColor-accent-muted, rgba(9,105,218,0.1));
     }
     li.prc-ActionList-ActionListItem-So4vC:hover .better-github-pin-btn {
       opacity: 1;
