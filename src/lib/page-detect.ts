@@ -83,7 +83,7 @@ export function isCommitsListPage(): boolean {
 }
 
 export function isDashboardPage(): boolean {
-  return location.pathname === "/" || location.pathname === "";
+  return location.pathname === "/" || location.pathname === "" || location.pathname === "/feed";
 }
 
 export function getPRListParams(): {

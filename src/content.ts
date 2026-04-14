@@ -7,7 +7,7 @@ import { injectFileAgeColor } from "./features/file-age-color";
 import { injectPRApproveNow } from "./features/pr-approve-now";
 import { applyDefaultSort } from "./features/default-sort";
 import { injectCommitTags } from "./features/commit-tags";
-import { injectDashboardTopRepos } from "./features/dashboard-top-repos";
+import { injectBetterTopRepos } from "./features/better-top-repos";
 
 const FEATURE_KEYS = [
   "feature-pr-branch-names",
@@ -17,7 +17,7 @@ const FEATURE_KEYS = [
   "feature-pr-approve-now",
   "feature-default-sort",
   "feature-commit-tags",
-  "feature-dashboard-top-repos",
+  "feature-better-top-repos",
 ] as const;
 
 type FeatureKey = (typeof FEATURE_KEYS)[number];
@@ -31,7 +31,7 @@ const FEATURE_CLASSES: Record<FeatureKey, string[]> = {
   "feature-pr-approve-now": ["better-github-approve-now", "better-github-approve-dialog-overlay"],
   "feature-default-sort": [],
   "feature-commit-tags": ["better-github-commit-tag"],
-  "feature-dashboard-top-repos": [],
+  "feature-better-top-repos": [],
 };
 
 function isExtensionValid(): boolean {
@@ -89,8 +89,8 @@ function injectFeature(key: FeatureKey): void {
     case "feature-commit-tags":
       injectCommitTags();
       break;
-    case "feature-dashboard-top-repos":
-      injectDashboardTopRepos();
+    case "feature-better-top-repos":
+      injectBetterTopRepos();
       break;
   }
 }
