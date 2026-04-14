@@ -63,6 +63,11 @@ Another motivation: Refined GitHub has too many features tightly coupled to GitH
 
 - **Redirect Home to Feed** — Automatically redirect `github.com` to the Feed page on your first visit. Navigating to Home from within GitHub (e.g. clicking the logo) still takes you to the normal Home page. Off by default.
 
+   <details>
+      <summary>Screenshot</summary>
+      <img src="docs/screenshots/redirect-home-feed.png" alt="Redirect Home to Feed" width="600" />
+   </details>
+
 - **Better Top Repositories** — Auto-expand the "Top repositories" sidebar list and pin your favorite repos to the top. Works on the dashboard, feed page, and navigation drawer.
 
    <details>
