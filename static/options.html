@@ -89,6 +89,36 @@
         border-top: 1px solid #d0d7de;
         padding-top: 16px;
       }
+      .feature-group {
+        margin-top: 8px;
+        border: 1px solid #d0d7de;
+        border-radius: 6px;
+      }
+      .feature-group summary {
+        padding: 8px 12px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #24292f;
+        cursor: pointer;
+        list-style: none;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .feature-group summary::-webkit-details-marker {
+        display: none;
+      }
+      .feature-group summary::before {
+        content: "▶";
+        font-size: 9px;
+        transition: transform 0.15s;
+      }
+      .feature-group[open] summary::before {
+        transform: rotate(90deg);
+      }
+      .feature-group summary:hover {
+        color: #24292f;
+      }
       .feature-list {
         list-style: none;
         padding: 0;
@@ -98,11 +128,8 @@
         display: flex;
         align-items: flex-start;
         gap: 10px;
-        padding: 10px 0;
-        border-bottom: 1px solid #d8dee4;
-      }
-      .feature-item:last-child {
-        border-bottom: none;
+        padding: 10px 12px;
+        border-top: 1px solid #d8dee4;
       }
       .feature-info {
         flex: 1;
@@ -173,119 +200,141 @@
     <div class="status" id="status">Saved!</div>
 
     <div class="section-title">Features</div>
-    <ul class="feature-list">
-      <li class="feature-item">
-        <div class="feature-info">
-          <div class="feature-name">Redirect Home to Feed</div>
-          <div class="feature-desc">
-            Redirect github.com to the Feed page on your first visit.
-            Navigating to Home from within GitHub (e.g. clicking the logo) won't redirect.
+
+    <details class="feature-group">
+      <summary>Home</summary>
+      <ul class="feature-list">
+        <li class="feature-item">
+          <div class="feature-info">
+            <div class="feature-name">Redirect Home to Feed</div>
+            <div class="feature-desc">
+              Redirect github.com to the Feed page on your first visit.
+              Navigating to Home from within GitHub (e.g. clicking the logo) won't redirect.
+            </div>
           </div>
-        </div>
-        <label class="toggle">
-          <input type="checkbox" id="feature-feed-redirect" />
-          <span class="slider"></span>
-        </label>
-      </li>
-      <li class="feature-item">
-        <div class="feature-info">
-          <div class="feature-name">PR Branch Names</div>
-          <div class="feature-desc">
-            Display source branch name next to each PR title. Click the badge to copy.
+          <label class="toggle">
+            <input type="checkbox" id="feature-feed-redirect" />
+            <span class="slider"></span>
+          </label>
+        </li>
+        <li class="feature-item">
+          <div class="feature-info">
+            <div class="feature-name">Better Top Repositories</div>
+            <div class="feature-desc">
+              Auto-expand the "Top repositories" list and pin your favorite repos to the top.
+            </div>
           </div>
-        </div>
-        <label class="toggle">
-          <input type="checkbox" id="feature-pr-branch-names" checked />
-          <span class="slider"></span>
-        </label>
-      </li>
-      <li class="feature-item">
-        <div class="feature-info">
-          <div class="feature-name">PR Review Status</div>
-          <div class="feature-desc">
-            Show review thread resolution status (resolved / unresolved) on the PR list. Requires a
-            token.
+          <label class="toggle">
+            <input type="checkbox" id="feature-better-top-repos" checked />
+            <span class="slider"></span>
+          </label>
+        </li>
+      </ul>
+    </details>
+
+    <details class="feature-group">
+      <summary>Pull Requests</summary>
+      <ul class="feature-list">
+        <li class="feature-item">
+          <div class="feature-info">
+            <div class="feature-name">PR Branch Names</div>
+            <div class="feature-desc">
+              Display source branch name next to each PR title. Click the badge to copy.
+            </div>
           </div>
-        </div>
-        <label class="toggle">
-          <input type="checkbox" id="feature-pr-review-status" checked />
-          <span class="slider"></span>
-        </label>
-      </li>
-      <li class="feature-item">
-        <div class="feature-info">
-          <div class="feature-name">Releases Tab</div>
-          <div class="feature-desc">
-            Add a Releases tab to the repository navigation bar for quick access.
+          <label class="toggle">
+            <input type="checkbox" id="feature-pr-branch-names" checked />
+            <span class="slider"></span>
+          </label>
+        </li>
+        <li class="feature-item">
+          <div class="feature-info">
+            <div class="feature-name">PR Review Status</div>
+            <div class="feature-desc">
+              Show review thread resolution status (resolved / unresolved) on the PR list. Requires
+              a token.
+            </div>
           </div>
-        </div>
-        <label class="toggle">
-          <input type="checkbox" id="feature-release-tab" checked />
-          <span class="slider"></span>
-        </label>
-      </li>
-      <li class="feature-item">
-        <div class="feature-info">
-          <div class="feature-name">PR Approve Now</div>
-          <div class="feature-desc">
-            Add an "approve now" shortcut to the Reviewers sidebar on PR detail pages. Requires a
-            token.
+          <label class="toggle">
+            <input type="checkbox" id="feature-pr-review-status" checked />
+            <span class="slider"></span>
+          </label>
+        </li>
+        <li class="feature-item">
+          <div class="feature-info">
+            <div class="feature-name">PR Label Position</div>
+            <div class="feature-desc">
+              Move labels to the front of PR titles for better visibility and scanning.
+            </div>
           </div>
-        </div>
-        <label class="toggle">
-          <input type="checkbox" id="feature-pr-approve-now" checked />
-          <span class="slider"></span>
-        </label>
-      </li>
-      <li class="feature-item">
-        <div class="feature-info">
-          <div class="feature-name">PR Label Position</div>
-          <div class="feature-desc">
-            Move labels to the front of PR titles for better visibility and scanning.
+          <label class="toggle">
+            <input type="checkbox" id="feature-pr-label-position" checked />
+            <span class="slider"></span>
+          </label>
+        </li>
+        <li class="feature-item">
+          <div class="feature-info">
+            <div class="feature-name">PR Approve Now</div>
+            <div class="feature-desc">
+              Add an "approve now" shortcut to the Reviewers sidebar on PR detail pages. Requires a
+              token.
+            </div>
           </div>
-        </div>
-        <label class="toggle">
-          <input type="checkbox" id="feature-pr-label-position" checked />
-          <span class="slider"></span>
-        </label>
-      </li>
-      <li class="feature-item">
-        <div class="feature-info">
-          <div class="feature-name">Default Sort by Updated</div>
-          <div class="feature-desc">
-            Sort PR and issue lists by recently updated instead of creation time.
+          <label class="toggle">
+            <input type="checkbox" id="feature-pr-approve-now" checked />
+            <span class="slider"></span>
+          </label>
+        </li>
+      </ul>
+    </details>
+
+    <details class="feature-group">
+      <summary>PR & Issue List</summary>
+      <ul class="feature-list">
+        <li class="feature-item">
+          <div class="feature-info">
+            <div class="feature-name">Default Sort by Updated</div>
+            <div class="feature-desc">
+              Sort PR and issue lists by recently updated instead of creation time.
+            </div>
           </div>
-        </div>
-        <label class="toggle">
-          <input type="checkbox" id="feature-default-sort" checked />
-          <span class="slider"></span>
-        </label>
-      </li>
-      <li class="feature-item">
-        <div class="feature-info">
-          <div class="feature-name">Commit Tags</div>
-          <div class="feature-desc">
-            Show git tags on the commits list page for easy identification.
+          <label class="toggle">
+            <input type="checkbox" id="feature-default-sort" checked />
+            <span class="slider"></span>
+          </label>
+        </li>
+      </ul>
+    </details>
+
+    <details class="feature-group">
+      <summary>Repository</summary>
+      <ul class="feature-list">
+        <li class="feature-item">
+          <div class="feature-info">
+            <div class="feature-name">Releases Tab</div>
+            <div class="feature-desc">
+              Add a Releases tab to the repository navigation bar for quick access.
+            </div>
           </div>
-        </div>
-        <label class="toggle">
-          <input type="checkbox" id="feature-commit-tags" checked />
-          <span class="slider"></span>
-        </label>
-      </li>
-      <li class="feature-item">
-        <div class="feature-info">
-          <div class="feature-name">Better Top Repositories</div>
-          <div class="feature-desc">
-            Auto-expand the "Top repositories" list and pin your favorite repos to the top.
+          <label class="toggle">
+            <input type="checkbox" id="feature-release-tab" checked />
+            <span class="slider"></span>
+          </label>
+        </li>
+        <li class="feature-item">
+          <div class="feature-info">
+            <div class="feature-name">Commit Tags</div>
+            <div class="feature-desc">
+              Show git tags on the commits list page for easy identification.
+            </div>
           </div>
-        </div>
-        <label class="toggle">
-          <input type="checkbox" id="feature-better-top-repos" checked />
-          <span class="slider"></span>
-        </label>
-      </li>
-    </ul>
+          <label class="toggle">
+            <input type="checkbox" id="feature-commit-tags" checked />
+            <span class="slider"></span>
+          </label>
+        </li>
+      </ul>
+    </details>
 
     <script src="options.js"></script>
   </body>

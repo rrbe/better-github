@@ -12,6 +12,24 @@ Another motivation: Refined GitHub has too many features tightly coupled to GitH
 
 ## Features
 
+### Home
+
+- **Redirect Home to Feed** — Automatically redirect `github.com` to the Feed page on your first visit. Navigating to Home from within GitHub (e.g. clicking the logo) still takes you to the normal Home page. Off by default.
+
+   <details>
+      <summary>Screenshot</summary>
+      <img src="docs/screenshots/redirect-home-feed.png" alt="Redirect Home to Feed" width="600" />
+   </details>
+
+- **Better Top Repositories** — Auto-expand the "Top repositories" sidebar list and pin your favorite repos to the top. Works on the dashboard, feed page, and navigation drawer.
+
+   <details>
+      <summary>Screenshot</summary>
+      <img src="docs/screenshots/better-top-repositories.png" alt="Better Top Repositories" width="300" />
+   </details>
+
+### Pull Requests
+
 - **PR Branch Names** — Display source branch name next to each PR title. Click to copy.
 
    <details>
@@ -24,13 +42,6 @@ Another motivation: Refined GitHub has too many features tightly coupled to GitH
    <details>
       <summary>Screenshot</summary>
       <img src="docs/screenshots/pr-review-status.png" alt="PR Review Status" width="430" />
-   </details>
-
-- **Releases Tab** — Add a Releases tab to the repository navigation bar for quick access.
-
-   <details>
-      <summary>Screenshot</summary>
-      <img src="docs/screenshots/releases-tab.png" alt="Releases Tab" width="800" />
    </details>
 
 - **PR Label Position** — Move labels to the front of PR titles for better visibility and scanning.
@@ -47,11 +58,22 @@ Another motivation: Refined GitHub has too many features tightly coupled to GitH
       <img src="docs/screenshots/pr-quick-approve.png" alt="PR Approve Now" width="300" />
    </details>
 
+### PR & Issue List
+
 - **Default Sort by Updated** — Sort PR and issue lists by recently updated instead of GitHub's default creation time order. No more missing active PRs buried on page 2.
 
    <details>
       <summary>Screenshot</summary>
       <img src="docs/screenshots/pr-issue-default-sort.png" alt="Default Sort by Updated" width="600" />
+   </details>
+
+### Repository
+
+- **Releases Tab** — Add a Releases tab to the repository navigation bar for quick access.
+
+   <details>
+      <summary>Screenshot</summary>
+      <img src="docs/screenshots/releases-tab.png" alt="Releases Tab" width="800" />
    </details>
 
 - **Commit Tags** — Show git tags as badges on the commits list page, so you can instantly see which commits are tagged releases.
@@ -61,21 +83,7 @@ Another motivation: Refined GitHub has too many features tightly coupled to GitH
       <img src="docs/screenshots/commit-tags.png" alt="Commit Tags" width="300" />
    </details>
 
-- **Redirect Home to Feed** — Automatically redirect `github.com` to the Feed page on your first visit. Navigating to Home from within GitHub (e.g. clicking the logo) still takes you to the normal Home page. Off by default.
-
-   <details>
-      <summary>Screenshot</summary>
-      <img src="docs/screenshots/redirect-home-feed.png" alt="Redirect Home to Feed" width="600" />
-   </details>
-
-- **Better Top Repositories** — Auto-expand the "Top repositories" sidebar list and pin your favorite repos to the top. Works on the dashboard, feed page, and navigation drawer.
-
-   <details>
-      <summary>Screenshot</summary>
-      <img src="docs/screenshots/better-top-repositories.png" alt="Better Top Repositories" width="300" />
-   </details>
-
-- **Recent Commit Message Color** — Highlight recent commits with color based on their age, making it easy to spot the latest changes. This feature is always on.
+- **Recent Commit Message Color** — Highlight recent commits with color based on their age, making it easy to spot the latest changes. Always on.
 
    <details>
       <summary>Screenshot</summary>
