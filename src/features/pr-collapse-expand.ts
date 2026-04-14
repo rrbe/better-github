@@ -73,7 +73,14 @@ function injectTreeToggle(): void {
     const folders = getFolders();
     const shouldCollapse = areMajorityExpanded();
 
-    for (const folder of folders) {
+    // Sort by depth: collapse deepest first, expand shallowest first
+    const sorted = [...folders].sort((a, b) => {
+      const levelA = parseInt(a.getAttribute("aria-level") || "0", 10);
+      const levelB = parseInt(b.getAttribute("aria-level") || "0", 10);
+      return shouldCollapse ? levelB - levelA : levelA - levelB;
+    });
+
+    for (const folder of sorted) {
       const isExpanded = folder.getAttribute("aria-expanded") === "true";
       if (shouldCollapse && isExpanded) {
         folder
