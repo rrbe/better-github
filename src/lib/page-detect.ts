@@ -71,6 +71,28 @@ export function isPRDetailPage(): boolean {
   return /^\/[^/]+\/[^/]+\/pull\/\d+/.test(location.pathname);
 }
 
+export function isPRFilesChangedPage(): boolean {
+  const info = getRepoInfo();
+  if (!info) return false;
+  return /^\/[^/]+\/[^/]+\/pull\/\d+\/(files|changes)(\/.*)?$/.test(location.pathname);
+}
+
+export function isCommitPage(): boolean {
+  const info = getRepoInfo();
+  if (!info) return false;
+  return /^\/[^/]+\/[^/]+\/commit\/[0-9a-f]+/.test(location.pathname);
+}
+
+export function isComparePage(): boolean {
+  const info = getRepoInfo();
+  if (!info) return false;
+  return /^\/[^/]+\/[^/]+\/compare\//.test(location.pathname);
+}
+
+export function isDiffPage(): boolean {
+  return isPRFilesChangedPage() || isCommitPage() || isComparePage();
+}
+
 export function getPRNumber(): number | null {
   const match = location.pathname.match(/^\/[^/]+\/[^/]+\/pull\/(\d+)/);
   return match ? parseInt(match[1], 10) : null;
