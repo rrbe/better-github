@@ -10,48 +10,78 @@ export function injectPRCollapseExpand(): void {
   injectDiffToggle();
 }
 
-// --- File tree show/hide button (PR pages only, near the tree icon toggle) ---
+// --- File tree folder collapse/expand (PR pages only, inside file tree sidebar) ---
 
 function injectTreeToggle(): void {
   if (!isPRFilesChangedPage()) return;
   if (document.querySelector(`.${TREE_BTN_CLASS}`)) return;
 
-  const nativeToggle = document.querySelector<HTMLElement>(
-    '[class*="RegularTreeToggle"]'
+  const sidebar = document.querySelector(
+    '[class*="PullRequestFileTree-module__sidebar"]'
   );
-  if (!nativeToggle) return;
+  if (!sidebar) return;
+
+  // Insert between the filter area and the scrollable tree
+  const scrollable = sidebar.querySelector(
+    '[class*="FileTreeScrollable"]'
+  );
+  if (!scrollable) return;
 
   const btn = document.createElement("button");
   btn.className = TREE_BTN_CLASS;
   btn.type = "button";
 
+  function getFolders(): Element[] {
+    return Array.from(
+      sidebar!.querySelectorAll('li[role="treeitem"][aria-expanded]')
+    );
+  }
+
+  function areMajorityExpanded(): boolean {
+    const folders = getFolders();
+    if (folders.length === 0) return false;
+    const expanded = folders.filter(
+      (f) => f.getAttribute("aria-expanded") === "true"
+    ).length;
+    return expanded > folders.length / 2;
+  }
+
   function updateLabel(): void {
-    const expanded = nativeToggle!.getAttribute("aria-expanded") === "true";
-    btn.textContent = expanded ? "Hide tree" : "Show tree";
-    btn.title = expanded ? "Hide file tree" : "Show file tree";
+    const expanded = areMajorityExpanded();
+    btn.textContent = expanded ? "Collapse tree" : "Expand tree";
+    btn.title = expanded
+      ? "Collapse all folders in file tree"
+      : "Expand all folders in file tree";
   }
 
   updateLabel();
 
   btn.addEventListener("click", () => {
-    nativeToggle!.click();
+    const folders = getFolders();
+    const shouldCollapse = areMajorityExpanded();
+
+    for (const folder of folders) {
+      const isExpanded = folder.getAttribute("aria-expanded") === "true";
+      if (shouldCollapse && isExpanded) {
+        const content = folder.querySelector<HTMLElement>(
+          '[class*="TreeViewItemContent"]'
+        );
+        content?.click();
+      } else if (!shouldCollapse && !isExpanded) {
+        const content = folder.querySelector<HTMLElement>(
+          '[class*="TreeViewItemContent"]'
+        );
+        content?.click();
+      }
+    }
+
     setTimeout(updateLabel, 100);
   });
 
-  // Keep label in sync if the user clicks GitHub's own icon toggle
-  const observer = new MutationObserver(updateLabel);
-  observer.observe(nativeToggle!, { attributes: true, attributeFilter: ["aria-expanded"] });
-
-  // Insert after the file tree toggle area (parent of nativeToggle)
-  const fileTreeArea = nativeToggle.closest(
-    '[class*="PullRequestFilesToolbar-module__toolbar"] > * > *'
-  ) ?? nativeToggle.parentElement;
-  if (fileTreeArea?.parentElement) {
-    fileTreeArea.parentElement.insertBefore(btn, fileTreeArea.nextElementSibling);
-  }
+  sidebar.insertBefore(btn, scrollable);
 }
 
-// --- File diff collapse/expand button (all diff pages, in the right controls) ---
+// --- File diff collapse/expand (all diff pages, in the right controls) ---
 
 function injectDiffToggle(): void {
   if (document.querySelector(`.${DIFF_BTN_CLASS}`)) return;
