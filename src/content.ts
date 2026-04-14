@@ -34,7 +34,7 @@ const FEATURE_CLASSES: Record<FeatureKey, string[]> = {
   "feature-default-sort": [],
   "feature-commit-tags": ["better-github-commit-tag"],
   "feature-better-top-repos": [],
-  "feature-pr-collapse-expand": ["better-github-collapse-expand"],
+  "feature-pr-collapse-expand": ["better-github-toggle-tree", "better-github-collapse-expand"],
 };
 
 function isExtensionValid(): boolean {
