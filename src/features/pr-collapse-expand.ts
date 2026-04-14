@@ -60,8 +60,8 @@ function injectTreeToggle(): void {
   function updateLabel(): void {
     const expanded = areMajorityExpanded();
     btn.innerHTML = expanded
-      ? `${makeIcon(ICON_CHEVRON_DOWN)} Collapse tree`
-      : `${makeIcon(ICON_CHEVRON_RIGHT)} Expand tree`;
+      ? `${makeIcon(ICON_FOLD_DOWN)} Collapse tree`
+      : `${makeIcon(ICON_UNFOLD)} Expand tree`;
     btn.title = expanded
       ? "Collapse all folders in file tree"
       : "Expand all folders in file tree";
