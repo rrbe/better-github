@@ -8,10 +8,6 @@ const ICON_FOLD_DOWN =
   '<path d="m8.177 14.323 2.896-2.896a.25.25 0 0 0-.177-.427H8.75V7.764a.75.75 0 1 0-1.5 0V11H5.104a.25.25 0 0 0-.177.427l2.896 2.896a.25.25 0 0 0 .354 0ZM2.25 5a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM6 4.25a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5a.75.75 0 0 1 .75.75ZM8.25 5a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM12 4.25a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5a.75.75 0 0 1 .75.75Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5Z"></path>';
 const ICON_UNFOLD =
   '<path d="m8.177.677 2.896 2.896a.25.25 0 0 1-.177.427H8.75v1.25a.75.75 0 0 1-1.5 0V4H5.104a.25.25 0 0 1-.177-.427L7.823.677a.25.25 0 0 1 .354 0ZM7.25 10.75a.75.75 0 0 1 1.5 0V12h2.146a.25.25 0 0 1 .177.427l-2.896 2.896a.25.25 0 0 1-.354 0l-2.896-2.896A.25.25 0 0 1 5.104 12H7.25v-1.25Zm-5-2a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM6 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 6 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM12 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 12 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5Z"></path>';
-const ICON_CHEVRON_DOWN =
-  '<path d="M12.78 5.22a.749.749 0 0 1 0 1.06l-4.25 4.25a.749.749 0 0 1-1.06 0L3.22 6.28a.749.749 0 1 1 1.06-1.06L8 8.94l3.72-3.72a.749.749 0 0 1 1.06 0Z"></path>';
-const ICON_CHEVRON_RIGHT =
-  '<path d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06Z"></path>';
 
 function makeIcon(pathHTML: string): string {
   return `<svg aria-hidden="true" focusable="false" viewBox="0 0 16 16" width="16" height="16" fill="currentColor" style="display:inline-block;vertical-align:text-bottom">${pathHTML}</svg>`;
@@ -24,36 +20,91 @@ export function injectPRCollapseExpand(): void {
   injectDiffToggle();
 }
 
-// --- File tree folder collapse/expand (PR pages only, inside file tree sidebar) ---
+// --- File tree folder collapse/expand (PR pages only) ---
+
+interface TreeFolder {
+  isExpanded: boolean;
+  level: number;
+  toggle(): void;
+}
+
+function getTreeFolders(): TreeFolder[] {
+  // New experience: aria-expanded lives on the <li> itself
+  const newSidebar = document.querySelector(
+    '[class*="PullRequestFileTree-module__sidebar"]'
+  );
+  if (newSidebar) {
+    return Array.from(
+      newSidebar.querySelectorAll('li[role="treeitem"][aria-expanded]')
+    ).map((el) => ({
+      isExpanded: el.getAttribute("aria-expanded") === "true",
+      level: parseInt(el.getAttribute("aria-level") || "0", 10),
+      toggle: () =>
+        el.querySelector<HTMLElement>('[class*="TreeViewItemContent"]')?.click(),
+    }));
+  }
+
+  // Old experience: aria-expanded lives on the button inside each directory item
+  return Array.from(
+    document.querySelectorAll(
+      'file-tree li[role="treeitem"][data-tree-entry-type="directory"]'
+    )
+  ).map((el) => {
+    const btn = el.querySelector<HTMLButtonElement>(
+      "button.ActionList-content[aria-expanded]"
+    );
+    return {
+      isExpanded: btn?.getAttribute("aria-expanded") === "true",
+      level: parseInt(el.getAttribute("aria-level") || "0", 10),
+      toggle: () => btn?.click(),
+    };
+  });
+}
+
+function findTreeInjectionPoint(): {
+  container: Element;
+  reference: Element;
+} | null {
+  // New experience
+  const newSidebar = document.querySelector(
+    '[class*="PullRequestFileTree-module__sidebar"]'
+  );
+  if (newSidebar) {
+    const scrollable = newSidebar.querySelector(
+      '[class*="FileTreeScrollable"]'
+    );
+    if (scrollable) return { container: newSidebar, reference: scrollable };
+  }
+
+  // Old experience: sidebar > inner div > [svg, filter-input, experimental-action-list]
+  const oldSidebar = document.querySelector(
+    '[data-target="diff-layout.sidebarContainer"]'
+  );
+  if (oldSidebar) {
+    const innerDiv = oldSidebar.firstElementChild;
+    const actionList = innerDiv?.querySelector("experimental-action-list");
+    if (innerDiv && actionList)
+      return { container: innerDiv, reference: actionList };
+  }
+
+  return null;
+}
 
 function injectTreeToggle(): void {
   if (!isPRFilesChangedPage()) return;
   if (document.querySelector(`.${TREE_BTN_CLASS}`)) return;
 
-  const sidebar = document.querySelector(
-    '[class*="PullRequestFileTree-module__sidebar"]'
-  );
-  if (!sidebar) return;
-
-  const scrollable = sidebar.querySelector('[class*="FileTreeScrollable"]');
-  if (!scrollable) return;
+  const injection = findTreeInjectionPoint();
+  if (!injection) return;
 
   const btn = document.createElement("button");
   btn.className = TREE_BTN_CLASS;
   btn.type = "button";
 
-  function getFolders(): Element[] {
-    return Array.from(
-      sidebar!.querySelectorAll('li[role="treeitem"][aria-expanded]')
-    );
-  }
-
   function areMajorityExpanded(): boolean {
-    const folders = getFolders();
+    const folders = getTreeFolders();
     if (folders.length === 0) return false;
-    const expanded = folders.filter(
-      (f) => f.getAttribute("aria-expanded") === "true"
-    ).length;
+    const expanded = folders.filter((f) => f.isExpanded).length;
     return expanded > folders.length / 2;
   }
 
@@ -70,89 +121,103 @@ function injectTreeToggle(): void {
   updateLabel();
 
   btn.addEventListener("click", () => {
-    const folders = getFolders();
+    const folders = getTreeFolders();
     const shouldCollapse = areMajorityExpanded();
 
     // Sort by depth: collapse deepest first, expand shallowest first
-    const sorted = [...folders].sort((a, b) => {
-      const levelA = parseInt(a.getAttribute("aria-level") || "0", 10);
-      const levelB = parseInt(b.getAttribute("aria-level") || "0", 10);
-      return shouldCollapse ? levelB - levelA : levelA - levelB;
-    });
+    const sorted = [...folders].sort((a, b) =>
+      shouldCollapse ? b.level - a.level : a.level - b.level
+    );
 
     for (const folder of sorted) {
-      const isExpanded = folder.getAttribute("aria-expanded") === "true";
-      if (shouldCollapse && isExpanded) {
-        folder
-          .querySelector<HTMLElement>('[class*="TreeViewItemContent"]')
-          ?.click();
-      } else if (!shouldCollapse && !isExpanded) {
-        folder
-          .querySelector<HTMLElement>('[class*="TreeViewItemContent"]')
-          ?.click();
+      if (shouldCollapse && folder.isExpanded) {
+        folder.toggle();
+      } else if (!shouldCollapse && !folder.isExpanded) {
+        folder.toggle();
       }
     }
 
     setTimeout(updateLabel, 100);
   });
 
-  sidebar.insertBefore(btn, scrollable);
+  injection.container.insertBefore(btn, injection.reference);
 }
 
-// --- File diff collapse/expand (all diff pages, in the right controls) ---
+// --- File diff collapse/expand (all diff pages) ---
 
-function injectDiffToggle(): void {
-  if (document.querySelector(`.${DIFF_BTN_CLASS}`)) return;
-
-  const container = findDiffControlsArea();
-  if (!container) return;
-
-  const btn = createDiffToggleButton();
-  container.prepend(btn);
+interface DiffFile {
+  isCollapsed: boolean;
+  toggle(): void;
 }
 
-function findDiffControlsArea(): Element | null {
+function getDiffFiles(): DiffFile[] {
+  // New experience
+  const newHeaders = document.querySelectorAll(
+    '[class*="DiffFileHeader-module__diff-file-header"]'
+  );
+  if (newHeaders.length > 0) {
+    return Array.from(newHeaders).map((header) => ({
+      isCollapsed: header.className.includes("collapsed"),
+      toggle: () => header.querySelector("div")?.querySelector("button")?.click(),
+    }));
+  }
+
+  // Old experience
+  return Array.from(document.querySelectorAll(".file-header")).map((header) => {
+    const toggleBtn = header.querySelector<HTMLButtonElement>(
+      ".js-details-target"
+    );
+    return {
+      isCollapsed: toggleBtn?.getAttribute("aria-expanded") === "false",
+      toggle: () => toggleBtn?.click(),
+    };
+  });
+}
+
+function findDiffInjectionPoint(): {
+  container: Element;
+  reference: Element | null;
+} | null {
+  // New experience: prepend inside the right controls area
   const prToolbar = document.querySelector(
     'section[class*="PullRequestFilesToolbar-module__toolbar"]'
   );
   if (prToolbar) {
     const rightControls = prToolbar.children[2];
-    return rightControls ?? null;
+    if (rightControls) return { container: rightControls, reference: rightControls.firstElementChild };
   }
 
+  // Old experience: insert into diffbar before .pr-review-tools
+  const diffBar = document.querySelector(".diffbar");
+  const reviewTools = diffBar?.querySelector(".pr-review-tools");
+  if (diffBar && reviewTools) return { container: diffBar, reference: reviewTools };
+
+  // Commit/compare pages fallback
   const diffContentParent = document.getElementById("diff-content-parent");
   if (diffContentParent) {
     const stickyBar = diffContentParent.querySelector(".position-sticky");
-    if (stickyBar) {
-      return stickyBar.children[1] ?? null;
-    }
+    const rightArea = stickyBar?.children[1];
+    if (rightArea) return { container: rightArea, reference: rightArea.firstElementChild };
   }
 
   return null;
 }
 
-function getAllFileHeaders(): Element[] {
-  return Array.from(
-    document.querySelectorAll(
-      '[class*="DiffFileHeader-module__diff-file-header"]'
-    )
-  );
-}
+function injectDiffToggle(): void {
+  if (document.querySelector(`.${DIFF_BTN_CLASS}`)) return;
 
-function isFileCollapsed(header: Element): boolean {
-  return header.className.includes("collapsed");
-}
+  const injection = findDiffInjectionPoint();
+  if (!injection) return;
 
-function getChevronButton(header: Element): HTMLElement | null {
-  const firstDiv = header.querySelector("div");
-  return firstDiv?.querySelector("button") ?? null;
+  const btn = createDiffToggleButton();
+  injection.container.insertBefore(btn, injection.reference);
 }
 
 function getMajorityCollapsed(): boolean {
-  const headers = getAllFileHeaders();
-  if (headers.length === 0) return false;
-  const collapsedCount = headers.filter(isFileCollapsed).length;
-  return collapsedCount > headers.length / 2;
+  const files = getDiffFiles();
+  if (files.length === 0) return false;
+  const collapsedCount = files.filter((f) => f.isCollapsed).length;
+  return collapsedCount > files.length / 2;
 }
 
 function createDiffToggleButton(): HTMLButtonElement {
@@ -163,15 +228,14 @@ function createDiffToggleButton(): HTMLButtonElement {
   updateDiffButtonLabel(btn);
 
   btn.addEventListener("click", () => {
-    const headers = getAllFileHeaders();
+    const files = getDiffFiles();
     const shouldExpand = getMajorityCollapsed();
 
-    for (const header of headers) {
-      const collapsed = isFileCollapsed(header);
-      if (shouldExpand && collapsed) {
-        getChevronButton(header)?.click();
-      } else if (!shouldExpand && !collapsed) {
-        getChevronButton(header)?.click();
+    for (const file of files) {
+      if (shouldExpand && file.isCollapsed) {
+        file.toggle();
+      } else if (!shouldExpand && !file.isCollapsed) {
+        file.toggle();
       }
     }
 
