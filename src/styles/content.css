@@ -291,17 +291,12 @@
 /* Watch/Fork/Star Popup */
 .bg-wfs-counter-wrap {
   position: relative;
-  display: inline-block;
-}
-
-.bg-wfs-counter-wrap > .Counter,
-.bg-wfs-counter-wrap > [class*="CounterLabel"] {
   cursor: pointer;
+  pointer-events: auto !important;
   transition: background-color 0.15s, color 0.15s;
 }
 
-.bg-wfs-counter-wrap:hover > .Counter,
-.bg-wfs-counter-wrap:hover > [class*="CounterLabel"] {
+.bg-wfs-counter-wrap:hover {
   background-color: var(--bgColor-accent-muted, var(--color-accent-subtle, #ddf4ff)) !important;
   color: var(--fgColor-accent, var(--color-accent-fg, #0969da)) !important;
 }

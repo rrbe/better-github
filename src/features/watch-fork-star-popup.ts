@@ -140,24 +140,33 @@ function setupHover(
   wrap.addEventListener("mouseleave", () => {
     hide();
   });
+
+  // Keep popup open when hovering directly over it
+  popup.addEventListener("mouseenter", () => {
+    if (closeTimer) {
+      clearTimeout(closeTimer);
+      closeTimer = null;
+    }
+  });
+
+  popup.addEventListener("mouseleave", () => {
+    hide();
+  });
 }
 
-function wrapCounter(
-  counter: Element,
+function attachPopup(
+  counter: HTMLElement,
   config: PopupConfig,
   loadData: (list: HTMLElement) => Promise<void>,
 ): void {
-  if (counter.closest(`.${WRAP_CLASS}`)) return;
+  if (counter.classList.contains(WRAP_CLASS)) return;
 
-  const wrap = document.createElement("span");
-  wrap.className = WRAP_CLASS;
-  counter.parentNode!.insertBefore(wrap, counter);
-  wrap.appendChild(counter);
+  counter.classList.add(WRAP_CLASS);
 
   const popup = createPopupElement(config);
-  wrap.appendChild(popup);
+  counter.appendChild(popup);
 
-  setupHover(wrap, popup, async () => {
+  setupHover(counter, popup, async () => {
     const list = popup.querySelector(".bg-wfs-popup-list") as HTMLElement;
     await loadData(list);
   });
@@ -167,20 +176,17 @@ export function injectWatchForkStarPopup(): void {
   const repoInfo = getRepoInfo();
   if (!repoInfo) return;
 
-  // Already injected
-  if (document.querySelector(`.${WRAP_CLASS}`)) return;
-
   const { owner, repo } = repoInfo;
 
   // Check that pagehead-actions exist (repo page)
   const actions = document.querySelector("ul.pagehead-actions");
   if (!actions) return;
 
-  // Watch counter (Primer React component)
-  const watchCounter = actions.querySelector('[class*="CounterLabel"]');
+  // Watch counter (Primer React component — don't move it, attach in-place)
+  const watchCounter = actions.querySelector('[class*="CounterLabel"]') as HTMLElement | null;
   if (watchCounter) {
     const countText = watchCounter.textContent?.trim() || "0";
-    wrapCounter(watchCounter, {
+    attachPopup(watchCounter, {
       type: "watchers",
       title: "Watchers",
       countText,
@@ -192,11 +198,10 @@ export function injectWatchForkStarPopup(): void {
   }
 
   // Fork counter
-  const forkButton = actions.querySelector("#fork-button");
-  const forkCounter = forkButton?.querySelector(".Counter");
+  const forkCounter = actions.querySelector("#fork-button .Counter") as HTMLElement | null;
   if (forkCounter) {
     const countText = forkCounter.textContent?.trim() || "0";
-    wrapCounter(forkCounter, {
+    attachPopup(forkCounter, {
       type: "forks",
       title: "Forks",
       countText,
@@ -207,13 +212,12 @@ export function injectWatchForkStarPopup(): void {
     });
   }
 
-  // Star counter — there can be multiple .Counter.js-social-count, pick the visible one
+  // Star counter — attach to ALL counters (both starred/unstarred forms)
+  // so the popup works regardless of toggle state
   const starCounters = actions.querySelectorAll(".Counter.js-social-count");
   for (const starCounter of starCounters) {
-    const rect = (starCounter as HTMLElement).getBoundingClientRect();
-    if (rect.width === 0 && rect.height === 0) continue;
     const countText = starCounter.textContent?.trim() || "0";
-    wrapCounter(starCounter, {
+    attachPopup(starCounter as HTMLElement, {
       type: "stargazers",
       title: "Stargazers",
       countText,
@@ -222,6 +226,5 @@ export function injectWatchForkStarPopup(): void {
       const data = await fetchStargazers(owner, repo);
       renderStargazers(list, data);
     });
-    break;
   }
 }
