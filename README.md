@@ -10,16 +10,11 @@ Inspired by [Refined GitHub](https://github.com/refined-github/refined-github) �
 
 Another motivation: Refined GitHub has too many features tightly coupled to GitHub's DOM, which breaks frequently as GitHub updates its UI. By keeping the feature set small and preferring the GitHub API over DOM manipulation, Better GitHub stays maintainable long-term.
 
+> **Note:** GitHub frequently A/B tests UI changes and offers additional toggles in Feature Preview. Features that depend on unstable or frequently changing DOM structures are unlikely to be added, to keep this project at a manageable complexity.
+
 ## Features
 
 ### Home
-
-- **Redirect Home to Feed** — Automatically redirect `github.com` to the Feed page on your first visit. Navigating to Home from within GitHub (e.g. clicking the logo) still takes you to the normal Home page. Off by default.
-
-   <details>
-      <summary>Screenshot</summary>
-      <img src="docs/screenshots/redirect-home-feed.png" alt="Redirect Home to Feed" width="600" />
-   </details>
 
 - **Better Top Repositories** — Auto-expand the "Top repositories" sidebar list and pin your favorite repos to the top. Works on the dashboard, feed page, and navigation drawer.
 

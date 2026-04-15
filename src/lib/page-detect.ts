@@ -82,10 +82,6 @@ export function isCommitsListPage(): boolean {
   return /^\/[^/]+\/[^/]+\/commits(\/|$)/.test(location.pathname);
 }
 
-export function isDashboardPage(): boolean {
-  return location.pathname === "/" || location.pathname === "" || location.pathname === "/feed";
-}
-
 export function getPRListParams(): {
   state: string;
   page: number;
