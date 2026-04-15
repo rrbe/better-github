@@ -9,16 +9,11 @@
 灵感来自 [Refined GitHub](https://github.com/refined-github/refined-github)——功能强大，但部分 bug 长期未修复（如 Releases Tab），一些实用的 feature request 也未被采纳（因为 refined-github 功能已经太多了，要控制复杂度）。Better GitHub 补上了这些缺口。
 还有一个点是 refined-github 有太多的功能是和 github 界面强绑定的，github 又经常改界面，所以很多功能都经常失效。只有保持功能足够少，并且尽量用 github api，少和 DOM 元素绑定，才能长期维护下去。
 
+> **注意：** 由于 GitHub 经常灰度测试功能，并且在 Feature Preview 中还有一些额外的功能开关，一些难以维护或经常变动的功能可能就不会加了，尽量控制项目在一个可维护的复杂度。
+
 ## 功能
 
 ### 首页
-
-- **首页跳转 Feed** — 首次访问 `github.com` 时自动跳转到 Feed 页面。从 GitHub 站内导航到首页（如点击 Logo）不会触发跳转。默认关闭。
-
-   <details>
-      <summary>示例截图</summary>
-      <img src="docs/screenshots/redirect-home-feed.png" alt="首页跳转 Feed" width="300" />
-   </details>
 
 - **Better Top Repositories** — 自动展开侧边栏 "Top repositories" 列表，并支持将常用仓库置顶。适用于 Dashboard、Feed 页面和导航抽屉。
 

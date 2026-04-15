@@ -1,1 +1,2 @@
-- [ ] service worker 是否能提升性能
+- [x] service worker 是否能提升性能
+- [ ] 设置多语言支持，根据系统语言设定默认语言
