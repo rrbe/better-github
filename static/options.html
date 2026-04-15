@@ -5,7 +5,9 @@
     <style>
       body {
         width: 360px;
-        padding: 16px;
+        height: 520px;
+        overflow-y: scroll;
+        padding: 4px 16px 16px;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
         font-size: 14px;
         color: #24292f;
@@ -184,10 +186,122 @@
       .toggle input:checked + .slider::before {
         transform: translateX(18px);
       }
+
+      /* Header row */
+      .header-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 0 0 12px;
+      }
+      .header-row h2 {
+        margin: 0;
+      }
+      .header-row a {
+        color: #656d76;
+        display: flex;
+      }
+      .header-row a:hover {
+        color: #24292f;
+      }
+
+      /* Features header */
+      .features-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 20px 0 8px;
+        border-top: 1px solid #d0d7de;
+        padding-top: 16px;
+      }
+      .features-header .section-title {
+        margin: 0;
+        border-top: none;
+        padding-top: 0;
+      }
+      .search-btn {
+        background: none;
+        border: none;
+        padding: 4px;
+        margin: 0;
+        cursor: pointer;
+        color: #656d76;
+        display: flex;
+        align-items: center;
+      }
+      .search-btn:hover {
+        color: #24292f;
+      }
+      .search-bar {
+        display: none;
+        margin-top: 8px;
+        margin-bottom: 4px;
+        position: relative;
+      }
+      .search-bar.visible {
+        display: flex;
+      }
+      .search-bar input {
+        width: 100%;
+        padding: 6px 28px 6px 8px;
+        border: 1px solid #d0d7de;
+        border-radius: 6px;
+        font-size: 13px;
+        box-sizing: border-box;
+      }
+      .search-bar input:focus {
+        outline: none;
+        border-color: #0969da;
+        box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.3);
+      }
+      .search-close {
+        position: absolute;
+        right: 4px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        border-radius: 0;
+        margin: 0;
+        padding: 2px 4px;
+        cursor: pointer;
+        color: #656d76;
+        font-size: 14px;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+      }
+      .search-close:hover {
+        color: #24292f;
+      }
+
+      /* Footer */
+      .footer {
+        margin-top: 16px;
+        padding-top: 12px;
+        border-top: 1px solid #d0d7de;
+        text-align: center;
+        font-size: 12px;
+        color: #656d76;
+      }
+      .footer a {
+        color: #0969da;
+        text-decoration: none;
+      }
+      .footer a:hover {
+        text-decoration: underline;
+      }
     </style>
   </head>
   <body>
-    <h2>Better GitHub Settings</h2>
+    <div class="header-row">
+      <h2>Better GitHub Settings</h2>
+      <a href="https://github.com/rrbe/better-github" target="_blank" title="View on GitHub">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+        </svg>
+      </a>
+    </div>
 
     <label for="token">GitHub Personal Access Token</label>
     <input type="password" id="token" placeholder="ghp_xxxxxxxxxxxx" />
@@ -199,24 +313,26 @@
     <button id="save">Save</button>
     <div class="status" id="status">Saved!</div>
 
-    <div class="section-title">Features</div>
+    <div class="features-header">
+      <div class="section-title">Features</div>
+      <button class="search-btn" id="searchBtn" title="Search features">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 7a4.499 4.499 0 1 0-8.997 0A4.499 4.499 0 0 0 11.5 7Z"/>
+        </svg>
+      </button>
+    </div>
+    <div class="search-bar" id="searchBar">
+      <input type="text" id="searchInput" placeholder="Search features..." />
+      <button class="search-close" id="searchClose" title="Close search">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"/>
+        </svg>
+      </button>
+    </div>
 
     <details class="feature-group">
       <summary>Home</summary>
       <ul class="feature-list">
-        <li class="feature-item">
-          <div class="feature-info">
-            <div class="feature-name">Redirect Home to Feed</div>
-            <div class="feature-desc">
-              Redirect github.com to the Feed page on your first visit.
-              Navigating to Home from within GitHub (e.g. clicking the logo) won't redirect.
-            </div>
-          </div>
-          <label class="toggle">
-            <input type="checkbox" id="feature-feed-redirect" />
-            <span class="slider"></span>
-          </label>
-        </li>
         <li class="feature-item">
           <div class="feature-info">
             <div class="feature-name">Better Top Repositories</div>
@@ -285,6 +401,18 @@
             <span class="slider"></span>
           </label>
         </li>
+        <li class="feature-item">
+          <div class="feature-info">
+            <div class="feature-name">Collapse/Expand All Files</div>
+            <div class="feature-desc">
+              Add a button to collapse or expand all file diffs on PR, commit, and compare pages.
+            </div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="feature-pr-collapse-expand" checked />
+            <span class="slider"></span>
+          </label>
+        </li>
       </ul>
     </details>
 
@@ -347,6 +475,8 @@
         </li>
       </ul>
     </details>
+
+    <div class="footer" id="footer"></div>
 
     <script src="options.js"></script>
   </body>

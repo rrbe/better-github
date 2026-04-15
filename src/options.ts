@@ -4,7 +4,6 @@ const saveBtn = document.getElementById("save") as HTMLButtonElement;
 const status = document.getElementById("status") as HTMLDivElement;
 
 const FEATURE_KEYS = [
-  "feature-feed-redirect",
   "feature-pr-branch-names",
   "feature-pr-review-status",
   "feature-release-tab",
@@ -16,9 +15,6 @@ const FEATURE_KEYS = [
   "feature-watch-fork-star-popup",
 ] as const;
 
-// Features that default to off (must be explicitly enabled)
-const DEFAULT_OFF_FEATURES: ReadonlySet<string> = new Set(["feature-feed-redirect"]);
-
 // --- Load saved settings ---
 chrome.storage.local.get(["githubToken", ...FEATURE_KEYS], (result) => {
   if (result.githubToken) {
@@ -26,11 +22,7 @@ chrome.storage.local.get(["githubToken", ...FEATURE_KEYS], (result) => {
   }
   for (const key of FEATURE_KEYS) {
     const checkbox = document.getElementById(key) as HTMLInputElement;
-    if (DEFAULT_OFF_FEATURES.has(key)) {
-      checkbox.checked = result[key] === true;
-    } else {
-      checkbox.checked = result[key] !== false;
-    }
+    checkbox.checked = result[key] !== false;
   }
 });
 
@@ -103,3 +95,56 @@ for (const key of FEATURE_KEYS) {
     chrome.storage.local.set({ [key]: checkbox.checked });
   });
 }
+
+// --- Footer version ---
+const footer = document.getElementById("footer") as HTMLDivElement;
+const version = chrome.runtime.getManifest().version;
+footer.innerHTML = `Better GitHub v${version} · <a href="https://github.com/rrbe/better-github" target="_blank">GitHub</a>`;
+
+// --- Feature search ---
+const searchBtn = document.getElementById("searchBtn") as HTMLButtonElement;
+const searchBar = document.getElementById("searchBar") as HTMLDivElement;
+const searchInput = document.getElementById("searchInput") as HTMLInputElement;
+const searchClose = document.getElementById("searchClose") as HTMLButtonElement;
+const featureGroups = document.querySelectorAll<HTMLDetailsElement>(".feature-group");
+
+function openSearch() {
+  searchBar.classList.add("visible");
+  searchBtn.style.display = "none";
+  featureGroups.forEach((g) => g.setAttribute("open", ""));
+  searchInput.focus();
+}
+
+function closeSearch() {
+  searchBar.classList.remove("visible");
+  searchBtn.style.display = "";
+  searchInput.value = "";
+  filterFeatures("");
+  // Restore default collapsed state: only first group open
+  featureGroups.forEach((g, i) => {
+    if (i === 0) g.setAttribute("open", "");
+    else g.removeAttribute("open");
+  });
+}
+
+function filterFeatures(query: string) {
+  const q = query.toLowerCase();
+  featureGroups.forEach((group) => {
+    const items = group.querySelectorAll<HTMLLIElement>(".feature-item");
+    let anyVisible = false;
+    items.forEach((item) => {
+      const name = item.querySelector(".feature-name")?.textContent ?? "";
+      const match = !q || name.toLowerCase().includes(q);
+      item.style.display = match ? "" : "none";
+      if (match) anyVisible = true;
+    });
+    group.style.display = anyVisible ? "" : "none";
+  });
+}
+
+searchBtn.addEventListener("click", openSearch);
+searchClose.addEventListener("click", closeSearch);
+searchInput.addEventListener("input", () => filterFeatures(searchInput.value));
+searchInput.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closeSearch();
+});

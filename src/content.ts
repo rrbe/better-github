@@ -9,6 +9,7 @@ import { applyDefaultSort } from "./features/default-sort";
 import { injectCommitTags } from "./features/commit-tags";
 import { injectBetterTopRepos } from "./features/better-top-repos";
 import { injectWatchForkStarPopup } from "./features/watch-fork-star-popup";
+import { injectPRCollapseExpand } from "./features/pr-collapse-expand";
 
 const FEATURE_KEYS = [
   "feature-pr-branch-names",
@@ -20,6 +21,7 @@ const FEATURE_KEYS = [
   "feature-commit-tags",
   "feature-better-top-repos",
   "feature-watch-fork-star-popup",
+  "feature-pr-collapse-expand",
 ] as const;
 
 type FeatureKey = (typeof FEATURE_KEYS)[number];
@@ -35,6 +37,7 @@ const FEATURE_CLASSES: Record<FeatureKey, string[]> = {
   "feature-commit-tags": ["better-github-commit-tag"],
   "feature-better-top-repos": [],
   "feature-watch-fork-star-popup": ["bg-wfs-counter-wrap"],
+  "feature-pr-collapse-expand": ["better-github-toggle-tree", "better-github-collapse-expand"],
 };
 
 function isExtensionValid(): boolean {
@@ -97,6 +100,9 @@ function injectFeature(key: FeatureKey): void {
       break;
     case "feature-watch-fork-star-popup":
       injectWatchForkStarPopup();
+      break;
+    case "feature-pr-collapse-expand":
+      injectPRCollapseExpand();
       break;
   }
 }
