@@ -12,6 +12,7 @@ const FEATURE_KEYS = [
   "feature-default-sort",
   "feature-commit-tags",
   "feature-better-top-repos",
+  "feature-watch-fork-star-popup",
 ] as const;
 
 // --- Load saved settings ---

@@ -288,6 +288,178 @@
   /* Inherits styling from cloned tab element */
 }
 
+/* Watch/Fork/Star Popup */
+.bg-wfs-counter-wrap {
+  position: relative;
+  cursor: pointer;
+  pointer-events: auto !important;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.bg-wfs-counter-wrap:hover {
+  background-color: var(--bgColor-accent-muted, var(--color-accent-subtle, #ddf4ff)) !important;
+  color: var(--fgColor-accent, var(--color-accent-fg, #0969da)) !important;
+}
+
+.bg-wfs-popup {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 280px;
+  background: var(--bgColor-default, var(--color-canvas-default, #fff));
+  border: 1px solid var(--borderColor-default, var(--color-border-default, #d0d7de));
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 999;
+  overflow: hidden;
+}
+
+/* Bridge pseudo-element to span the gap between counter and popup */
+.bg-wfs-counter-wrap::after {
+  content: "";
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 100%;
+  min-width: 280px;
+  height: 8px;
+}
+
+.bg-wfs-counter-wrap:hover::after {
+  display: block;
+}
+
+.bg-wfs-popup-header {
+  padding: 12px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fgColor-muted, var(--color-fg-muted, #656d76));
+  border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted, #d8dee4));
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.bg-wfs-popup-list {
+  padding: 8px 0;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.bg-wfs-popup-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 16px;
+  text-decoration: none !important;
+  color: var(--fgColor-default, var(--color-fg-default, #1f2328));
+  transition: background-color 0.1s;
+}
+
+.bg-wfs-popup-item:hover {
+  background: var(--bgColor-muted, var(--color-canvas-subtle, #f6f8fa));
+}
+
+.bg-wfs-popup-item img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.bg-wfs-popup-user-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.bg-wfs-popup-username {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fgColor-default, var(--color-fg-default, #1f2328));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bg-wfs-popup-sub {
+  font-size: 11px;
+  color: var(--fgColor-muted, var(--color-fg-muted, #656d76));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bg-wfs-popup-footer {
+  padding: 8px 16px;
+  text-align: center;
+  border-top: 1px solid var(--borderColor-muted, var(--color-border-muted, #d8dee4));
+}
+
+.bg-wfs-popup-footer a {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fgColor-accent, var(--color-accent-fg, #0969da));
+  text-decoration: none;
+}
+
+.bg-wfs-popup-footer a:hover {
+  text-decoration: underline;
+}
+
+.bg-wfs-popup-empty {
+  padding: 16px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--fgColor-muted, var(--color-fg-muted, #656d76));
+}
+
+/* Skeleton loading */
+.bg-wfs-skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 16px;
+}
+
+.bg-wfs-skeleton-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--bgColor-muted, var(--color-canvas-subtle, #f6f8fa));
+  flex-shrink: 0;
+  animation: bg-wfs-skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+.bg-wfs-skeleton-lines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bg-wfs-skeleton-line {
+  height: 10px;
+  border-radius: 3px;
+  background: var(--bgColor-muted, var(--color-canvas-subtle, #f6f8fa));
+  animation: bg-wfs-skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+.bg-wfs-skeleton-line-long {
+  width: 60%;
+}
+
+.bg-wfs-skeleton-line-short {
+  width: 40%;
+}
+
+@keyframes bg-wfs-skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
 /* PR File Tree Toggle */
 .better-github-toggle-tree {
   display: inline-flex;
