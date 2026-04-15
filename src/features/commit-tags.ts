@@ -1,5 +1,6 @@
 import { isCommitsListPage, getRepoInfo } from "../lib/page-detect";
 import { fetchRepoTags } from "../lib/github-api";
+import { escapeHtml } from "../lib/utils";
 
 const TAG_CLASS = "better-github-commit-tag";
 const TAG_ROW_CLASS = "better-github-commit-tag-row";
@@ -70,8 +71,3 @@ export async function injectCommitTags(): Promise<void> {
   }
 }
 
-function escapeHtml(str: string): string {
-  const div = document.createElement("div");
-  div.textContent = str;
-  return div.innerHTML;
-}

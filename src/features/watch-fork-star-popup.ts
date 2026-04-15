@@ -1,6 +1,7 @@
 import { getRepoInfo } from "../lib/page-detect";
 import { fetchStargazers, fetchWatchers, fetchForks } from "../lib/github-api";
-import type { StargazerInfo, WatcherInfo, ForkInfo } from "../lib/github-api";
+import { escapeHtml } from "../lib/utils";
+import type { ForkInfo } from "../lib/github-api";
 
 const WRAP_CLASS = "bg-wfs-counter-wrap";
 const POPUP_CLASS = "bg-wfs-popup";
@@ -9,7 +10,6 @@ const HOVER_OPEN_DELAY = 300;
 const HOVER_CLOSE_DELAY = 200;
 
 interface PopupConfig {
-  type: "stargazers" | "watchers" | "forks";
   title: string;
   countText: string;
   viewAllUrl: string;
@@ -45,32 +45,20 @@ function createPopupElement(config: PopupConfig): HTMLDivElement {
   return popup;
 }
 
-function renderStargazers(list: HTMLElement, items: StargazerInfo[]): void {
+function renderUserList(
+  list: HTMLElement,
+  items: Array<{ login: string; avatarUrl: string; name: string | null }>,
+  emptyMsg: string,
+): void {
   if (items.length === 0) {
-    list.innerHTML = `<div class="bg-wfs-popup-empty">No stargazers yet</div>`;
+    list.innerHTML = `<div class="bg-wfs-popup-empty">${emptyMsg}</div>`;
     return;
   }
   list.innerHTML = items.map((user) => `
-    <a class="bg-wfs-popup-item" href="https://github.com/${user.login}">
-      <img src="${user.avatarUrl}&s=56" alt="${user.login}" loading="lazy">
+    <a class="bg-wfs-popup-item" href="https://github.com/${escapeHtml(user.login)}">
+      <img src="${escapeHtml(user.avatarUrl)}&s=56" alt="${escapeHtml(user.login)}" loading="lazy">
       <div class="bg-wfs-popup-user-info">
-        <span class="bg-wfs-popup-username">${user.login}</span>
-        ${user.name ? `<span class="bg-wfs-popup-sub">${escapeHtml(user.name)}</span>` : ""}
-      </div>
-    </a>
-  `).join("");
-}
-
-function renderWatchers(list: HTMLElement, items: WatcherInfo[]): void {
-  if (items.length === 0) {
-    list.innerHTML = `<div class="bg-wfs-popup-empty">No watchers yet</div>`;
-    return;
-  }
-  list.innerHTML = items.map((user) => `
-    <a class="bg-wfs-popup-item" href="https://github.com/${user.login}">
-      <img src="${user.avatarUrl}&s=56" alt="${user.login}" loading="lazy">
-      <div class="bg-wfs-popup-user-info">
-        <span class="bg-wfs-popup-username">${user.login}</span>
+        <span class="bg-wfs-popup-username">${escapeHtml(user.login)}</span>
         ${user.name ? `<span class="bg-wfs-popup-sub">${escapeHtml(user.name)}</span>` : ""}
       </div>
     </a>
@@ -83,20 +71,14 @@ function renderForks(list: HTMLElement, items: ForkInfo[]): void {
     return;
   }
   list.innerHTML = items.map((fork) => `
-    <a class="bg-wfs-popup-item" href="https://github.com/${fork.fullName}">
-      <img src="${fork.ownerAvatarUrl}&s=56" alt="${fork.owner}" loading="lazy">
+    <a class="bg-wfs-popup-item" href="https://github.com/${escapeHtml(fork.fullName)}">
+      <img src="${escapeHtml(fork.ownerAvatarUrl)}&s=56" alt="${escapeHtml(fork.owner)}" loading="lazy">
       <div class="bg-wfs-popup-user-info">
         <span class="bg-wfs-popup-username">${escapeHtml(fork.fullName)}</span>
         ${fork.description ? `<span class="bg-wfs-popup-sub">${escapeHtml(fork.description)}</span>` : ""}
       </div>
     </a>
   `).join("");
-}
-
-function escapeHtml(text: string): string {
-  const el = document.createElement("span");
-  el.textContent = text;
-  return el.innerHTML;
 }
 
 function setupHover(
@@ -187,13 +169,12 @@ export function injectWatchForkStarPopup(): void {
   if (watchCounter) {
     const countText = watchCounter.textContent?.trim() || "0";
     attachPopup(watchCounter, {
-      type: "watchers",
       title: "Watchers",
       countText,
       viewAllUrl: `/${owner}/${repo}/watchers`,
     }, async (list) => {
       const data = await fetchWatchers(owner, repo);
-      renderWatchers(list, data);
+      renderUserList(list, data, "No watchers yet");
     });
   }
 
@@ -202,7 +183,6 @@ export function injectWatchForkStarPopup(): void {
   if (forkCounter) {
     const countText = forkCounter.textContent?.trim() || "0";
     attachPopup(forkCounter, {
-      type: "forks",
       title: "Forks",
       countText,
       viewAllUrl: `/${owner}/${repo}/forks`,
@@ -213,18 +193,19 @@ export function injectWatchForkStarPopup(): void {
   }
 
   // Star counter — attach to ALL counters (both starred/unstarred forms)
-  // so the popup works regardless of toggle state
+  // so the popup works regardless of toggle state.
+  // Share fetched data so toggling star state doesn't re-fetch.
+  let starData: Awaited<ReturnType<typeof fetchStargazers>> | null = null;
   const starCounters = actions.querySelectorAll(".Counter.js-social-count");
   for (const starCounter of starCounters) {
     const countText = starCounter.textContent?.trim() || "0";
     attachPopup(starCounter as HTMLElement, {
-      type: "stargazers",
       title: "Stargazers",
       countText,
       viewAllUrl: `/${owner}/${repo}/stargazers`,
     }, async (list) => {
-      const data = await fetchStargazers(owner, repo);
-      renderStargazers(list, data);
+      if (!starData) starData = await fetchStargazers(owner, repo);
+      renderUserList(list, starData, "No stargazers yet");
     });
   }
 }
