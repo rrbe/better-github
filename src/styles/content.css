@@ -287,3 +287,46 @@
 .better-github-releases-tab {
   /* Inherits styling from cloned tab element */
 }
+
+/* PR File Tree Toggle */
+.better-github-toggle-tree {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  margin: 0 12px 4px;
+  font-size: 12px;
+  line-height: 20px;
+  color: var(--fgColor-accent, var(--color-accent-fg, #0969da));
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.better-github-toggle-tree:hover {
+  text-decoration: underline;
+}
+
+/* PR Collapse/Expand All */
+.better-github-collapse-expand {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--fgColor-muted, var(--color-fg-muted, #656d76));
+  background: transparent;
+  border: 1px solid var(--borderColor-default, var(--color-border-default, #d0d7de));
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.better-github-collapse-expand:hover {
+  color: var(--fgColor-default, var(--color-fg-default, #24292f));
+  background: var(--bgColor-muted, var(--color-canvas-subtle, #f6f8fa));
+}
