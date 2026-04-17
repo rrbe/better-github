@@ -13,6 +13,9 @@ export async function injectPRApproveNow(): Promise<void> {
   const prNumber = getPRNumber();
   if (!prNumber) return;
 
+  // GitHub forbids authors from approving their own PRs — hide the button in that case.
+  if (isCurrentUserPRAuthor()) return;
+
   const headingEl = findReviewersHeading();
   if (!headingEl) return;
 
@@ -29,6 +32,25 @@ export async function injectPRApproveNow(): Promise<void> {
   const sep = document.createTextNode(" – ");
   // The heading is a <summary> inside <details>; append inside it so it stays visible
   headingEl.append(sep, link);
+}
+
+function isCurrentUserPRAuthor(): boolean {
+  const currentUser = document
+    .querySelector('meta[name="user-login"]')
+    ?.getAttribute("content")
+    ?.trim()
+    .toLowerCase();
+  if (!currentUser) return false;
+
+  const authorEl =
+    document.querySelector<HTMLAnchorElement>(".gh-header-meta a.author") ||
+    document.querySelector<HTMLAnchorElement>(
+      '.gh-header-meta a[data-hovercard-type="user"]',
+    );
+  const author = authorEl?.textContent?.trim().toLowerCase();
+  if (!author) return false;
+
+  return currentUser === author;
 }
 
 function findReviewersHeading(): Element | null {
