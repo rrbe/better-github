@@ -42,11 +42,12 @@ function isCurrentUserPRAuthor(): boolean {
     .toLowerCase();
   if (!currentUser) return false;
 
+  // New React-based PR UI: the opening comment is marked with js-command-palette-pull-body.
+  // Old UI: .gh-header-meta wraps the "<author> wants to merge..." line.
   const authorEl =
-    document.querySelector<HTMLAnchorElement>(".gh-header-meta a.author") ||
-    document.querySelector<HTMLAnchorElement>(
-      '.gh-header-meta a[data-hovercard-type="user"]',
-    );
+    document.querySelector<HTMLAnchorElement>(".js-command-palette-pull-body a.author") ||
+    document.querySelector<HTMLAnchorElement>('[class*="PullRequestHeaderSummary"] a[data-inline="true"]') ||
+    document.querySelector<HTMLAnchorElement>(".gh-header-meta a.author");
   const author = authorEl?.textContent?.trim().toLowerCase();
   if (!author) return false;
 
