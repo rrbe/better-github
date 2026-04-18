@@ -53,6 +53,14 @@ Another motivation: Refined GitHub has too many features tightly coupled to GitH
       <img src="docs/screenshots/pr-quick-approve.png" alt="PR Approve Now" width="300" />
    </details>
 
+- **Collapse/Expand All Files** — Add buttons to the diff toolbar to collapse or expand all file diffs in one click, plus a button inside the file tree to collapse or expand all folders. Works on PR, commit, and compare pages, and compatible with both the old and the new "Files changed" experience.
+
+   <details>
+      <summary>Screenshot</summary>
+      <img src="docs/screenshots/pr-collapse-expand-1.png" alt="Collapse/Expand All Files" width="600" />
+      <img src="docs/screenshots/pr-collapse-expand-2.png" alt="Collapse/Expand All Files" width="300" />
+   </details>
+
 ### PR & Issue List
 
 - **Default Sort by Updated** — Sort PR and issue lists by recently updated instead of GitHub's default creation time order. No more missing active PRs buried on page 2.
@@ -69,6 +77,13 @@ Another motivation: Refined GitHub has too many features tightly coupled to GitH
    <details>
       <summary>Screenshot</summary>
       <img src="docs/screenshots/releases-tab.png" alt="Releases Tab" width="800" />
+   </details>
+
+- **Watch/Fork/Star Popup** — Hover over the Watch, Fork, or Star counts on a repo page to preview the full list of watchers, forks, or stargazers in a popup, with "View all" links to the full pages. Results are cached for 5 minutes to minimize API calls.
+
+   <details>
+      <summary>Screenshot</summary>
+      <img src="docs/screenshots/watch-fork-star-popup.png" alt="Watch/Fork/Star Popup" width="400" />
    </details>
 
 - **Commit Tags** — Show git tags as badges on the commits list page, so you can instantly see which commits are tagged releases.

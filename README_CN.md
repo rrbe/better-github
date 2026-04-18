@@ -52,6 +52,14 @@
       <img src="docs/screenshots/pr-quick-approve.png" alt="PR 快速 Approve" width="300" />
    </details>
 
+- **一键折叠/展开所有文件** — 在 diff 工具栏添加按钮，一键折叠或展开所有文件 diff；同时在文件树侧边栏添加按钮，一键折叠或展开所有目录。适用于 PR、commit 和 compare 页面，兼容新旧两种 "Files changed" 体验。
+
+   <details>
+      <summary>示例截图</summary>
+      <img src="docs/screenshots/pr-collapse-expand-1.png" alt="一键折叠/展开所有文件" width="600" />
+      <img src="docs/screenshots/pr-collapse-expand-2.png" alt="一键折叠/展开所有文件" width="300" />
+   </details>
+
 ### PR & Issue 列表
 
 - **默认按更新时间排序** — PR 和 Issue 列表默认按最近更新排序，而非 GitHub 默认的创建时间。不再错过活跃的 PR。
@@ -68,6 +76,13 @@
    <details>
       <summary>示例截图</summary>
       <img src="docs/screenshots/releases-tab.png" alt="Releases Tab" width="800" />
+   </details>
+
+- **Watch/Fork/Star 悬浮预览** — 在仓库页面悬停 Watch、Fork 或 Star 的数字，即可弹出预览列表，展示关注者、Fork 者或 Star 用户，并提供 "View all" 链接跳转完整页面。结果缓存 5 分钟，减少 API 请求。
+
+   <details>
+      <summary>示例截图</summary>
+      <img src="docs/screenshots/watch-fork-star-popup.png" alt="Watch/Fork/Star 悬浮预览" width="400" />
    </details>
 
 - **Commit 标签显示** — 在 commits 列表页展示 git tag 标记，一眼看出哪些 commit 对应了 release 版本。
