@@ -146,6 +146,7 @@ function injectTreeToggle(): void {
 // --- File diff collapse/expand (all diff pages) ---
 
 interface DiffFile {
+  element: Element;
   isCollapsed: boolean;
   toggle(): void;
 }
@@ -157,6 +158,7 @@ function getDiffFiles(): DiffFile[] {
   );
   if (newHeaders.length > 0) {
     return Array.from(newHeaders).map((header) => ({
+      element: header,
       isCollapsed: header.className.includes("collapsed"),
       toggle: () => header.querySelector("div")?.querySelector("button")?.click(),
     }));
@@ -168,6 +170,7 @@ function getDiffFiles(): DiffFile[] {
       ".js-details-target"
     );
     return {
+      element: header,
       isCollapsed: toggleBtn?.getAttribute("aria-expanded") === "false",
       toggle: () => toggleBtn?.click(),
     };
@@ -203,11 +206,58 @@ function findDiffInjectionPoint(): {
   return null;
 }
 
+// Tracks user's last-applied intent so the button label stays stable even as
+// GitHub lazy-loads more files, and so newly-appearing files can be auto-folded
+// to match the intent.
+let diffIntent: "collapsed" | "expanded" | null = null;
+let diffProcessed = new WeakSet<Element>();
+let diffObserver: MutationObserver | null = null;
+let diffRafId: number | null = null;
+
+function resetDiffState(): void {
+  diffIntent = null;
+  diffProcessed = new WeakSet();
+  if (diffRafId !== null) {
+    cancelAnimationFrame(diffRafId);
+    diffRafId = null;
+  }
+  if (diffObserver) {
+    diffObserver.disconnect();
+    diffObserver = null;
+  }
+}
+
+function applyDiffIntentToNewFiles(): void {
+  if (diffIntent === null) return;
+  for (const file of getDiffFiles()) {
+    if (diffProcessed.has(file.element)) continue;
+    if (diffIntent === "collapsed" && !file.isCollapsed) file.toggle();
+    else if (diffIntent === "expanded" && file.isCollapsed) file.toggle();
+    diffProcessed.add(file.element);
+  }
+}
+
+function startDiffObserver(): void {
+  if (diffObserver) return;
+  diffObserver = new MutationObserver(() => {
+    if (diffIntent === null) return;
+    if (diffRafId !== null) return;
+    diffRafId = requestAnimationFrame(() => {
+      diffRafId = null;
+      applyDiffIntentToNewFiles();
+    });
+  });
+  diffObserver.observe(document.body, { childList: true, subtree: true });
+}
+
 function injectDiffToggle(): void {
   if (document.querySelector(`.${DIFF_BTN_CLASS}`)) return;
 
   const injection = findDiffInjectionPoint();
   if (!injection) return;
+
+  // New button means a fresh page — drop stale intent from the previous view.
+  resetDiffState();
 
   const btn = createDiffToggleButton();
   injection.container.insertBefore(btn, injection.reference);
@@ -228,17 +278,17 @@ function createDiffToggleButton(): HTMLButtonElement {
   updateDiffButtonLabel(btn);
 
   btn.addEventListener("click", () => {
-    const files = getDiffFiles();
-    const shouldExpand = getMajorityCollapsed();
+    const currentlyCollapsed =
+      diffIntent !== null ? diffIntent === "collapsed" : getMajorityCollapsed();
+    diffIntent = currentlyCollapsed ? "expanded" : "collapsed";
 
-    for (const file of files) {
-      if (shouldExpand && file.isCollapsed) {
-        file.toggle();
-      } else if (!shouldExpand && !file.isCollapsed) {
-        file.toggle();
-      }
+    for (const file of getDiffFiles()) {
+      if (diffIntent === "collapsed" && !file.isCollapsed) file.toggle();
+      else if (diffIntent === "expanded" && file.isCollapsed) file.toggle();
+      diffProcessed.add(file.element);
     }
 
+    startDiffObserver();
     setTimeout(() => updateDiffButtonLabel(btn), 100);
   });
 
@@ -246,11 +296,12 @@ function createDiffToggleButton(): HTMLButtonElement {
 }
 
 function updateDiffButtonLabel(btn: HTMLButtonElement): void {
-  const shouldExpand = getMajorityCollapsed();
-  btn.innerHTML = shouldExpand
+  const collapsed =
+    diffIntent !== null ? diffIntent === "collapsed" : getMajorityCollapsed();
+  btn.innerHTML = collapsed
     ? `${makeIcon(ICON_UNFOLD)} Expand all files`
     : `${makeIcon(ICON_FOLD_DOWN)} Collapse all files`;
-  btn.title = shouldExpand
+  btn.title = collapsed
     ? "Expand all file diffs"
     : "Collapse all file diffs";
 }
