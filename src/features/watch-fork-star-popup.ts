@@ -148,6 +148,14 @@ function attachPopup(
   const popup = createPopupElement(config);
   counter.appendChild(popup);
 
+  // GitHub's own JS rewrites the stargazer counter's children after
+  // hydration (e.g. setting textContent on `.js-social-count`), which
+  // wipes our popup. Re-attach if that happens.
+  const observer = new MutationObserver(() => {
+    if (popup.parentElement !== counter) counter.appendChild(popup);
+  });
+  observer.observe(counter, { childList: true });
+
   setupHover(counter, popup, async () => {
     const list = popup.querySelector(".bg-wfs-popup-list") as HTMLElement;
     await loadData(list);
