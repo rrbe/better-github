@@ -121,6 +121,8 @@ function injectTreeToggle(): void {
   updateLabel();
 
   btn.addEventListener("click", () => {
+    // Release focus so Space keeps scrolling the PR instead of re-triggering the button.
+    btn.blur();
     const folders = getTreeFolders();
     const shouldCollapse = areMajorityExpanded();
 
@@ -278,6 +280,8 @@ function createDiffToggleButton(): HTMLButtonElement {
   updateDiffButtonLabel(btn);
 
   btn.addEventListener("click", () => {
+    // Release focus so Space keeps scrolling the PR instead of re-triggering the button.
+    btn.blur();
     const currentlyCollapsed =
       diffIntent !== null ? diffIntent === "collapsed" : getMajorityCollapsed();
     diffIntent = currentlyCollapsed ? "expanded" : "collapsed";
