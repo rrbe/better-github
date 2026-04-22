@@ -197,6 +197,43 @@ async function approvePR(
   }
 }
 
+async function fetchRepoTagsViaRest(
+  owner: string,
+  repo: string,
+  token: string,
+): Promise<TagInfo[]> {
+  const headers: Record<string, string> = {
+    Accept: "application/vnd.github.v3+json",
+  };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const allTags: TagInfo[] = [];
+  const maxPages = 3;
+
+  for (let page = 1; page <= maxPages; page++) {
+    const url = `https://api.github.com/repos/${owner}/${repo}/tags?per_page=100&page=${page}`;
+    const response = await fetch(url, { headers });
+
+    if (!response.ok) {
+      console.error(`[Better GitHub] Tags REST error: ${response.status} ${response.statusText}`);
+      break;
+    }
+
+    const tags: Array<{ name: string; commit: { sha: string } }> = await response.json();
+    if (tags.length === 0) break;
+
+    for (const tag of tags) {
+      allTags.push({ name: tag.name, commitSha: tag.commit.sha });
+    }
+
+    if (tags.length < 100) break;
+  }
+
+  return allTags;
+}
+
 async function fetchRepoTags(
   owner: string,
   repo: string,
@@ -204,36 +241,62 @@ async function fetchRepoTags(
   const cacheKey = `cache:tags:${owner}/${repo}`;
   return cachedFetch<TagInfo[]>(cacheKey, async () => {
     const token = await getToken();
-    const headers: Record<string, string> = {
-      Accept: "application/vnd.github.v3+json",
-    };
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
+
+    // GraphQL requires auth — fall back to anonymous REST when no token is set
+    if (!token) return fetchRepoTagsViaRest(owner, repo, "");
+
+    const query = `query($owner: String!, $repo: String!) {
+  repository(owner: $owner, name: $repo) {
+    refs(refPrefix: "refs/tags/", first: 100, orderBy: {field: TAG_COMMIT_DATE, direction: DESC}) {
+      nodes {
+        name
+        target {
+          ... on Commit { oid }
+          ... on Tag {
+            target {
+              ... on Commit { oid }
+            }
+          }
+        }
+      }
+    }
+  }
+}`;
+
+    const response = await fetch("https://api.github.com/graphql", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query,
+        variables: { owner, repo },
+      }),
+    });
+
+    if (!response.ok) {
+      console.error(`[Better GitHub] Tags GraphQL error: ${response.status} ${response.statusText}`);
+      return fetchRepoTagsViaRest(owner, repo, token);
     }
 
-    const allTags: TagInfo[] = [];
-    const maxPages = 3;
-
-    for (let page = 1; page <= maxPages; page++) {
-      const url = `https://api.github.com/repos/${owner}/${repo}/tags?per_page=100&page=${page}`;
-      const response = await fetch(url, { headers });
-
-      if (!response.ok) {
-        console.error(`[Better GitHub] Tags API error: ${response.status} ${response.statusText}`);
-        break;
-      }
-
-      const tags: Array<{ name: string; commit: { sha: string } }> = await response.json();
-      if (tags.length === 0) break;
-
-      for (const tag of tags) {
-        allTags.push({ name: tag.name, commitSha: tag.commit.sha });
-      }
-
-      if (tags.length < 100) break;
+    const json = await response.json();
+    if (json.errors) {
+      console.error("[Better GitHub] Tags GraphQL errors:", json.errors);
+      return fetchRepoTagsViaRest(owner, repo, token);
     }
 
-    return allTags;
+    const nodes = json.data?.repository?.refs?.nodes as
+      | Array<{ name: string; target: { oid?: string; target?: { oid?: string } } }>
+      | undefined;
+    if (!nodes) return [];
+
+    const tags: TagInfo[] = [];
+    for (const node of nodes) {
+      const sha = node.target.oid ?? node.target.target?.oid;
+      if (sha) tags.push({ name: node.name, commitSha: sha });
+    }
+    return tags;
   });
 }
 
