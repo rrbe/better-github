@@ -59,8 +59,9 @@
   background-color: var(--bgColor-attention-muted, var(--color-attention-subtle, #fff8c5));
 }
 
-/* PR Diff Stats Badge */
-.better-github-diff-stats {
+/* Diff Stats Badge — used by PR list and commits list */
+.better-github-diff-stats,
+.better-github-commit-diff-stats {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -74,6 +75,10 @@
   border-radius: 2em;
   background-color: var(--bgColor-muted, var(--color-canvas-subtle, #f6f8fa));
   white-space: nowrap;
+}
+
+.better-github-commit-diff-stats {
+  margin-top: 4px;
 }
 
 .better-github-diff-stats-add {

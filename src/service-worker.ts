@@ -1,4 +1,4 @@
-import type { ServiceWorkerRequest, ServiceWorkerResponse, PRBranchInfo, PRReviewStatus, PRDiffStats, PRApproveResult, TagInfo, StargazerInfo, WatcherInfo, ForkInfo } from "./lib/messages";
+import type { ServiceWorkerRequest, ServiceWorkerResponse, PRBranchInfo, PRReviewStatus, PRDiffStats, CommitDiffStats, PRApproveResult, TagInfo, StargazerInfo, WatcherInfo, ForkInfo } from "./lib/messages";
 
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
@@ -85,32 +85,33 @@ async function fetchPRBranches(
   });
 }
 
-async function fetchPRReviewStatuses(
-  owner: string,
-  repo: string,
-  prNumbers: number[],
-): Promise<PRReviewStatus[]> {
-  if (prNumbers.length === 0) return [];
+interface GraphQLBatchSpec<K extends string | number, V> {
+  cachePrefix: string;
+  owner: string;
+  repo: string;
+  keys: K[];
+  aliasFor: (k: K) => string;
+  buildNodeQuery: (k: K) => string;
+  parseNode: (k: K, node: Record<string, unknown>) => V | null;
+}
+
+async function fetchGraphQLBatch<K extends string | number, V>(
+  spec: GraphQLBatchSpec<K, V>,
+): Promise<V[]> {
+  if (spec.keys.length === 0) return [];
 
   const token = await getToken();
   if (!token) return [];
 
-  const cacheKey = `cache:reviews:${owner}/${repo}:${prNumbers.sort().join(",")}`;
-  return cachedFetch<PRReviewStatus[]>(cacheKey, async () => {
-    const prQueries = prNumbers
-      .map(
-        (n) => `    pr_${n}: pullRequest(number: ${n}) {
-      reviewThreads(first: 100) {
-        totalCount
-        nodes { isResolved }
-      }
-    }`,
-      )
+  const cacheKey = `cache:${spec.cachePrefix}:${spec.owner}/${spec.repo}:${spec.keys.join(",")}`;
+  return cachedFetch<V[]>(cacheKey, async () => {
+    const entries = spec.keys
+      .map((k) => `    ${spec.aliasFor(k)}: ${spec.buildNodeQuery(k)}`)
       .join("\n");
 
     const query = `query($owner: String!, $repo: String!) {
   repository(owner: $owner, name: $repo) {
-${prQueries}
+${entries}
   }
 }`;
 
@@ -122,7 +123,7 @@ ${prQueries}
       },
       body: JSON.stringify({
         query,
-        variables: { owner, repo },
+        variables: { owner: spec.owner, repo: spec.repo },
       }),
     });
 
@@ -137,21 +138,42 @@ ${prQueries}
       return [];
     }
 
-    const repoData = json.data?.repository;
+    const repoData = json.data?.repository as Record<string, Record<string, unknown> | null> | undefined;
     if (!repoData) return [];
 
-    return prNumbers
-      .map((n) => {
-        const pr = repoData[`pr_${n}`];
-        if (!pr) return null;
-        const threads = pr.reviewThreads;
-        const totalThreads = threads.totalCount;
-        const resolvedThreads = (threads.nodes as Array<{ isResolved: boolean }>).filter(
-          (t) => t.isResolved,
-        ).length;
-        return { number: n, totalThreads, resolvedThreads };
-      })
-      .filter((s): s is PRReviewStatus => s !== null);
+    const results: V[] = [];
+    for (const k of spec.keys) {
+      const node = repoData[spec.aliasFor(k)];
+      if (!node) continue;
+      const parsed = spec.parseNode(k, node);
+      if (parsed !== null) results.push(parsed);
+    }
+    return results;
+  });
+}
+
+async function fetchPRReviewStatuses(
+  owner: string,
+  repo: string,
+  prNumbers: number[],
+): Promise<PRReviewStatus[]> {
+  return fetchGraphQLBatch<number, PRReviewStatus>({
+    cachePrefix: "reviews",
+    owner,
+    repo,
+    keys: [...prNumbers].sort((a, b) => a - b),
+    aliasFor: (n) => `pr_${n}`,
+    buildNodeQuery: (n) => `pullRequest(number: ${n}) {
+      reviewThreads(first: 100) {
+        totalCount
+        nodes { isResolved }
+      }
+    }`,
+    parseNode: (n, pr) => {
+      const threads = pr.reviewThreads as { totalCount: number; nodes: Array<{ isResolved: boolean }> };
+      const resolvedThreads = threads.nodes.filter((t) => t.isResolved).length;
+      return { number: n, totalThreads: threads.totalCount, resolvedThreads };
+    },
   });
 }
 
@@ -160,67 +182,55 @@ async function fetchPRDiffStats(
   repo: string,
   prNumbers: number[],
 ): Promise<PRDiffStats[]> {
-  if (prNumbers.length === 0) return [];
-
-  const token = await getToken();
-  if (!token) return [];
-
-  const cacheKey = `cache:diffstats:${owner}/${repo}:${prNumbers.sort().join(",")}`;
-  return cachedFetch<PRDiffStats[]>(cacheKey, async () => {
-    const prQueries = prNumbers
-      .map(
-        (n) => `    pr_${n}: pullRequest(number: ${n}) {
+  return fetchGraphQLBatch<number, PRDiffStats>({
+    cachePrefix: "diffstats",
+    owner,
+    repo,
+    keys: [...prNumbers].sort((a, b) => a - b),
+    aliasFor: (n) => `pr_${n}`,
+    buildNodeQuery: (n) => `pullRequest(number: ${n}) {
       additions
       deletions
       changedFiles
     }`,
-      )
-      .join("\n");
+    parseNode: (n, pr) => ({
+      number: n,
+      additions: pr.additions as number,
+      deletions: pr.deletions as number,
+      changedFiles: pr.changedFiles as number,
+    }),
+  });
+}
 
-    const query = `query($owner: String!, $repo: String!) {
-  repository(owner: $owner, name: $repo) {
-${prQueries}
-  }
-}`;
+async function fetchCommitDiffStats(
+  owner: string,
+  repo: string,
+  shas: string[],
+): Promise<CommitDiffStats[]> {
+  const normalized = shas
+    .map((s) => s.toLowerCase())
+    .filter((s) => /^[0-9a-f]{40}$/.test(s))
+    .sort();
 
-    const response = await fetch("https://api.github.com/graphql", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        query,
-        variables: { owner, repo },
-      }),
-    });
-
-    if (!response.ok) {
-      console.error(`[Better GitHub] GraphQL error: ${response.status} ${response.statusText}`);
-      return [];
-    }
-
-    const json = await response.json();
-    if (json.errors) {
-      console.error("[Better GitHub] GraphQL errors:", json.errors);
-      return [];
-    }
-
-    const repoData = json.data?.repository;
-    if (!repoData) return [];
-
-    return prNumbers
-      .map((n) => {
-        const pr = repoData[`pr_${n}`];
-        if (!pr) return null;
-        return {
-          number: n,
-          additions: pr.additions as number,
-          deletions: pr.deletions as number,
-          changedFiles: pr.changedFiles as number,
-        };
-      })
-      .filter((s): s is PRDiffStats => s !== null);
+  return fetchGraphQLBatch<string, CommitDiffStats>({
+    cachePrefix: "commitdiffstats",
+    owner,
+    repo,
+    keys: normalized,
+    aliasFor: (sha) => `c_${sha}`,
+    buildNodeQuery: (sha) => `object(oid: "${sha}") {
+      ... on Commit {
+        additions
+        deletions
+        changedFilesIfAvailable
+      }
+    }`,
+    parseNode: (sha, commit) => ({
+      sha,
+      additions: commit.additions as number,
+      deletions: commit.deletions as number,
+      changedFiles: (commit.changedFilesIfAvailable as number | null | undefined) ?? null,
+    }),
   });
 }
 
@@ -410,6 +420,8 @@ async function handleMessage(request: ServiceWorkerRequest): Promise<ServiceWork
       return { ok: true, data: await fetchPRReviewStatuses(request.owner, request.repo, request.prNumbers) };
     case "FETCH_PR_DIFF_STATS":
       return { ok: true, data: await fetchPRDiffStats(request.owner, request.repo, request.prNumbers) };
+    case "FETCH_COMMIT_DIFF_STATS":
+      return { ok: true, data: await fetchCommitDiffStats(request.owner, request.repo, request.shas) };
     case "APPROVE_PR":
       return { ok: true, data: await approvePR(request.owner, request.repo, request.prNumber, request.body) };
     case "FETCH_REPO_TAGS":

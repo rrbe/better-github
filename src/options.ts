@@ -12,6 +12,7 @@ const FEATURE_KEYS = [
   "feature-pr-approve-now",
   "feature-default-sort",
   "feature-commit-tags",
+  "feature-commit-diff-stats",
   "feature-better-top-repos",
   "feature-watch-fork-star-popup",
 ] as const;

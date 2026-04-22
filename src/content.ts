@@ -8,6 +8,7 @@ import { injectFileAgeColor } from "./features/file-age-color";
 import { injectPRApproveNow } from "./features/pr-approve-now";
 import { applyDefaultSort } from "./features/default-sort";
 import { injectCommitTags } from "./features/commit-tags";
+import { injectCommitDiffStats } from "./features/commit-diff-stats";
 import { injectBetterTopRepos } from "./features/better-top-repos";
 import { injectWatchForkStarPopup } from "./features/watch-fork-star-popup";
 import { injectPRCollapseExpand } from "./features/pr-collapse-expand";
@@ -21,6 +22,7 @@ const FEATURE_KEYS = [
   "feature-pr-approve-now",
   "feature-default-sort",
   "feature-commit-tags",
+  "feature-commit-diff-stats",
   "feature-better-top-repos",
   "feature-watch-fork-star-popup",
   "feature-pr-collapse-expand",
@@ -38,6 +40,7 @@ const FEATURE_CLASSES: Record<FeatureKey, string[]> = {
   "feature-pr-approve-now": ["better-github-approve-now", "better-github-approve-dialog-overlay"],
   "feature-default-sort": [],
   "feature-commit-tags": ["better-github-commit-tag"],
+  "feature-commit-diff-stats": ["better-github-commit-diff-stats"],
   "feature-better-top-repos": [],
   "feature-watch-fork-star-popup": ["bg-wfs-counter-wrap"],
   "feature-pr-collapse-expand": ["better-github-toggle-tree", "better-github-collapse-expand"],
@@ -100,6 +103,9 @@ function injectFeature(key: FeatureKey): void {
       break;
     case "feature-commit-tags":
       injectCommitTags();
+      break;
+    case "feature-commit-diff-stats":
+      injectCommitDiffStats();
       break;
     case "feature-better-top-repos":
       injectBetterTopRepos();
