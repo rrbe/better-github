@@ -59,6 +59,42 @@
   background-color: var(--bgColor-attention-muted, var(--color-attention-subtle, #fff8c5));
 }
 
+/* PR Diff Stats Badge */
+.better-github-diff-stats {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px;
+  font-family:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  border: 1px solid transparent;
+  border-radius: 2em;
+  background-color: var(--bgColor-muted, var(--color-canvas-subtle, #f6f8fa));
+  white-space: nowrap;
+}
+
+.better-github-diff-stats-add {
+  color: var(--fgColor-success, var(--color-success-fg, #1a7f37));
+}
+
+.better-github-diff-stats-del {
+  color: var(--fgColor-danger, var(--color-danger-fg, #d1242f));
+}
+
+.better-github-diff-stats-files {
+  color: var(--fgColor-muted, var(--color-fg-muted, #656d76));
+  font-family: inherit;
+}
+
+.better-github-diff-stats-files::before {
+  content: "·";
+  margin-right: 6px;
+  color: var(--fgColor-muted, var(--color-fg-muted, #656d76));
+}
+
 /* File Age Color — heat map for recent commits */
 :root {
   --better-github-heat-color: #c24e00;

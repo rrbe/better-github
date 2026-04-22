@@ -1,4 +1,4 @@
-import type { ServiceWorkerRequest, ServiceWorkerResponse, PRBranchInfo, PRReviewStatus, PRApproveResult, TagInfo, StargazerInfo, WatcherInfo, ForkInfo } from "./lib/messages";
+import type { ServiceWorkerRequest, ServiceWorkerResponse, PRBranchInfo, PRReviewStatus, PRDiffStats, PRApproveResult, TagInfo, StargazerInfo, WatcherInfo, ForkInfo } from "./lib/messages";
 
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
@@ -152,6 +152,75 @@ ${prQueries}
         return { number: n, totalThreads, resolvedThreads };
       })
       .filter((s): s is PRReviewStatus => s !== null);
+  });
+}
+
+async function fetchPRDiffStats(
+  owner: string,
+  repo: string,
+  prNumbers: number[],
+): Promise<PRDiffStats[]> {
+  if (prNumbers.length === 0) return [];
+
+  const token = await getToken();
+  if (!token) return [];
+
+  const cacheKey = `cache:diffstats:${owner}/${repo}:${prNumbers.sort().join(",")}`;
+  return cachedFetch<PRDiffStats[]>(cacheKey, async () => {
+    const prQueries = prNumbers
+      .map(
+        (n) => `    pr_${n}: pullRequest(number: ${n}) {
+      additions
+      deletions
+      changedFiles
+    }`,
+      )
+      .join("\n");
+
+    const query = `query($owner: String!, $repo: String!) {
+  repository(owner: $owner, name: $repo) {
+${prQueries}
+  }
+}`;
+
+    const response = await fetch("https://api.github.com/graphql", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query,
+        variables: { owner, repo },
+      }),
+    });
+
+    if (!response.ok) {
+      console.error(`[Better GitHub] GraphQL error: ${response.status} ${response.statusText}`);
+      return [];
+    }
+
+    const json = await response.json();
+    if (json.errors) {
+      console.error("[Better GitHub] GraphQL errors:", json.errors);
+      return [];
+    }
+
+    const repoData = json.data?.repository;
+    if (!repoData) return [];
+
+    return prNumbers
+      .map((n) => {
+        const pr = repoData[`pr_${n}`];
+        if (!pr) return null;
+        return {
+          number: n,
+          additions: pr.additions as number,
+          deletions: pr.deletions as number,
+          changedFiles: pr.changedFiles as number,
+        };
+      })
+      .filter((s): s is PRDiffStats => s !== null);
   });
 }
 
@@ -339,6 +408,8 @@ async function handleMessage(request: ServiceWorkerRequest): Promise<ServiceWork
       return { ok: true, data: await fetchPRBranches(request.owner, request.repo, request.state, request.page) };
     case "FETCH_PR_REVIEW_STATUSES":
       return { ok: true, data: await fetchPRReviewStatuses(request.owner, request.repo, request.prNumbers) };
+    case "FETCH_PR_DIFF_STATS":
+      return { ok: true, data: await fetchPRDiffStats(request.owner, request.repo, request.prNumbers) };
     case "APPROVE_PR":
       return { ok: true, data: await approvePR(request.owner, request.repo, request.prNumber, request.body) };
     case "FETCH_REPO_TAGS":

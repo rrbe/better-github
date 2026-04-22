@@ -1,6 +1,7 @@
 import { onPageReady, startNavigation } from "./lib/navigation";
 import { injectPRBranchNames } from "./features/pr-branch-names";
 import { injectPRReviewStatus } from "./features/pr-review-status";
+import { injectPRDiffStats } from "./features/pr-diff-stats";
 import { injectReleasesTab } from "./features/release-tab";
 import { injectPRLabelPosition, cleanupPRLabelPosition } from "./features/pr-label-position";
 import { injectFileAgeColor } from "./features/file-age-color";
@@ -14,6 +15,7 @@ import { injectPRCollapseExpand } from "./features/pr-collapse-expand";
 const FEATURE_KEYS = [
   "feature-pr-branch-names",
   "feature-pr-review-status",
+  "feature-pr-diff-stats",
   "feature-release-tab",
   "feature-pr-label-position",
   "feature-pr-approve-now",
@@ -30,6 +32,7 @@ type FeatureKey = (typeof FEATURE_KEYS)[number];
 const FEATURE_CLASSES: Record<FeatureKey, string[]> = {
   "feature-pr-branch-names": ["better-github-branch-badge"],
   "feature-pr-review-status": ["better-github-review-status"],
+  "feature-pr-diff-stats": ["better-github-diff-stats"],
   "feature-release-tab": ["better-github-releases-tab"],
   "feature-pr-label-position": ["better-github-label-prefix"],
   "feature-pr-approve-now": ["better-github-approve-now", "better-github-approve-dialog-overlay"],
@@ -79,6 +82,9 @@ function injectFeature(key: FeatureKey): void {
       break;
     case "feature-pr-review-status":
       injectPRReviewStatus();
+      break;
+    case "feature-pr-diff-stats":
+      injectPRDiffStats();
       break;
     case "feature-release-tab":
       injectReleasesTab();

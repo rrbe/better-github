@@ -9,6 +9,13 @@ export interface PRReviewStatus {
   resolvedThreads: number;
 }
 
+export interface PRDiffStats {
+  number: number;
+  additions: number;
+  deletions: number;
+  changedFiles: number;
+}
+
 export interface PRApproveResult {
   success: boolean;
   error?: string;
@@ -43,6 +50,7 @@ export interface ForkInfo {
 export type ServiceWorkerRequest =
   | { type: "FETCH_PR_BRANCHES"; owner: string; repo: string; state: string; page: number }
   | { type: "FETCH_PR_REVIEW_STATUSES"; owner: string; repo: string; prNumbers: number[] }
+  | { type: "FETCH_PR_DIFF_STATS"; owner: string; repo: string; prNumbers: number[] }
   | { type: "APPROVE_PR"; owner: string; repo: string; prNumber: number; body?: string }
   | { type: "FETCH_REPO_TAGS"; owner: string; repo: string }
   | { type: "FETCH_STARGAZERS"; owner: string; repo: string }
