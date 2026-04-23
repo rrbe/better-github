@@ -39,6 +39,13 @@ Another motivation: Refined GitHub has too many features tightly coupled to GitH
       <img src="docs/screenshots/pr-review-status.png" alt="PR Review Status" width="430" />
    </details>
 
+- **PR Diff Stats** — Show additions, deletions, and changed file count (e.g. `+223 −114 · 5 files`) on each row of the PR list. Requires a token.
+
+   <details>
+      <summary>Screenshot</summary>
+      <img src="docs/screenshots/pr-commit-diff-stats.png" alt="PR Diff Stats" width="430" />
+   </details>
+
 - **PR Label Position** — Move labels to the front of PR titles for better visibility and scanning.
 
    <details>
@@ -91,6 +98,13 @@ Another motivation: Refined GitHub has too many features tightly coupled to GitH
    <details>
       <summary>Screenshot</summary>
       <img src="docs/screenshots/commit-tags.png" alt="Commit Tags" width="300" />
+   </details>
+
+- **Commit Diff Stats** — Show additions, deletions, and changed file count (e.g. `+223 −114 · 5 files`) on each row of the commits list page. Requires a token.
+
+   <details>
+      <summary>Screenshot</summary>
+      <img src="docs/screenshots/pr-commit-diff-stats.png" alt="Commit Diff Stats" width="430" />
    </details>
 
 - **Recent Commit Message Color** — Highlight recent commits with color based on their age, making it easy to spot the latest changes. Always on.

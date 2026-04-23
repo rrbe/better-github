@@ -1,4 +1,4 @@
-import type { ServiceWorkerRequest, PRBranchInfo, PRReviewStatus, PRApproveResult, TagInfo, StargazerInfo, WatcherInfo, ForkInfo } from "./messages";
+import type { ServiceWorkerRequest, PRBranchInfo, PRReviewStatus, PRDiffStats, CommitDiffStats, PRApproveResult, TagInfo, StargazerInfo, WatcherInfo, ForkInfo } from "./messages";
 
 function sendMessage<T>(request: ServiceWorkerRequest): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -25,7 +25,7 @@ function sendMessage<T>(request: ServiceWorkerRequest): Promise<T> {
   });
 }
 
-export type { PRReviewStatus, PRApproveResult, TagInfo, StargazerInfo, WatcherInfo, ForkInfo };
+export type { PRReviewStatus, PRDiffStats, CommitDiffStats, PRApproveResult, TagInfo, StargazerInfo, WatcherInfo, ForkInfo };
 
 export async function fetchPRBranches(
   owner: string,
@@ -61,6 +61,42 @@ export async function fetchPRReviewStatuses(
     });
   } catch (err) {
     console.error("[Better GitHub] Failed to fetch review statuses:", err);
+    return [];
+  }
+}
+
+export async function fetchPRDiffStats(
+  owner: string,
+  repo: string,
+  prNumbers: number[],
+): Promise<PRDiffStats[]> {
+  try {
+    return await sendMessage<PRDiffStats[]>({
+      type: "FETCH_PR_DIFF_STATS",
+      owner,
+      repo,
+      prNumbers,
+    });
+  } catch (err) {
+    console.error("[Better GitHub] Failed to fetch diff stats:", err);
+    return [];
+  }
+}
+
+export async function fetchCommitDiffStats(
+  owner: string,
+  repo: string,
+  shas: string[],
+): Promise<CommitDiffStats[]> {
+  try {
+    return await sendMessage<CommitDiffStats[]>({
+      type: "FETCH_COMMIT_DIFF_STATS",
+      owner,
+      repo,
+      shas,
+    });
+  } catch (err) {
+    console.error("[Better GitHub] Failed to fetch commit diff stats:", err);
     return [];
   }
 }

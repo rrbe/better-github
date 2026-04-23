@@ -6,11 +6,13 @@ const status = document.getElementById("status") as HTMLDivElement;
 const FEATURE_KEYS = [
   "feature-pr-branch-names",
   "feature-pr-review-status",
+  "feature-pr-diff-stats",
   "feature-release-tab",
   "feature-pr-label-position",
   "feature-pr-approve-now",
   "feature-default-sort",
   "feature-commit-tags",
+  "feature-commit-diff-stats",
   "feature-better-top-repos",
   "feature-watch-fork-star-popup",
 ] as const;
