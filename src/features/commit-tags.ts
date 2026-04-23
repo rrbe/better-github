@@ -1,6 +1,7 @@
 import { isCommitsListPage, getRepoInfo } from "../lib/page-detect";
 import { fetchRepoTags } from "../lib/github-api";
 import { escapeHtml } from "../lib/utils";
+import { collectCommitRows, MAIN_CONTENT_INNER_SELECTOR } from "../lib/commit-dom";
 
 const TAG_CLASS = "better-github-commit-tag";
 const TAG_ROW_CLASS = "better-github-commit-tag-row";
@@ -13,44 +14,29 @@ export async function injectCommitTags(): Promise<void> {
   const info = getRepoInfo();
   if (!info) return;
 
-  if (document.querySelectorAll(`.${TAG_CLASS}`).length > 0) return;
-
   const tags = await fetchRepoTags(info.owner, info.repo);
   if (tags.length === 0) return;
 
   const tagMap = new Map<string, string[]>();
   for (const tag of tags) {
-    const existing = tagMap.get(tag.commitSha);
+    const sha = tag.commitSha.toLowerCase();
+    const existing = tagMap.get(sha);
     if (existing) {
       existing.push(tag.name);
     } else {
-      tagMap.set(tag.commitSha, [tag.name]);
+      tagMap.set(sha, [tag.name]);
     }
   }
 
-  const commitPattern = new RegExp(`^/${info.owner}/${info.repo}/commit/([0-9a-f]+)$`, "i");
+  const shaToContainer = collectCommitRows(info.owner, info.repo);
 
-  // Find all commit SHA links on the page
-  const links = document.querySelectorAll<HTMLAnchorElement>("a[href*='/commit/']");
-
-  for (const link of links) {
-    const href = new URL(link.href).pathname;
-    const match = href.match(commitPattern);
-    if (!match) continue;
-
-    const sha = match[1];
+  for (const [sha, container] of shaToContainer) {
     const tagNames = tagMap.get(sha);
     if (!tagNames) continue;
 
-    // Find the parent container of the SHA link to insert tag badges
-    const container = link.closest("li, div.TimelineItem-body, div[data-testid]") || link.parentElement;
-    if (!container) continue;
-
-    // Skip if tags already injected in this container
     if (container.querySelector(`.${TAG_CLASS}`)) continue;
 
-    // Create a tag row inside the MainContent inner area (below author/date line)
-    const mainInner = container.querySelector<HTMLElement>("[class*='MainContent-module__inner']");
+    const mainInner = container.querySelector<HTMLElement>(MAIN_CONTENT_INNER_SELECTOR);
     const tagParent = mainInner || container;
 
     let tagRow = tagParent.querySelector<HTMLElement>(`.${TAG_ROW_CLASS}`);

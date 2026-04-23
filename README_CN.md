@@ -38,6 +38,13 @@
       <img src="docs/screenshots/pr-review-status.png" alt="PR Review 状态" width="430" />
    </details>
 
+- **PR Diff 统计** — 在 PR 列表的每一行展示新增行数、删除行数与变更文件数（例如 `+223 −114 · 5 files`）。需要 token。
+
+   <details>
+      <summary>示例截图</summary>
+      <img src="docs/screenshots/pr-commit-diff-stats.png" alt="PR Diff 统计" width="430" />
+   </details>
+
 - **PR Label 前置** — 将 PR 标签移到标题前方，提升可读性和浏览效率。
 
    <details>
@@ -90,6 +97,13 @@
    <details>
       <summary>示例截图</summary>
       <img src="docs/screenshots/commit-tags.png" alt="Commit 标签显示" width="300" />
+   </details>
+
+- **Commit Diff 统计** — 在 commits 列表页的每一行展示新增行数、删除行数与变更文件数（例如 `+223 −114 · 5 files`）。需要 token。
+
+   <details>
+      <summary>示例截图</summary>
+      <img src="docs/screenshots/pr-commit-diff-stats.png" alt="Commit Diff 统计" width="430" />
    </details>
 
 - **最近提交 Commit Message 颜色** — 根据提交时间为最近的几个 commit message 添加颜色，帮助快速定位最新提交。常驻开启。
