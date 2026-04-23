@@ -1,6 +1,6 @@
 {
   "name": "better-github",
-  "version": "1.6.2",
+  "version": "1.7.0",
   "private": true,
   "scripts": {
     "build": "node build.mjs",
