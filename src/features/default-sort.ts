@@ -24,9 +24,9 @@ function rewriteLink(link: HTMLAnchorElement): void {
   if (!q) {
     const isIssues = /\/issues\/?$/.test(url.pathname);
     const base = isIssues ? "is:issue is:open" : "is:pr is:open";
-    url.searchParams.set("q", `${base} sort:updated-desc`);
+    url.searchParams.set("q", `${base} sort:updated-desc `);
   } else {
-    url.searchParams.set("q", `${q} sort:updated-desc`);
+    url.searchParams.set("q", `${q} sort:updated-desc `);
   }
 
   // Preserve relative vs absolute href
