@@ -26,9 +26,9 @@
     if (!currentQ) {
       const isIssues = /\/issues\/?$/.test(location.pathname);
       const base = isIssues ? "is:issue is:open" : "is:pr is:open";
-      currentParams.set("q", `${base} sort:updated-desc`);
+      currentParams.set("q", `${base} sort:updated-desc `);
     } else {
-      currentParams.set("q", `${currentQ} sort:updated-desc`);
+      currentParams.set("q", `${currentQ} sort:updated-desc `);
     }
 
     location.replace(`${location.pathname}?${currentParams.toString()}`);
