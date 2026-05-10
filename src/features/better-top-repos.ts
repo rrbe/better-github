@@ -45,7 +45,7 @@ function getRepoList(): { ul: HTMLUListElement; items: HTMLLIElement[] } | null 
       const ul = headingLi.parentElement as HTMLUListElement | null;
       if (!ul || ul.tagName !== "UL") continue;
       const items = [
-        ...ul.querySelectorAll<HTMLLIElement>("li.prc-ActionList-ActionListItem-So4vC"),
+        ...ul.querySelectorAll<HTMLLIElement>('li[class*="prc-ActionList-ActionListItem-"]'),
       ];
       return { ul, items };
     }
@@ -158,8 +158,8 @@ async function togglePin(repoName: string, btn: HTMLButtonElement, ul: HTMLUList
 }
 
 function reorderPinnedRepos(ul: HTMLUListElement, pinned: string[]): void {
-  const items = [...ul.querySelectorAll<HTMLLIElement>("li.prc-ActionList-ActionListItem-So4vC")];
-  const heading = ul.querySelector("li:not(.prc-ActionList-ActionListItem-So4vC)");
+  const items = [...ul.querySelectorAll<HTMLLIElement>('li[class*="prc-ActionList-ActionListItem-"]')];
+  const heading = ul.querySelector('li:not([class*="prc-ActionList-ActionListItem-"])');
 
   // Collect pinned items in order of pinned array
   const pinnedItems: HTMLLIElement[] = [];
@@ -217,7 +217,7 @@ function injectStyles(): void {
       color: var(--fgColor-accent, #0969da);
       background: var(--bgColor-accent-muted, rgba(9,105,218,0.1));
     }
-    li.prc-ActionList-ActionListItem-So4vC:hover .better-github-pin-btn {
+    li[${PIN_INJECTED_ATTR}]:hover .better-github-pin-btn {
       opacity: 1;
     }
 `;
