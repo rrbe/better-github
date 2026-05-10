@@ -29,8 +29,9 @@
         border-radius: 4px;
         flex-shrink: 0;
       }
-      .brand-name {
-        font-size: 14px;
+      .brand-title {
+        margin: 0;
+        font-size: 16px;
         font-weight: 600;
         color: #24292f;
       }
@@ -312,7 +313,7 @@
   <body>
     <div class="brand-row">
       <img class="brand-icon" src="icons/icon48.png" alt="" />
-      <span class="brand-name">Better GitHub</span>
+      <h2 class="brand-title">Settings</h2>
       <a class="brand-link" href="https://github.com/rrbe/better-github" target="_blank" title="View on GitHub">
         <span>It's open sourced!</span>
         <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
@@ -320,8 +321,6 @@
         </svg>
       </a>
     </div>
-
-    <h2>Settings</h2>
 
     <label for="token">GitHub Personal Access Token</label>
     <input type="password" id="token" placeholder="ghp_xxxxxxxxxxxx" />
