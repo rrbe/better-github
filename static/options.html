@@ -74,6 +74,19 @@
         font-size: 12px;
         color: #656d76;
       }
+      .hint > div {
+        margin-top: 4px;
+      }
+      .hint-or {
+        font-style: italic;
+        color: #8b949e;
+      }
+      .hint code {
+        font-size: 11px;
+        padding: 1px 4px;
+        background: #eaeef2;
+        border-radius: 3px;
+      }
       .hint a {
         color: #0969da;
         text-decoration: none;
@@ -326,8 +339,16 @@
     <input type="password" id="token" placeholder="ghp_xxxxxxxxxxxx" />
     <div id="tokenStatus" class="token-status"></div>
     <div class="hint">
-      Required for private repos. Needs <code>repo</code> scope.
-      <a href="https://github.com/settings/tokens" target="_blank">Create a classic token →</a>
+      Required for private repos.
+      <div>
+        Classic token — check the <code>repo</code> scope.
+        <a href="https://github.com/settings/tokens/new?scopes=repo&description=Better%20GitHub" target="_blank">Create a classic token →</a>
+      </div>
+      <div class="hint-or">Or</div>
+      <div>
+        Fine-grained token — grant <code>Contents: Read</code>, <code>Pull requests: Read and write</code>, <code>Metadata: Read</code>.
+        <a href="https://github.com/settings/personal-access-tokens/new" target="_blank">Create a fine-grained token →</a>
+      </div>
     </div>
     <button id="save">Save</button>
     <div class="status" id="status">Saved!</div>
