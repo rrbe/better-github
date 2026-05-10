@@ -73,6 +73,18 @@ tokenInput.addEventListener("blur", () => {
 });
 
 // --- Save button ---
+let statusTimer: number | undefined;
+
+function showStatus(kind: "success" | "error", message: string) {
+  status.className = `status ${kind}`;
+  status.textContent = message;
+  if (statusTimer) clearTimeout(statusTimer);
+  statusTimer = window.setTimeout(() => {
+    status.className = "status";
+    status.textContent = "";
+  }, 2000);
+}
+
 saveBtn.addEventListener("click", () => {
   const token = tokenInput.value.trim();
   const settings: Record<string, string | boolean> = { githubToken: token };
@@ -83,10 +95,11 @@ saveBtn.addEventListener("click", () => {
   }
 
   chrome.storage.local.set(settings, () => {
-    status.style.display = "block";
-    setTimeout(() => {
-      status.style.display = "none";
-    }, 2000);
+    if (chrome.runtime.lastError) {
+      showStatus("error", chrome.runtime.lastError.message ?? "Save failed");
+    } else {
+      showStatus("success", "Saved!");
+    }
   });
 });
 
