@@ -1,6 +1,7 @@
 import { isPRListPage, getRepoInfo, getPRListParams } from "../lib/page-detect";
 import { fetchPRBranches } from "../lib/github-api";
 import { getOrCreateInfoRow } from "../lib/info-row";
+import { SKELETON_BRANCH_CLASS, clearSkeletonsByClass } from "../lib/info-row-skeleton";
 
 const BADGE_CLASS = "better-github-branch-badge";
 
@@ -17,7 +18,10 @@ export async function injectPRBranchNames(): Promise<void> {
   const { state, page } = getPRListParams();
   const branches = await fetchPRBranches(info.owner, info.repo, state, page);
 
-  if (branches.length === 0) return;
+  if (branches.length === 0) {
+    clearSkeletonsByClass(SKELETON_BRANCH_CLASS);
+    return;
+  }
 
   const branchMap = new Map(branches.map((b) => [b.number, b.headRef]));
 
@@ -62,4 +66,6 @@ export async function injectPRBranchNames(): Promise<void> {
 
     infoRow.appendChild(badge);
   }
+
+  clearSkeletonsByClass(SKELETON_BRANCH_CLASS);
 }

@@ -2,6 +2,7 @@ import { isPRListPage, getRepoInfo } from "../lib/page-detect";
 import { fetchPRDiffStats } from "../lib/github-api";
 import { getOrCreateInfoRow } from "../lib/info-row";
 import { buildDiffStatsBadge } from "../lib/diff-stats-badge";
+import { SKELETON_PR_DIFF_CLASS, clearSkeletonsByClass } from "../lib/info-row-skeleton";
 
 const BADGE_CLASS = "better-github-diff-stats";
 
@@ -22,7 +23,10 @@ export async function injectPRDiffStats(): Promise<void> {
   if (prNumbers.length === 0) return;
 
   const stats = await fetchPRDiffStats(info.owner, info.repo, prNumbers);
-  if (stats.length === 0) return;
+  if (stats.length === 0) {
+    clearSkeletonsByClass(SKELETON_PR_DIFF_CLASS);
+    return;
+  }
 
   const statsMap = new Map(stats.map((s) => [s.number, s]));
 
@@ -41,4 +45,6 @@ export async function injectPRDiffStats(): Promise<void> {
 
     infoRow.appendChild(buildDiffStatsBadge(stat, BADGE_CLASS));
   }
+
+  clearSkeletonsByClass(SKELETON_PR_DIFF_CLASS);
 }

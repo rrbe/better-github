@@ -12,6 +12,7 @@ import { injectCommitDiffStats } from "./features/commit-diff-stats";
 import { injectBetterTopRepos } from "./features/better-top-repos";
 import { injectWatchForkStarPopup } from "./features/watch-fork-star-popup";
 import { injectPRCollapseExpand } from "./features/pr-collapse-expand";
+import { reserveInfoRowSkeletons } from "./lib/info-row-skeleton";
 
 const FEATURE_KEYS = [
   "feature-pr-branch-names",
@@ -32,15 +33,15 @@ type FeatureKey = (typeof FEATURE_KEYS)[number];
 
 // CSS classes used by each feature's injected elements
 const FEATURE_CLASSES: Record<FeatureKey, string[]> = {
-  "feature-pr-branch-names": ["better-github-branch-badge"],
+  "feature-pr-branch-names": ["better-github-branch-badge", "bg-skeleton-pill--branch"],
   "feature-pr-review-status": ["better-github-review-status"],
-  "feature-pr-diff-stats": ["better-github-diff-stats"],
+  "feature-pr-diff-stats": ["better-github-diff-stats", "bg-skeleton-pill--pr-diff"],
   "feature-release-tab": ["better-github-releases-tab"],
   "feature-pr-label-position": ["better-github-label-prefix"],
   "feature-pr-approve-now": ["better-github-approve-now", "better-github-approve-dialog-overlay"],
   "feature-default-sort": [],
   "feature-commit-tags": ["better-github-commit-tag"],
-  "feature-commit-diff-stats": ["better-github-commit-diff-stats"],
+  "feature-commit-diff-stats": ["better-github-commit-diff-stats", "bg-skeleton-pill--commit-diff"],
   "feature-better-top-repos": [],
   "feature-watch-fork-star-popup": ["bg-wfs-counter-wrap"],
   "feature-pr-collapse-expand": ["better-github-toggle-tree", "better-github-collapse-expand"],
@@ -145,6 +146,11 @@ onPageReady(async () => {
 
   // Toggleable features
   const flags = await getFeatureFlags();
+
+  // Reserve row height with skeleton placeholders before any async fetch starts
+  // — avoids layout-shift "flash" when real badges arrive.
+  reserveInfoRowSkeletons(flags);
+
   for (const key of FEATURE_KEYS) {
     if (flags[key]) {
       injectFeature(key);

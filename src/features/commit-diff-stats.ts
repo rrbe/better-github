@@ -2,6 +2,7 @@ import { isCommitsListPage, getRepoInfo } from "../lib/page-detect";
 import { fetchCommitDiffStats } from "../lib/github-api";
 import { collectCommitRows, MAIN_CONTENT_INNER_SELECTOR } from "../lib/commit-dom";
 import { buildDiffStatsBadge } from "../lib/diff-stats-badge";
+import { SKELETON_COMMIT_DIFF_CLASS, clearSkeletonsByClass } from "../lib/info-row-skeleton";
 
 const BADGE_CLASS = "better-github-commit-diff-stats";
 
@@ -15,7 +16,10 @@ export async function injectCommitDiffStats(): Promise<void> {
   if (shaToContainer.size === 0) return;
 
   const stats = await fetchCommitDiffStats(info.owner, info.repo, [...shaToContainer.keys()]);
-  if (stats.length === 0) return;
+  if (stats.length === 0) {
+    clearSkeletonsByClass(SKELETON_COMMIT_DIFF_CLASS);
+    return;
+  }
 
   const statsMap = new Map(stats.map((s) => [s.sha, s]));
 
@@ -28,4 +32,6 @@ export async function injectCommitDiffStats(): Promise<void> {
     const parent = mainInner || container;
     parent.appendChild(buildDiffStatsBadge(stat, BADGE_CLASS));
   }
+
+  clearSkeletonsByClass(SKELETON_COMMIT_DIFF_CLASS);
 }
