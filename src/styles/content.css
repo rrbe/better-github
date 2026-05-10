@@ -301,6 +301,14 @@
   margin-top: 4px;
 }
 
+/* Inline variant — sits next to commit title in new GitHub DOM */
+.better-github-commit-tag-row-inline {
+  display: inline-flex;
+  margin-top: 0;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
 /* Commit Tag Badge */
 .better-github-commit-tag {
   display: inline-flex;
