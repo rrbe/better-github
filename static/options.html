@@ -75,31 +75,101 @@
         box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.3);
       }
       .hint {
-        margin-top: 8px;
+        margin-top: 12px;
         font-size: 12px;
         color: #656d76;
       }
-      .hint > div {
-        margin-top: 6px;
+      .hint-intro {
+        margin: 0 0 10px;
+        line-height: 1.5;
       }
-      .hint-or {
-        font-style: italic;
+      .token-card {
+        display: block;
+        border: 1px solid #d0d7de;
+        border-radius: 6px;
+        background: #fff;
+        text-decoration: none;
+        color: inherit;
+        overflow: hidden;
+        transition:
+          border-color 0.15s,
+          box-shadow 0.15s;
+      }
+      .token-card:hover {
+        border-color: #0969da;
+        box-shadow: 0 0 0 1px #0969da;
+      }
+      .token-card-header {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 10px;
+        background: #f6f8fa;
+        border-bottom: 1px solid #d8dee4;
+        transition: background 0.15s;
+      }
+      .token-card:hover .token-card-header {
+        background: #ddf4ff;
+      }
+      .token-card-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: #0969da;
+      }
+      .token-card-arrow {
+        margin-left: auto;
+        color: #0969da;
+        opacity: 0.7;
+        transition:
+          opacity 0.15s,
+          transform 0.15s;
+      }
+      .token-card:hover .token-card-arrow {
+        opacity: 1;
+        transform: translate(1px, -1px);
+      }
+      .token-card-meta {
+        display: grid;
+        grid-template-columns: max-content 1fr;
+        column-gap: 14px;
+        row-gap: 4px;
+        margin: 0;
+        padding: 8px 10px;
+      }
+      .token-card-meta dt {
+        font-size: 11px;
+        font-weight: 500;
+        color: #57606a;
+      }
+      .token-card-meta dd {
+        margin: 0;
+        font-size: 12px;
+        color: #24292f;
+      }
+      .token-card-meta code {
+        font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+        font-size: 11px;
+        padding: 1px 5px;
+        background: rgba(175, 184, 193, 0.2);
+        border-radius: 3px;
+      }
+      .token-divider {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 8px 0;
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
         color: #8b949e;
       }
-      .hint ul {
-        list-style: disc;
-        margin: 2px 0 0;
-        padding-left: 20px;
-      }
-      .hint li {
-        margin-top: 1px;
-      }
-      .hint a {
-        color: #0969da;
-        text-decoration: none;
-      }
-      .hint a:hover {
-        text-decoration: underline;
+      .token-divider::before,
+      .token-divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: #d8dee4;
       }
       .token-status {
         margin-top: 6px;
@@ -368,30 +438,68 @@
       <div class="status" id="status"></div>
     </div>
     <div class="hint">
-      "Access Token" is required for private repos.
-      <div>
-        <a
-          href="https://github.com/settings/tokens/new?scopes=repo&description=Better%20GitHub"
-          target="_blank"
-          >Create a classic token →</a
-        >
-        with scope:
-        <ul>
-          <li>repo</li>
-        </ul>
-      </div>
-      <div class="hint-or">Or</div>
-      <div>
-        <a href="https://github.com/settings/personal-access-tokens/new" target="_blank"
-          >Create a fine-grained token →</a
-        >
-        with permissions:
-        <ul>
-          <li>Contents: Read</li>
-          <li>Pull requests: Read and write</li>
-          <li>Metadata: Read</li>
-        </ul>
-      </div>
+      <p class="hint-intro">
+        ⬆️ A token is required for accessing private repositories. The plugin itself will never
+        store your token or access your data.
+      </p>
+
+      <a
+        class="token-card"
+        href="https://github.com/settings/tokens/new?scopes=repo&description=Better%20GitHub"
+        target="_blank"
+      >
+        <div class="token-card-header">
+          <span class="token-card-title">Create a classic token with <b>scopes</b></span>
+          <svg
+            class="token-card-arrow"
+            width="12"
+            height="12"
+            viewBox="0 0 16 16"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              d="M3.75 2h3.5a.75.75 0 0 1 0 1.5h-3.5a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25v-3.5a.75.75 0 0 1 1.5 0v3.5A1.75 1.75 0 0 1 12.25 14h-8.5A1.75 1.75 0 0 1 2 12.25v-8.5C2 2.784 2.784 2 3.75 2Zm6.854-1h4.146a.25.25 0 0 1 .25.25v4.146a.25.25 0 0 1-.427.177L13.03 4.03 9.28 7.78a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042l3.75-3.75-1.543-1.543A.25.25 0 0 1 10.604 1Z"
+            />
+          </svg>
+        </div>
+        <dl class="token-card-meta">
+          <dt>Scope</dt>
+          <dd><code>repo</code></dd>
+        </dl>
+      </a>
+
+      <div class="token-divider"><span>or</span></div>
+
+      <a
+        class="token-card"
+        href="https://github.com/settings/personal-access-tokens/new"
+        target="_blank"
+      >
+        <div class="token-card-header">
+          <span class="token-card-title">Create a fine-grained token with <b>permissions</b></span>
+          <svg
+            class="token-card-arrow"
+            width="12"
+            height="12"
+            viewBox="0 0 16 16"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              d="M3.75 2h3.5a.75.75 0 0 1 0 1.5h-3.5a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25v-3.5a.75.75 0 0 1 1.5 0v3.5A1.75 1.75 0 0 1 12.25 14h-8.5A1.75 1.75 0 0 1 2 12.25v-8.5C2 2.784 2.784 2 3.75 2Zm6.854-1h4.146a.25.25 0 0 1 .25.25v4.146a.25.25 0 0 1-.427.177L13.03 4.03 9.28 7.78a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042l3.75-3.75-1.543-1.543A.25.25 0 0 1 10.604 1Z"
+            />
+          </svg>
+        </div>
+        <dl class="token-card-meta">
+          <dt>Contents</dt>
+          <dd>Read</dd>
+          <dt>Pull requests</dt>
+          <dd>Read and write</dd>
+          <dt>Metadata</dt>
+          <dd>Read</dd>
+        </dl>
+      </a>
     </div>
 
     <div class="features-header">
