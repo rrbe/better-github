@@ -7,13 +7,54 @@
         width: 360px;
         height: 520px;
         overflow-y: scroll;
-        padding: 4px 16px 16px;
+        margin: 0;
+        padding: 0 16px 16px;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
         font-size: 14px;
         color: #24292f;
       }
+
+      /* Brand row pinned to the top, mimics the Chrome popup chrome */
+      .brand-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 0 10px;
+        margin-bottom: 8px;
+        border-bottom: 1px solid #d0d7de;
+      }
+      .brand-icon {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+        flex-shrink: 0;
+      }
+      .brand-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: #24292f;
+      }
+      .brand-link {
+        margin-left: auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #1f883d;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .brand-link:hover {
+        text-decoration: underline;
+      }
+      .brand-link svg {
+        color: #656d76;
+      }
+      .brand-link:hover svg {
+        color: #24292f;
+      }
       h2 {
-        margin: 0 0 12px;
+        margin: 0 0 10px;
         font-size: 16px;
       }
       label {
@@ -187,24 +228,6 @@
         transform: translateX(18px);
       }
 
-      /* Header row */
-      .header-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin: 0 0 12px;
-      }
-      .header-row h2 {
-        margin: 0;
-      }
-      .header-row a {
-        color: #656d76;
-        display: flex;
-      }
-      .header-row a:hover {
-        color: #24292f;
-      }
-
       /* Features header */
       .features-header {
         display: flex;
@@ -294,14 +317,18 @@
     </style>
   </head>
   <body>
-    <div class="header-row">
-      <h2>Better GitHub Settings</h2>
-      <a href="https://github.com/rrbe/better-github" target="_blank" title="View on GitHub">
+    <div class="brand-row">
+      <img class="brand-icon" src="icons/icon48.png" alt="" />
+      <span class="brand-name">Better GitHub</span>
+      <a class="brand-link" href="https://github.com/rrbe/better-github" target="_blank" title="View on GitHub">
+        <span>It's open sourced!</span>
         <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
           <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
         </svg>
       </a>
     </div>
+
+    <h2>Settings</h2>
 
     <label for="token">GitHub Personal Access Token</label>
     <input type="password" id="token" placeholder="ghp_xxxxxxxxxxxx" />
