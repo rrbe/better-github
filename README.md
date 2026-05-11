@@ -23,7 +23,14 @@ Another motivation: Refined GitHub has too many features tightly coupled to GitH
       <img src="docs/screenshots/better-top-repositories.png" alt="Better Top Repositories" width="300" />
    </details>
 
-### Pull Requests
+### PRs and issues
+
+- **Default Sort by Updated** — Sort PR and issue lists by recently updated instead of GitHub's default creation time order. No more missing active PRs buried on page 2.
+
+   <details>
+      <summary>Screenshot</summary>
+      <img src="docs/screenshots/pr-issue-default-sort.png" alt="Default Sort by Updated" width="600" />
+   </details>
 
 - **PR Branch Names** — Display source branch name next to each PR title. Click to copy.
 
@@ -53,6 +60,8 @@ Another motivation: Refined GitHub has too many features tightly coupled to GitH
       <img src="docs/screenshots/pr-label-position.png" alt="PR Label Position" width="500" />
    </details>
 
+### PR details
+
 - **PR Approve Now** — Add an "approve now" shortcut to the Reviewers sidebar on PR detail pages for quick approval. Requires a token.
 
    <details>
@@ -68,13 +77,20 @@ Another motivation: Refined GitHub has too many features tightly coupled to GitH
       <img src="docs/screenshots/pr-collapse-expand-2.png" alt="Collapse/Expand All Files" width="300" />
    </details>
 
-### PR & Issue List
+### Commits
 
-- **Default Sort by Updated** — Sort PR and issue lists by recently updated instead of GitHub's default creation time order. No more missing active PRs buried on page 2.
+- **Commit Tags** — Show git tags as badges on the commits list page, so you can instantly see which commits are tagged releases.
 
    <details>
       <summary>Screenshot</summary>
-      <img src="docs/screenshots/pr-issue-default-sort.png" alt="Default Sort by Updated" width="600" />
+      <img src="docs/screenshots/commit-tags.png" alt="Commit Tags" width="300" />
+   </details>
+
+- **Commit Diff Stats** — Show additions, deletions, and changed file count (e.g. `+223 −114 · 5 files`) on each row of the commits list page. Requires a token.
+
+   <details>
+      <summary>Screenshot</summary>
+      <img src="docs/screenshots/pr-commit-diff-stats.png" alt="Commit Diff Stats" width="430" />
    </details>
 
 ### Repository
@@ -91,20 +107,6 @@ Another motivation: Refined GitHub has too many features tightly coupled to GitH
    <details>
       <summary>Screenshot</summary>
       <img src="docs/screenshots/watch-fork-star-popup.png" alt="Watch/Fork/Star Popup" width="400" />
-   </details>
-
-- **Commit Tags** — Show git tags as badges on the commits list page, so you can instantly see which commits are tagged releases.
-
-   <details>
-      <summary>Screenshot</summary>
-      <img src="docs/screenshots/commit-tags.png" alt="Commit Tags" width="300" />
-   </details>
-
-- **Commit Diff Stats** — Show additions, deletions, and changed file count (e.g. `+223 −114 · 5 files`) on each row of the commits list page. Requires a token.
-
-   <details>
-      <summary>Screenshot</summary>
-      <img src="docs/screenshots/pr-commit-diff-stats.png" alt="Commit Diff Stats" width="430" />
    </details>
 
 - **Recent Commit Message Color** — Highlight recent commits with color based on their age, making it easy to spot the latest changes. Always on.

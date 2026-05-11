@@ -22,7 +22,14 @@
       <img src="docs/screenshots/better-top-repositories.png" alt="Better Top Repositories" width="300" />
    </details>
 
-### Pull Requests
+### PR 和 Issue
+
+- **默认按更新时间排序** — PR 和 Issue 列表默认按最近更新排序，而非 GitHub 默认的创建时间。不再错过活跃的 PR。
+
+   <details>
+      <summary>示例截图</summary>
+      <img src="docs/screenshots/pr-issue-default-sort.png" alt="默认按更新时间排序" width="600" />
+   </details>
 
 - **PR 分支名显示** — 在 PR 标题旁显示源分支名，点击即可复制。
 
@@ -52,6 +59,8 @@
       <img src="docs/screenshots/pr-label-position.png" alt="PR Label 前置" width="500" />
    </details>
 
+### PR 详情页
+
 - **PR 快速 Approve** — 在 PR 详情页的 Reviewers 侧边栏添加"approve now"快捷按钮，快速通过 PR。需要 token。
 
    <details>
@@ -67,13 +76,20 @@
       <img src="docs/screenshots/pr-collapse-expand-2.png" alt="一键折叠/展开所有文件" width="300" />
    </details>
 
-### PR & Issue 列表
+### Commits
 
-- **默认按更新时间排序** — PR 和 Issue 列表默认按最近更新排序，而非 GitHub 默认的创建时间。不再错过活跃的 PR。
+- **Commit 标签显示** — 在 commits 列表页展示 git tag 标记，一眼看出哪些 commit 对应了 release 版本。
 
    <details>
       <summary>示例截图</summary>
-      <img src="docs/screenshots/pr-issue-default-sort.png" alt="默认按更新时间排序" width="600" />
+      <img src="docs/screenshots/commit-tags.png" alt="Commit 标签显示" width="300" />
+   </details>
+
+- **Commit Diff 统计** — 在 commits 列表页的每一行展示新增行数、删除行数与变更文件数（例如 `+223 −114 · 5 files`）。需要 token。
+
+   <details>
+      <summary>示例截图</summary>
+      <img src="docs/screenshots/pr-commit-diff-stats.png" alt="Commit Diff 统计" width="430" />
    </details>
 
 ### 仓库页面
@@ -90,20 +106,6 @@
    <details>
       <summary>示例截图</summary>
       <img src="docs/screenshots/watch-fork-star-popup.png" alt="Watch/Fork/Star 悬浮预览" width="400" />
-   </details>
-
-- **Commit 标签显示** — 在 commits 列表页展示 git tag 标记，一眼看出哪些 commit 对应了 release 版本。
-
-   <details>
-      <summary>示例截图</summary>
-      <img src="docs/screenshots/commit-tags.png" alt="Commit 标签显示" width="300" />
-   </details>
-
-- **Commit Diff 统计** — 在 commits 列表页的每一行展示新增行数、删除行数与变更文件数（例如 `+223 −114 · 5 files`）。需要 token。
-
-   <details>
-      <summary>示例截图</summary>
-      <img src="docs/screenshots/pr-commit-diff-stats.png" alt="Commit Diff 统计" width="430" />
    </details>
 
 - **最近提交 Commit Message 颜色** — 根据提交时间为最近的几个 commit message 添加颜色，帮助快速定位最新提交。常驻开启。
