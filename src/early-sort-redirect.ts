@@ -1,8 +1,13 @@
 // Runs at document_start — before page renders, so no visible flicker.
 // Handles early redirects that must happen before the page renders.
 // Respects the feature toggles in storage.
+import { applyPageMarker } from "./lib/page-marker";
+
 (function () {
   const path = location.pathname;
+
+  // Must run sync before body parse so skeleton-reserve.css matches.
+  applyPageMarker();
 
   // --- Default sort for PR/issue lists ---
   if (!/^\/[^/]+\/[^/]+\/(pulls|issues)\/?$/.test(path)) return;

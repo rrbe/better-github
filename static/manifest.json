@@ -19,6 +19,7 @@
     {
       "matches": ["https://github.com/*"],
       "js": ["early-sort-redirect.js"],
+      "css": ["styles/skeleton-reserve.css"],
       "run_at": "document_start"
     },
     {

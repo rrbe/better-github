@@ -473,13 +473,18 @@
   padding: 6px 16px;
 }
 
+.bg-wfs-skeleton-avatar,
+.bg-wfs-skeleton-line,
+.bg-skeleton-pill {
+  background: var(--bgColor-muted, var(--color-canvas-subtle, #f6f8fa));
+  animation: bg-wfs-skeleton-pulse 1.5s ease-in-out infinite;
+}
+
 .bg-wfs-skeleton-avatar {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: var(--bgColor-muted, var(--color-canvas-subtle, #f6f8fa));
   flex-shrink: 0;
-  animation: bg-wfs-skeleton-pulse 1.5s ease-in-out infinite;
 }
 
 .bg-wfs-skeleton-lines {
@@ -492,8 +497,6 @@
 .bg-wfs-skeleton-line {
   height: 10px;
   border-radius: 3px;
-  background: var(--bgColor-muted, var(--color-canvas-subtle, #f6f8fa));
-  animation: bg-wfs-skeleton-pulse 1.5s ease-in-out infinite;
 }
 
 .bg-wfs-skeleton-line-long {
@@ -507,6 +510,28 @@
 @keyframes bg-wfs-skeleton-pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }
+}
+
+/* Height matches the real badges' outer box: line-height 18px + 1px border × 2 = 20px. */
+.bg-skeleton-pill {
+  display: inline-block;
+  height: 20px;
+  border-radius: 2em;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.bg-skeleton-pill--branch {
+  width: 120px;
+}
+
+.bg-skeleton-pill--pr-diff {
+  width: 96px;
+}
+
+.bg-skeleton-pill--commit-diff {
+  width: 96px;
+  margin-top: 4px;
 }
 
 /* PR File Tree Toggle */
