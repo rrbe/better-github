@@ -6,9 +6,7 @@ import { applyPageMarker } from "./lib/page-marker";
 (function () {
   const path = location.pathname;
 
-  // Stamp <html data-bg-page> synchronously so skeleton-reserve.css (loaded
-  // in the same document_start content_script) can pre-reserve info-row
-  // height before the body parses.
+  // Must run sync before body parse so skeleton-reserve.css matches.
   applyPageMarker();
 
   // --- Default sort for PR/issue lists ---

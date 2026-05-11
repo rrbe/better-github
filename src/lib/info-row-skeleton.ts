@@ -2,14 +2,18 @@ import { isPRListPage, isCommitsListPage, getRepoInfo } from "./page-detect";
 import { collectCommitRows, MAIN_CONTENT_INNER_SELECTOR } from "./commit-dom";
 import { getOrCreateInfoRow } from "./info-row";
 
-export const SKELETON_BASE_CLASS = "bg-skeleton-pill";
-export const SKELETON_BRANCH_CLASS = "bg-skeleton-pill--branch";
-export const SKELETON_PR_DIFF_CLASS = "bg-skeleton-pill--pr-diff";
-export const SKELETON_COMMIT_DIFF_CLASS = "bg-skeleton-pill--commit-diff";
+export type SkeletonKind = "branch" | "prDiff" | "commitDiff";
 
-const REAL_BRANCH_CLASS = "better-github-branch-badge";
-const REAL_PR_DIFF_CLASS = "better-github-diff-stats";
-const REAL_COMMIT_DIFF_CLASS = "better-github-commit-diff-stats";
+const SKELETONS: Record<SkeletonKind, { skeleton: string; real: string }> = {
+  branch: { skeleton: "bg-skeleton-pill--branch", real: "better-github-branch-badge" },
+  prDiff: { skeleton: "bg-skeleton-pill--pr-diff", real: "better-github-diff-stats" },
+  commitDiff: {
+    skeleton: "bg-skeleton-pill--commit-diff",
+    real: "better-github-commit-diff-stats",
+  },
+};
+
+const SKELETON_BASE_CLASS = "bg-skeleton-pill";
 
 export interface SkeletonFlags {
   "feature-pr-branch-names"?: boolean;
@@ -17,70 +21,69 @@ export interface SkeletonFlags {
   "feature-commit-diff-stats"?: boolean;
 }
 
-function buildPill(...extraClasses: string[]): HTMLSpanElement {
+function buildPill(extraClass: string): HTMLSpanElement {
   const span = document.createElement("span");
-  span.className = [SKELETON_BASE_CLASS, ...extraClasses].join(" ");
+  span.className = `${SKELETON_BASE_CLASS} ${extraClass}`;
   span.setAttribute("aria-hidden", "true");
   return span;
 }
 
-export function reserveInfoRowSkeletons(flags: SkeletonFlags): void {
-  if (!getRepoInfo()) return;
+function hasChild(scope: Element, cls: string): boolean {
+  return scope.querySelector(`.${cls}`) !== null;
+}
 
+export function reserveInfoRowSkeletons(flags: SkeletonFlags): void {
   if (isPRListPage()) {
     reservePRListSkeletons(flags);
     return;
   }
-
   if (isCommitsListPage()) {
     reserveCommitsListSkeletons(flags);
-    return;
   }
 }
 
 function reservePRListSkeletons(flags: SkeletonFlags): void {
-  const wantBranch = flags["feature-pr-branch-names"] === true;
-  const wantDiff = flags["feature-pr-diff-stats"] === true;
+  const wantBranch = !!flags["feature-pr-branch-names"];
+  const wantDiff = !!flags["feature-pr-diff-stats"];
   if (!wantBranch && !wantDiff) return;
 
-  const prRows = document.querySelectorAll("[id^='issue_']");
-  for (const row of prRows) {
-    if (wantBranch && !hasReal(row, REAL_BRANCH_CLASS) && !hasSkeleton(row, SKELETON_BRANCH_CLASS)) {
-      const infoRow = getOrCreateInfoRow(row);
-      if (infoRow) infoRow.appendChild(buildPill(SKELETON_BRANCH_CLASS));
-    }
-    if (wantDiff && !hasReal(row, REAL_PR_DIFF_CLASS) && !hasSkeleton(row, SKELETON_PR_DIFF_CLASS)) {
-      const infoRow = getOrCreateInfoRow(row);
-      if (infoRow) infoRow.appendChild(buildPill(SKELETON_PR_DIFF_CLASS));
-    }
+  const branch = SKELETONS.branch;
+  const prDiff = SKELETONS.prDiff;
+  const probeSelector = [branch.real, branch.skeleton, prDiff.real, prDiff.skeleton]
+    .map((c) => `.${c}`)
+    .join(", ");
+
+  for (const row of document.querySelectorAll("[id^='issue_']")) {
+    const present = new Set(
+      [...row.querySelectorAll(probeSelector)].flatMap((el) => [...el.classList]),
+    );
+    const needBranch = wantBranch && !present.has(branch.real) && !present.has(branch.skeleton);
+    const needDiff = wantDiff && !present.has(prDiff.real) && !present.has(prDiff.skeleton);
+    if (!needBranch && !needDiff) continue;
+
+    const infoRow = getOrCreateInfoRow(row);
+    if (!infoRow) continue;
+
+    if (needBranch) infoRow.appendChild(buildPill(branch.skeleton));
+    if (needDiff) infoRow.appendChild(buildPill(prDiff.skeleton));
   }
 }
 
 function reserveCommitsListSkeletons(flags: SkeletonFlags): void {
-  if (flags["feature-commit-diff-stats"] !== true) return;
+  if (!flags["feature-commit-diff-stats"]) return;
 
   const info = getRepoInfo();
   if (!info) return;
 
-  const shaToContainer = collectCommitRows(info.owner, info.repo);
-  for (const container of shaToContainer.values()) {
-    if (hasReal(container, REAL_COMMIT_DIFF_CLASS)) continue;
-    if (hasSkeleton(container, SKELETON_COMMIT_DIFF_CLASS)) continue;
+  const { skeleton, real } = SKELETONS.commitDiff;
+  for (const container of collectCommitRows(info.owner, info.repo).values()) {
+    if (hasChild(container, real) || hasChild(container, skeleton)) continue;
 
     const mainInner = container.querySelector<HTMLElement>(MAIN_CONTENT_INNER_SELECTOR);
-    const parent = mainInner || container;
-    parent.appendChild(buildPill(SKELETON_COMMIT_DIFF_CLASS));
+    (mainInner || container).appendChild(buildPill(skeleton));
   }
 }
 
-function hasReal(scope: Element, realClass: string): boolean {
-  return scope.querySelector(`.${realClass}`) !== null;
-}
-
-function hasSkeleton(scope: Element, skeletonClass: string): boolean {
-  return scope.querySelector(`.${skeletonClass}`) !== null;
-}
-
-export function clearSkeletonsByClass(skeletonClass: string): void {
-  document.querySelectorAll(`.${skeletonClass}`).forEach((el) => el.remove());
+export function clearSkeletons(kind: SkeletonKind): void {
+  document.querySelectorAll(`.${SKELETONS[kind].skeleton}`).forEach((el) => el.remove());
 }

@@ -11,8 +11,10 @@
 export type PageMarker = "pr-list" | "commits-list";
 
 export function detectPageMarker(path: string): PageMarker | null {
-  if (/^\/[^/]+\/[^/]+\/pulls(\/|$|\?)/.test(path)) return "pr-list";
-  if (/^\/[^/]+\/[^/]+\/commits(\/|$|\?)/.test(path)) return "commits-list";
+  // Mirror isPRListPage / isCommitsListPage in page-detect.ts so the CSS
+  // reservation only kicks in where the corresponding feature actually runs.
+  if (/^\/[^/]+\/[^/]+\/pulls\/?$/.test(path)) return "pr-list";
+  if (/^\/[^/]+\/[^/]+\/commits(\/|$)/.test(path)) return "commits-list";
   return null;
 }
 

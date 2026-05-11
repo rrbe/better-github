@@ -1,7 +1,7 @@
 import { isPRListPage, getRepoInfo, getPRListParams } from "../lib/page-detect";
 import { fetchPRBranches } from "../lib/github-api";
 import { getOrCreateInfoRow } from "../lib/info-row";
-import { SKELETON_BRANCH_CLASS, clearSkeletonsByClass } from "../lib/info-row-skeleton";
+import { clearSkeletons } from "../lib/info-row-skeleton";
 
 const BADGE_CLASS = "better-github-branch-badge";
 const COPIED_CLASS = "better-github-branch-copied";
@@ -49,41 +49,37 @@ export async function injectPRBranchNames(): Promise<void> {
   const existing = document.querySelectorAll(`.${BADGE_CLASS}`);
   if (existing.length > 0) return;
 
-  const { state, page } = getPRListParams();
-  const branches = await fetchPRBranches(info.owner, info.repo, state, page);
+  try {
+    const { state, page } = getPRListParams();
+    const branches = await fetchPRBranches(info.owner, info.repo, state, page);
 
-  if (branches.length === 0) {
-    clearSkeletonsByClass(SKELETON_BRANCH_CLASS);
-    return;
+    if (branches.length === 0) return;
+
+    const branchMap = new Map(branches.map((b) => [b.number, b.headRef]));
+    const prRows = document.querySelectorAll("[id^='issue_']");
+
+    for (const row of prRows) {
+      const id = row.getAttribute("id");
+      if (!id) continue;
+
+      const prNumber = parseInt(id.replace("issue_", ""), 10);
+      const branchName = branchMap.get(prNumber);
+      if (!branchName) continue;
+
+      if (row.querySelector(`.${BADGE_CLASS}`)) continue;
+
+      const infoRow = getOrCreateInfoRow(row);
+      if (!infoRow) continue;
+
+      const badge = document.createElement("span");
+      badge.className = BADGE_CLASS;
+      badge.textContent = branchName;
+      badge.dataset.branch = branchName;
+      badge.title = "Click to copy branch name";
+
+      infoRow.appendChild(badge);
+    }
+  } finally {
+    clearSkeletons("branch");
   }
-
-  const branchMap = new Map(branches.map((b) => [b.number, b.headRef]));
-
-  // Find PR rows — GitHub uses [id^='issue_'] for PR list items
-  const prRows = document.querySelectorAll("[id^='issue_']");
-
-  for (const row of prRows) {
-    const id = row.getAttribute("id");
-    if (!id) continue;
-
-    const prNumber = parseInt(id.replace("issue_", ""), 10);
-    const branchName = branchMap.get(prNumber);
-    if (!branchName) continue;
-
-    // Don't inject if already present
-    if (row.querySelector(`.${BADGE_CLASS}`)) continue;
-
-    const infoRow = getOrCreateInfoRow(row);
-    if (!infoRow) continue;
-
-    const badge = document.createElement("span");
-    badge.className = BADGE_CLASS;
-    badge.textContent = branchName;
-    badge.dataset.branch = branchName;
-    badge.title = "Click to copy branch name";
-
-    infoRow.appendChild(badge);
-  }
-
-  clearSkeletonsByClass(SKELETON_BRANCH_CLASS);
 }

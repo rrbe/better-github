@@ -2,7 +2,7 @@ import { isPRListPage, getRepoInfo } from "../lib/page-detect";
 import { fetchPRDiffStats } from "../lib/github-api";
 import { getOrCreateInfoRow } from "../lib/info-row";
 import { buildDiffStatsBadge } from "../lib/diff-stats-badge";
-import { SKELETON_PR_DIFF_CLASS, clearSkeletonsByClass } from "../lib/info-row-skeleton";
+import { clearSkeletons } from "../lib/info-row-skeleton";
 
 const BADGE_CLASS = "better-github-diff-stats";
 
@@ -22,29 +22,28 @@ export async function injectPRDiffStats(): Promise<void> {
 
   if (prNumbers.length === 0) return;
 
-  const stats = await fetchPRDiffStats(info.owner, info.repo, prNumbers);
-  if (stats.length === 0) {
-    clearSkeletonsByClass(SKELETON_PR_DIFF_CLASS);
-    return;
+  try {
+    const stats = await fetchPRDiffStats(info.owner, info.repo, prNumbers);
+    if (stats.length === 0) return;
+
+    const statsMap = new Map(stats.map((s) => [s.number, s]));
+
+    for (const row of prRows) {
+      const id = row.getAttribute("id");
+      if (!id) continue;
+
+      const prNumber = parseInt(id.replace("issue_", ""), 10);
+      const stat = statsMap.get(prNumber);
+      if (!stat) continue;
+
+      if (row.querySelector(`.${BADGE_CLASS}`)) continue;
+
+      const infoRow = getOrCreateInfoRow(row);
+      if (!infoRow) continue;
+
+      infoRow.appendChild(buildDiffStatsBadge(stat, BADGE_CLASS));
+    }
+  } finally {
+    clearSkeletons("prDiff");
   }
-
-  const statsMap = new Map(stats.map((s) => [s.number, s]));
-
-  for (const row of prRows) {
-    const id = row.getAttribute("id");
-    if (!id) continue;
-
-    const prNumber = parseInt(id.replace("issue_", ""), 10);
-    const stat = statsMap.get(prNumber);
-    if (!stat) continue;
-
-    if (row.querySelector(`.${BADGE_CLASS}`)) continue;
-
-    const infoRow = getOrCreateInfoRow(row);
-    if (!infoRow) continue;
-
-    infoRow.appendChild(buildDiffStatsBadge(stat, BADGE_CLASS));
-  }
-
-  clearSkeletonsByClass(SKELETON_PR_DIFF_CLASS);
 }

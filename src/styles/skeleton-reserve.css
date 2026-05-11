@@ -1,60 +1,37 @@
 /*
  * Pre-reserve info-row height on PR list and commits list pages.
  *
- * content.js runs at document_idle, which is AFTER GitHub has already
- * painted the list. When it then mounts the info-row + skeleton, the row
- * grows by ~22px — visible as a layout-shift flicker.
+ * content.js runs at document_idle — AFTER GitHub's first paint. When it
+ * then mounts the info-row + skeleton, the row grows by 20px, visible as
+ * a layout-shift flicker. This file is loaded at document_start with the
+ * `<html data-bg-page>` marker (set sync by applyPageMarker), so GitHub's
+ * first paint already includes the slot. `:has()` hides the pseudo once
+ * the real info-row / commit-diff badge mounts.
  *
- * This file is loaded at document_start alongside early-sort-redirect.js.
- * Together with the `<html data-bg-page>` marker (set synchronously by
- * applyPageMarker), it makes GitHub's first paint already include the
- * 22px slot, so there is no shift when content.js mounts the real row.
- *
- * The reservation is implemented as an `::after` pseudo-element matching
- * the height of the info-row (height: 18px + margin-top: 4px). When the
- * real info-row / commit-diff badge is mounted, `:has()` hides the
- * pseudo so the height stays consistent.
+ * Reserved height = real badges' outer box: line-height 18px + 1px
+ * border × 2 = 20px. Using 18px caused a 2px shift on swap.
  */
 
-/* Reserved height matches the real badges' outer box: line-height 18px
-   + 1px transparent border × 2 = 20px. Using 18px here caused a 2px
-   layout shift when the real badge swapped in. */
-
-/* Old-DOM PR list rows. info-row is appended after the meta line, deeper
-   inside the row, but `:has()` finds it anywhere in the subtree. */
-[data-bg-page="pr-list"] .js-issue-row::after {
-  content: "";
-  display: block;
-  height: 20px;
-  margin-top: 4px;
-}
-[data-bg-page="pr-list"] .js-issue-row:has(.better-github-info-row)::after {
-  display: none;
-}
-
-/* New-DOM PR list rows: <li role="listitem"> uses display:grid, so the
-   pseudo must live on the inner flex column instead. */
-[data-bg-page="pr-list"] li[role="listitem"] [class*="MainContent-module__inner"]::after {
-  content: "";
-  display: block;
-  height: 20px;
-  margin-top: 4px;
-}
-[data-bg-page="pr-list"] li[role="listitem"] [class*="MainContent-module__inner"]:has(.better-github-info-row)::after {
-  display: none;
-}
-
-/* Commits list rows: the diff-stats badge is appended directly into the
-   MainContent inner (no info-row wrapper), so we hide the pseudo when
-   either the skeleton or the real badge is present. */
-[data-bg-page="commits-list"] li[data-testid="commit-row-item"] [class*="MainContent-module__inner"]::after {
-  content: "";
-  display: block;
-  height: 20px;
-  margin-top: 4px;
-}
+[data-bg-page="pr-list"] .js-issue-row::after,
+[data-bg-page="pr-list"] li[role="listitem"] [class*="MainContent-module__inner"]::after,
 [data-bg-page="commits-list"]
   li[data-testid="commit-row-item"]
-  [class*="MainContent-module__inner"]:has(.better-github-commit-diff-stats, .bg-skeleton-pill--commit-diff)::after {
+  [class*="MainContent-module__inner"]::after {
+  content: "";
+  display: block;
+  height: 20px;
+  margin-top: 4px;
+}
+
+[data-bg-page="pr-list"] .js-issue-row:has(.better-github-info-row)::after,
+[data-bg-page="pr-list"]
+  li[role="listitem"]
+  [class*="MainContent-module__inner"]:has(.better-github-info-row)::after,
+[data-bg-page="commits-list"]
+  li[data-testid="commit-row-item"]
+  [class*="MainContent-module__inner"]:has(
+    .better-github-commit-diff-stats,
+    .bg-skeleton-pill--commit-diff
+  )::after {
   display: none;
 }
