@@ -509,10 +509,12 @@
   50% { opacity: 0.4; }
 }
 
-/* Info-row skeleton placeholders — reserve row height before async data arrives */
+/* Info-row skeleton placeholders — reserve row height before async data arrives.
+   Height matches the real badges' outer box (line-height 18px + 1px transparent
+   border × 2 = 20px) so swapping skeleton → real causes no layout shift. */
 .bg-skeleton-pill {
   display: inline-block;
-  height: 18px;
+  height: 20px;
   border-radius: 2em;
   background: var(--bgColor-muted, var(--color-canvas-subtle, #f6f8fa));
   animation: bg-wfs-skeleton-pulse 1.5s ease-in-out infinite;

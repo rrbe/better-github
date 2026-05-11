@@ -13,6 +13,7 @@ import { injectBetterTopRepos } from "./features/better-top-repos";
 import { injectWatchForkStarPopup } from "./features/watch-fork-star-popup";
 import { injectPRCollapseExpand } from "./features/pr-collapse-expand";
 import { reserveInfoRowSkeletons } from "./lib/info-row-skeleton";
+import { applyPageMarker } from "./lib/page-marker";
 
 const FEATURE_KEYS = [
   "feature-pr-branch-names",
@@ -141,6 +142,10 @@ if (isExtensionValid()) {
 
 // On each navigation, inject enabled features
 onPageReady(async () => {
+  // Keep <html data-bg-page> in sync with the current URL so
+  // skeleton-reserve.css matches the right row selector after SPA navs.
+  applyPageMarker();
+
   // Always-on features
   injectFileAgeColor();
 
