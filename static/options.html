@@ -542,8 +542,20 @@
     </details>
 
     <details class="feature-group">
-      <summary>Pull Requests</summary>
+      <summary>PRs and issues</summary>
       <ul class="feature-list">
+        <li class="feature-item">
+          <div class="feature-info">
+            <div class="feature-name">Default Sort by Updated</div>
+            <div class="feature-desc">
+              Sort PR and issue lists by recently updated instead of creation time.
+            </div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="feature-default-sort" checked />
+            <span class="slider"></span>
+          </label>
+        </li>
         <li class="feature-item">
           <div class="feature-info">
             <div class="feature-name">PR Branch Names</div>
@@ -594,6 +606,12 @@
             <span class="slider"></span>
           </label>
         </li>
+      </ul>
+    </details>
+
+    <details class="feature-group">
+      <summary>PR details</summary>
+      <ul class="feature-list">
         <li class="feature-item">
           <div class="feature-info">
             <div class="feature-name">PR Approve Now</div>
@@ -623,38 +641,8 @@
     </details>
 
     <details class="feature-group">
-      <summary>PR & Issue List</summary>
+      <summary>Commits</summary>
       <ul class="feature-list">
-        <li class="feature-item">
-          <div class="feature-info">
-            <div class="feature-name">Default Sort by Updated</div>
-            <div class="feature-desc">
-              Sort PR and issue lists by recently updated instead of creation time.
-            </div>
-          </div>
-          <label class="toggle">
-            <input type="checkbox" id="feature-default-sort" checked />
-            <span class="slider"></span>
-          </label>
-        </li>
-      </ul>
-    </details>
-
-    <details class="feature-group">
-      <summary>Repository</summary>
-      <ul class="feature-list">
-        <li class="feature-item">
-          <div class="feature-info">
-            <div class="feature-name">Releases Tab</div>
-            <div class="feature-desc">
-              Add a Releases tab to the repository navigation bar for quick access.
-            </div>
-          </div>
-          <label class="toggle">
-            <input type="checkbox" id="feature-release-tab" checked />
-            <span class="slider"></span>
-          </label>
-        </li>
         <li class="feature-item">
           <div class="feature-info">
             <div class="feature-name">Commit Tags</div>
@@ -677,6 +665,24 @@
           </div>
           <label class="toggle">
             <input type="checkbox" id="feature-commit-diff-stats" checked />
+            <span class="slider"></span>
+          </label>
+        </li>
+      </ul>
+    </details>
+
+    <details class="feature-group">
+      <summary>Repository</summary>
+      <ul class="feature-list">
+        <li class="feature-item">
+          <div class="feature-info">
+            <div class="feature-name">Releases Tab</div>
+            <div class="feature-desc">
+              Add a Releases tab to the repository navigation bar for quick access.
+            </div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="feature-release-tab" checked />
             <span class="slider"></span>
           </label>
         </li>
