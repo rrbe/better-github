@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { setUrl } from "../test/url";
+import { setUrl } from "../test-utils/url";
 import {
   getRepoInfo,
   isPRListPage,
