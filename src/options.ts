@@ -22,6 +22,7 @@ const FEATURE_KEYS = [
   "feature-commit-diff-stats",
   "feature-better-top-repos",
   "feature-watch-fork-star-popup",
+  "feature-pr-collapse-expand",
 ] as const;
 
 // --- Load saved settings ---

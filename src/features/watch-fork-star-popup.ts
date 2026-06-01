@@ -152,6 +152,10 @@ function attachPopup(
   // hydration (e.g. setting textContent on `.js-social-count`), which
   // wipes our popup. Re-attach if that happens.
   const observer = new MutationObserver(() => {
+    if (!counter.classList.contains(WRAP_CLASS)) {
+      observer.disconnect();
+      return;
+    }
     if (popup.parentElement !== counter) counter.appendChild(popup);
   });
   observer.observe(counter, { childList: true });
@@ -215,5 +219,12 @@ export function injectWatchForkStarPopup(): void {
       if (!starData) starData = await fetchStargazers(owner, repo);
       renderUserList(list, starData, "No stargazers yet");
     });
+  }
+}
+
+export function cleanupWatchForkStarPopup(): void {
+  for (const counter of document.querySelectorAll<HTMLElement>(`.${WRAP_CLASS}`)) {
+    counter.classList.remove(WRAP_CLASS);
+    counter.querySelectorAll(`.${POPUP_CLASS}`).forEach((popup) => popup.remove());
   }
 }
