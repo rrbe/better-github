@@ -124,7 +124,7 @@ async function getPinnedRepos(): Promise<string[]> {
   return new Promise((resolve) => {
     try {
       if (!chrome.runtime?.id) return resolve([]);
-      chrome.storage.local.get([STORAGE_KEY], (result) => {
+      chrome.storage.local.get<Record<string, string[]>>([STORAGE_KEY], (result) => {
         resolve(result[STORAGE_KEY] || []);
       });
     } catch {

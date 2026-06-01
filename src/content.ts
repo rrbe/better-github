@@ -10,7 +10,7 @@ import { applyDefaultSort } from "./features/default-sort";
 import { injectCommitTags } from "./features/commit-tags";
 import { injectCommitDiffStats } from "./features/commit-diff-stats";
 import { injectBetterTopRepos } from "./features/better-top-repos";
-import { injectWatchForkStarPopup } from "./features/watch-fork-star-popup";
+import { cleanupWatchForkStarPopup, injectWatchForkStarPopup } from "./features/watch-fork-star-popup";
 import { injectPRCollapseExpand } from "./features/pr-collapse-expand";
 import { reserveInfoRowSkeletons } from "./lib/info-row-skeleton";
 import { applyPageMarker } from "./lib/page-marker";
@@ -44,7 +44,7 @@ const FEATURE_CLASSES: Record<FeatureKey, string[]> = {
   "feature-commit-tags": ["better-github-commit-tag"],
   "feature-commit-diff-stats": ["better-github-commit-diff-stats", "bg-skeleton-pill--commit-diff"],
   "feature-better-top-repos": [],
-  "feature-watch-fork-star-popup": ["bg-wfs-counter-wrap"],
+  "feature-watch-fork-star-popup": ["bg-wfs-popup"],
   "feature-pr-collapse-expand": ["better-github-toggle-tree", "better-github-collapse-expand"],
 };
 
@@ -74,7 +74,7 @@ function getFeatureFlags(): Promise<Record<FeatureKey, boolean>> {
   });
 }
 
-function removeFeatureElements(key: FeatureKey): void {
+export function removeFeatureElements(key: FeatureKey): void {
   for (const cls of FEATURE_CLASSES[key]) {
     document.querySelectorAll(`.${cls}`).forEach((el) => el.remove());
   }
@@ -133,6 +133,9 @@ if (isExtensionValid()) {
       } else {
         if (key === "feature-pr-label-position") {
           cleanupPRLabelPosition();
+        }
+        if (key === "feature-watch-fork-star-popup") {
+          cleanupWatchForkStarPopup();
         }
         removeFeatureElements(key);
       }
