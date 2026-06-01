@@ -45,7 +45,7 @@ async function cachedFetch<T>(key: string, fetcher: () => Promise<T>): Promise<T
 
 function getToken(): Promise<string> {
   return new Promise((resolve) => {
-    chrome.storage.local.get("githubToken", (result) => {
+    chrome.storage.local.get<{ githubToken?: string }>("githubToken", (result) => {
       resolve(result.githubToken || "");
     });
   });

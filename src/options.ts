@@ -1,7 +1,14 @@
 const tokenInput = document.getElementById("token") as HTMLInputElement;
 const tokenStatus = document.getElementById("tokenStatus") as HTMLDivElement;
 const saveBtn = document.getElementById("save") as HTMLButtonElement;
-const status = document.getElementById("status") as HTMLDivElement;
+// Not named `status`: as a top-level script var that would shadow the DOM
+// global `window.status` (a string), breaking `.className`/`.textContent`.
+const statusEl = document.getElementById("status") as HTMLDivElement;
+
+interface StoredSettings {
+  githubToken?: string;
+  [feature: string]: string | boolean | undefined;
+}
 
 const FEATURE_KEYS = [
   "feature-pr-branch-names",
@@ -18,7 +25,7 @@ const FEATURE_KEYS = [
 ] as const;
 
 // --- Load saved settings ---
-chrome.storage.local.get(["githubToken", ...FEATURE_KEYS], (result) => {
+chrome.storage.local.get<StoredSettings>(["githubToken", ...FEATURE_KEYS], (result) => {
   if (result.githubToken) {
     tokenInput.value = result.githubToken;
   }
@@ -76,12 +83,12 @@ tokenInput.addEventListener("blur", () => {
 let statusTimer: number | undefined;
 
 function showStatus(kind: "success" | "error", message: string) {
-  status.className = `status ${kind}`;
-  status.textContent = message;
+  statusEl.className = `status ${kind}`;
+  statusEl.textContent = message;
   if (statusTimer) clearTimeout(statusTimer);
   statusTimer = window.setTimeout(() => {
-    status.className = "status";
-    status.textContent = "";
+    statusEl.className = "status";
+    statusEl.textContent = "";
   }, 2000);
 }
 
