@@ -14,13 +14,25 @@ const PIN_SVG_FILLED = `<svg xmlns="http://www.w3.org/2000/svg" width="12" heigh
 // Track click count per "Show more" button to avoid infinite loops
 const clickCounts = new WeakMap<HTMLElement, number>();
 
+// GitHub renders the dashboard "Top repositories" list in two different layouts
+// depending on the "New Dashboard Experience" feature flag:
+//   - "new": Primer React ActionList (heading + items share one <ul>)
+//   - "old": server-rendered list (<ul class="js-dashboard-repos-list">, items only)
+// We normalize both behind RepoList so the pin/reorder logic stays layout-agnostic.
+type Layout = "new" | "old";
+interface RepoList {
+  layout: Layout;
+  ul: HTMLUListElement;
+}
+
 export function injectBetterTopRepos(): void {
+  const list = findRepoList();
+  if (!list) return;
+
   // Auto-expand: keep clicking "Show more" until >= MIN_REPOS or no more
-  const list = getRepoList();
-  if (list && list.items.length < MIN_REPOS) {
-    const showMoreBtn = list.ul.querySelector<HTMLElement>(
-      '[data-testid="dynamic-side-panel-items-show-more"]',
-    );
+  const items = getRepoItems(list);
+  if (items.length < MIN_REPOS) {
+    const showMoreBtn = getShowMore(list);
     if (showMoreBtn) {
       const clicks = clickCounts.get(showMoreBtn) || 0;
       if (clicks < MAX_SHOW_MORE_CLICKS) {
@@ -32,25 +44,71 @@ export function injectBetterTopRepos(): void {
   }
 
   // Pin feature: inject pin icons and reorder
-  injectPinIcons();
+  injectPinIcons(list);
 }
 
-function getRepoList(): { ul: HTMLUListElement; items: HTMLLIElement[] } | null {
+function findRepoList(): RepoList | null {
+  // NEW dashboard: the "Top repositories" <h3> sits in a heading <li> whose
+  // parent <ul> also holds the repo items.
   const headings = document.querySelectorAll("h3");
   for (const h of headings) {
     if (h.textContent?.includes("Top repositories")) {
-      // h3 is inside a heading <li>, whose parent is the inner <ul> with repo items
       const headingLi = h.closest("li");
       if (!headingLi) continue;
       const ul = headingLi.parentElement as HTMLUListElement | null;
-      if (!ul || ul.tagName !== "UL") continue;
-      const items = [
-        ...ul.querySelectorAll<HTMLLIElement>('li[class*="prc-ActionList-ActionListItem-"]'),
-      ];
-      return { ul, items };
+      if (ul && ul.tagName === "UL") return { layout: "new", ul };
     }
   }
+
+  // OLD dashboard: a dedicated repo list <ul> (heading lives outside it).
+  // GitHub renders the list twice — the left sidebar (filter-left) and a
+  // responsive center copy (filter-center) — and hides one via CSS depending on
+  // viewport. Pick the visible one so pins don't land on the hidden duplicate.
+  const oldUls = [...document.querySelectorAll<HTMLUListElement>("ul.js-dashboard-repos-list")];
+  const oldUl = oldUls.find((ul) => ul.offsetParent !== null) ?? oldUls[0];
+  if (oldUl) return { layout: "old", ul: oldUl };
+
   return null;
+}
+
+// Repo items in display order. Filtering by getRepoName() naturally drops the
+// heading row and the "Show more" row in both layouts.
+function getRepoItems(list: RepoList): HTMLLIElement[] {
+  if (list.layout === "new") {
+    return [
+      ...list.ul.querySelectorAll<HTMLLIElement>('li[class*="prc-ActionList-ActionListItem-"]'),
+    ].filter((li) => getRepoName(li) !== null);
+  }
+  // OLD dashboard: items start inside the <ul>, but AJAX "Show more" pagination
+  // can append later pages as siblings of the <ul>. Scope to the whole repos
+  // container and identify repo rows by their /owner/repo link.
+  const container = list.ul.closest<HTMLElement>(".js-repos-container") ?? list.ul;
+  return [...container.querySelectorAll<HTMLLIElement>("li")].filter(
+    (li) => getRepoName(li) !== null,
+  );
+}
+
+// Insertion anchor for pinned repos. The new layout keeps the heading as the
+// first <li> in the same <ul>, so pins go after it; the old layout's <ul> has
+// no heading, so pins go to the very top.
+function getHeadingAnchor(list: RepoList): HTMLLIElement | null {
+  if (list.layout !== "new") return null;
+  const first = list.ul.querySelector<HTMLLIElement>(":scope > li");
+  return first && !getRepoName(first) ? first : null;
+}
+
+function getShowMore(list: RepoList): HTMLElement | null {
+  if (list.layout === "new") {
+    return list.ul.querySelector<HTMLElement>(
+      '[data-testid="dynamic-side-panel-items-show-more"]',
+    );
+  }
+
+  // OLD dashboard: an AJAX pagination form (js-more-repos-form) whose submit
+  // button appends the next page of repos in place — no navigation — so it is
+  // safe to click programmatically.
+  const container = list.ul.closest<HTMLElement>(".js-repos-container") ?? list.ul.parentElement;
+  return container?.querySelector<HTMLElement>(".js-more-repos-form button[type='submit']") ?? null;
 }
 
 function getRepoName(li: HTMLLIElement): string | null {
@@ -84,25 +142,21 @@ function savePinnedRepos(pinned: string[]): void {
   }
 }
 
-function injectPinIcons(): void {
-  const list = getRepoList();
-  if (!list) return;
-
+function injectPinIcons(list: RepoList): void {
   // Inject styles once
   injectStyles();
+
+  const items = getRepoItems(list);
 
   getPinnedRepos().then((pinned) => {
     let hasNew = false;
 
-    for (const li of list.items) {
+    for (const li of items) {
       // Skip already-injected items
       if (li.hasAttribute(PIN_INJECTED_ATTR)) continue;
 
       const repoName = getRepoName(li);
       if (!repoName) continue;
-
-      // Skip "Show more" button item
-      if (li.querySelector('[data-testid="dynamic-side-panel-items-show-more"]')) continue;
 
       li.setAttribute(PIN_INJECTED_ATTR, "true");
       hasNew = true;
@@ -113,7 +167,7 @@ function injectPinIcons(): void {
       btn.addEventListener("click", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        togglePin(repoName, btn, list.ul);
+        togglePin(repoName, btn, list);
       });
 
       li.style.position = "relative";
@@ -122,7 +176,7 @@ function injectPinIcons(): void {
 
     // Reorder if there are new items or on first run
     if (hasNew) {
-      reorderPinnedRepos(list.ul, pinned);
+      reorderPinnedRepos(list, pinned);
     }
   });
 }
@@ -137,7 +191,7 @@ function createPinButton(isPinned: boolean): HTMLButtonElement {
   return btn;
 }
 
-async function togglePin(repoName: string, btn: HTMLButtonElement, ul: HTMLUListElement) {
+async function togglePin(repoName: string, btn: HTMLButtonElement, list: RepoList) {
   const pinned = await getPinnedRepos();
   const index = pinned.indexOf(repoName);
 
@@ -154,12 +208,12 @@ async function togglePin(repoName: string, btn: HTMLButtonElement, ul: HTMLUList
   }
 
   savePinnedRepos(pinned);
-  reorderPinnedRepos(ul, pinned);
+  reorderPinnedRepos(list, pinned);
 }
 
-function reorderPinnedRepos(ul: HTMLUListElement, pinned: string[]): void {
-  const items = [...ul.querySelectorAll<HTMLLIElement>('li[class*="prc-ActionList-ActionListItem-"]')];
-  const heading = ul.querySelector('li:not([class*="prc-ActionList-ActionListItem-"])');
+function reorderPinnedRepos(list: RepoList, pinned: string[]): void {
+  const items = getRepoItems(list);
+  const anchor = getHeadingAnchor(list);
 
   // Collect pinned items in order of pinned array
   const pinnedItems: HTMLLIElement[] = [];
@@ -168,12 +222,12 @@ function reorderPinnedRepos(ul: HTMLUListElement, pinned: string[]): void {
     if (item) pinnedItems.push(item);
   }
 
-  // Move pinned items to top (after heading), in order
+  // Move pinned items to top (after heading if present), in order
   for (const item of pinnedItems.reverse()) {
-    if (heading?.nextSibling) {
-      ul.insertBefore(item, heading.nextSibling);
+    if (anchor?.nextSibling) {
+      list.ul.insertBefore(item, anchor.nextSibling);
     } else {
-      ul.prepend(item);
+      list.ul.insertBefore(item, list.ul.firstChild);
     }
   }
 }
