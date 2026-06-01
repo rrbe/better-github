@@ -14,10 +14,10 @@ export default defineConfig({
       // enforced when run with `--coverage` (i.e. `pnpm test:coverage`), so the
       // plain `pnpm test` used in CI is unaffected.
       thresholds: {
-        statements: 40,
-        branches: 32,
-        functions: 45,
-        lines: 42,
+        statements: 78,
+        branches: 62,
+        functions: 78,
+        lines: 82,
       },
     },
   },

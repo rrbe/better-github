@@ -274,4 +274,136 @@ describe("service worker", () => {
 
     expect(state.sessionStore["cache:branches:owner/repo:open:1"]).toBeDefined();
   });
+
+  it("maps GraphQL review threads into resolved/total counts", async () => {
+    const state = await loadWorker("token");
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse({
+        data: {
+          repository: {
+            pr_1: { reviewThreads: { totalCount: 3, nodes: [{ isResolved: true }, { isResolved: true }, { isResolved: false }] } },
+          },
+        },
+      }),
+    );
+
+    const response = await sendMessage(state.messageListeners[0], {
+      type: "FETCH_PR_REVIEW_STATUSES",
+      owner: "owner",
+      repo: "repo",
+      prNumbers: [1],
+    });
+
+    expect(response).toEqual({ ok: true, data: [{ number: 1, totalThreads: 3, resolvedThreads: 2 }] });
+    expect(vi.mocked(fetch).mock.calls[0][0]).toBe("https://api.github.com/graphql");
+  });
+
+  it("normalizes commit SHAs and parses GraphQL commit diff stats", async () => {
+    const SHA = "0123456789abcdef0123456789abcdef01234567";
+    const state = await loadWorker("token");
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse({
+        data: { repository: { [`c_${SHA}`]: { additions: 10, deletions: 2, changedFilesIfAvailable: 3 } } },
+      }),
+    );
+
+    const response = await sendMessage(state.messageListeners[0], {
+      type: "FETCH_COMMIT_DIFF_STATS",
+      owner: "owner",
+      repo: "repo",
+      shas: [SHA.toUpperCase(), "not-a-sha"],
+    });
+
+    // Uppercase SHA is lowercased; the invalid one is filtered out before the query.
+    expect(response).toEqual({
+      ok: true,
+      data: [{ sha: SHA, additions: 10, deletions: 2, changedFiles: 3 }],
+    });
+  });
+
+  it("maps the stargazers REST payload", async () => {
+    const state = await loadWorker("token");
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse([
+        { user: { login: "octocat", avatar_url: "https://a/o.png", name: "Octo Cat" }, starred_at: "2026-01-01T00:00:00Z" },
+        { user: { login: "mona", avatar_url: "https://a/m.png", name: null }, starred_at: "2026-01-02T00:00:00Z" },
+      ]),
+    );
+
+    const response = await sendMessage(state.messageListeners[0], {
+      type: "FETCH_STARGAZERS",
+      owner: "owner",
+      repo: "repo",
+    });
+
+    expect(response).toEqual({
+      ok: true,
+      data: [
+        { login: "octocat", avatarUrl: "https://a/o.png", name: "Octo Cat", starredAt: "2026-01-01T00:00:00Z" },
+        { login: "mona", avatarUrl: "https://a/m.png", name: null, starredAt: "2026-01-02T00:00:00Z" },
+      ],
+    });
+  });
+
+  it("maps the forks REST payload", async () => {
+    const state = await loadWorker("token");
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse([
+        {
+          owner: { login: "octocat", avatar_url: "https://a/o.png" },
+          full_name: "octocat/repo",
+          description: "a fork",
+          stargazers_count: 5,
+        },
+      ]),
+    );
+
+    const response = await sendMessage(state.messageListeners[0], {
+      type: "FETCH_FORKS",
+      owner: "owner",
+      repo: "repo",
+    });
+
+    expect(response).toEqual({
+      ok: true,
+      data: [
+        { owner: "octocat", ownerAvatarUrl: "https://a/o.png", fullName: "octocat/repo", description: "a fork", stargazersCount: 5 },
+      ],
+    });
+    expect(vi.mocked(fetch).mock.calls[0][0]).toContain("/repos/owner/repo/forks");
+  });
+
+  it("reads tag commit OIDs from the GraphQL refs response", async () => {
+    const state = await loadWorker("token");
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse({
+        data: {
+          repository: {
+            refs: {
+              nodes: [
+                { name: "v2.0.0", target: { oid: "sha-lightweight" } },
+                { name: "v1.0.0", target: { target: { oid: "sha-annotated" } } },
+              ],
+            },
+          },
+        },
+      }),
+    );
+
+    const response = await sendMessage(state.messageListeners[0], {
+      type: "FETCH_REPO_TAGS",
+      owner: "owner",
+      repo: "repo",
+    });
+
+    // Lightweight tags carry oid directly; annotated tags nest it under target.target.
+    expect(response).toEqual({
+      ok: true,
+      data: [
+        { name: "v2.0.0", commitSha: "sha-lightweight" },
+        { name: "v1.0.0", commitSha: "sha-annotated" },
+      ],
+    });
+    expect(vi.mocked(fetch)).toHaveBeenCalledTimes(1);
+  });
 });

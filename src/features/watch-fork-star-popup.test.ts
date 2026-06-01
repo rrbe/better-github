@@ -1,11 +1,15 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { setUrl } from "../test-utils/url";
 import { cleanupWatchForkStarPopup, injectWatchForkStarPopup } from "./watch-fork-star-popup";
+import { fetchWatchers } from "../lib/github-api";
+
+vi.mock("../lib/github-api");
 
 const GH = "https://github.com";
 
 describe("watch/fork/star popup", () => {
   beforeEach(() => {
+    vi.clearAllMocks();
     setUrl(`${GH}/owner/repo`);
     document.body.innerHTML = `
       <ul class="pagehead-actions">
@@ -34,5 +38,32 @@ describe("watch/fork/star popup", () => {
     await Promise.resolve();
 
     expect(document.querySelector(".bg-wfs-popup")).toBeNull();
+  });
+
+  it("loads and renders the user list when a counter is hovered", async () => {
+    vi.useFakeTimers();
+    vi.mocked(fetchWatchers).mockResolvedValue([
+      { login: "alice", avatarUrl: "https://a/alice.png", name: "Alice A" },
+      { login: "bob", avatarUrl: "https://a/bob.png", name: null },
+    ]);
+
+    injectWatchForkStarPopup();
+    const watchCounter = document.getElementById("watch-counter")!;
+
+    // Hover opens after HOVER_OPEN_DELAY, which triggers the (mocked) fetch.
+    watchCounter.dispatchEvent(new Event("mouseenter"));
+    await vi.advanceTimersByTimeAsync(300);
+
+    expect(fetchWatchers).toHaveBeenCalledWith("owner", "repo");
+    const items = watchCounter.querySelectorAll(".bg-wfs-popup-item");
+    expect(items).toHaveLength(2);
+    expect(items[0].querySelector(".bg-wfs-popup-username")?.textContent).toBe("alice");
+    expect(items[0].querySelector("img")?.getAttribute("alt")).toBe("alice");
+
+    vi.useRealTimers();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 });

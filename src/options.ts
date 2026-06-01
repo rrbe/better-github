@@ -171,3 +171,7 @@ searchInput.addEventListener("input", () => filterFeatures(searchInput.value));
 searchInput.addEventListener("keydown", (e) => {
   if (e.key === "Escape") closeSearch();
 });
+
+// Marks this entry script as an ES module so tests can `import()` it; emits no
+// runtime code.
+export {};
