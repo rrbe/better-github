@@ -74,7 +74,7 @@ function getFeatureFlags(): Promise<Record<FeatureKey, boolean>> {
   });
 }
 
-function removeFeatureElements(key: FeatureKey): void {
+export function removeFeatureElements(key: FeatureKey): void {
   for (const cls of FEATURE_CLASSES[key]) {
     document.querySelectorAll(`.${cls}`).forEach((el) => el.remove());
   }

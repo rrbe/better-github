@@ -259,4 +259,19 @@ describe("service worker", () => {
 
     expect(state.sessionStore).toEqual({});
   });
+
+  it("keeps the session cache for non-token changes and other storage areas", async () => {
+    const state = await loadWorker("token");
+    state.sessionStore["cache:branches:owner/repo:open:1"] = { data: [], timestamp: 1 };
+
+    // A feature toggle in local storage — not the token.
+    state.changedListeners[0](
+      { "feature-pr-branch-names": { oldValue: true, newValue: false } },
+      "local",
+    );
+    // A token change, but in the sync area rather than local.
+    state.changedListeners[0]({ githubToken: { oldValue: "token", newValue: "next" } }, "sync");
+
+    expect(state.sessionStore["cache:branches:owner/repo:open:1"]).toBeDefined();
+  });
 });
