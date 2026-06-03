@@ -128,7 +128,7 @@ if (isExtensionValid()) {
     if (area !== "local") return;
     // Picked-up on the next injection/navigation; a refresh re-renders all text.
     if (LOCALE_KEY in changes) {
-      setLocale((changes[LOCALE_KEY].newValue as LocalePref) ?? "auto");
+      setLocale((changes[LOCALE_KEY].newValue as LocalePref) ?? "en");
     }
     for (const key of FEATURE_KEYS) {
       if (!(key in changes)) continue;

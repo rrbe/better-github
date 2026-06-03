@@ -14,7 +14,6 @@
 
   "settingsTitle": { "message": "设置" },
   "language": { "message": "语言" },
-  "langFollowBrowser": { "message": "跟随浏览器" },
   "openSourced": { "message": "本项目已开源！" },
   "viewOnGithub": { "message": "在 GitHub 上查看" },
   "tokenLabel": { "message": "GitHub 个人访问令牌" },

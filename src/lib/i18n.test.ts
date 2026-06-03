@@ -15,7 +15,6 @@ describe("i18n", () => {
     setLocale("zh_CN");
     expect(t("approveNow")).toBe("立即批准");
     expect(t("settingsTitle")).toBe("设置");
-    expect(t("langFollowBrowser")).toBe("跟随浏览器");
   });
 
   it("switches to Traditional Chinese via setLocale", () => {
@@ -33,6 +32,14 @@ describe("i18n", () => {
     );
     setLocale("zh_CN");
     expect(t("commitTagTitle", "v1.0.0")).toBe("标签：v1.0.0");
+  });
+
+  it("falls back to English for a legacy/unknown preference", () => {
+    // "auto" was a valid preference before we dropped browser auto-detection;
+    // an existing user may still have it stored. It must resolve to English.
+    setLocale("auto" as unknown as Parameters<typeof setLocale>[0]);
+    expect(t("settingsTitle")).toBe("Settings");
+    expect(t("approveNow")).toBe("approve now");
   });
 
   it("returns empty string for an unknown key", () => {

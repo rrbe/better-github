@@ -14,7 +14,6 @@
 
   "settingsTitle": { "message": "設定" },
   "language": { "message": "語言" },
-  "langFollowBrowser": { "message": "跟隨瀏覽器" },
   "openSourced": { "message": "本專案已開源！" },
   "viewOnGithub": { "message": "在 GitHub 上查看" },
   "tokenLabel": { "message": "GitHub 個人存取權杖" },

@@ -1,8 +1,9 @@
 // Lightweight i18n that, unlike chrome.i18n (which is locked to the browser UI
 // locale), supports an in-extension manual language override stored in
-// chrome.storage.local. Catalogs are bundled so t() stays synchronous; the
-// active locale is resolved once from the stored preference (default: follow
-// the browser locale) and can be changed at runtime via setLocale().
+// chrome.storage.local. Catalogs are bundled so t() stays synchronous. The
+// active locale defaults to English for everyone; we deliberately do NOT
+// auto-detect the browser locale. Users opt into another language explicitly
+// on the options page, and the choice can be applied at runtime via setLocale().
 import enMessages from "../_locales/en/messages.json";
 import zhCNMessages from "../_locales/zh_CN/messages.json";
 import zhTWMessages from "../_locales/zh_TW/messages.json";
@@ -19,52 +20,43 @@ const CATALOGS: Record<string, Catalog> = {
   zh_TW: zhTWMessages as unknown as Catalog,
 };
 
-/** Locale preference: "auto" follows the browser, or a concrete catalog id. */
-export type LocalePref = "auto" | "en" | "zh_CN" | "zh_TW";
+/** A concrete catalog id. English is the default; other locales are opt-in. */
+export type LocalePref = "en" | "zh_CN" | "zh_TW";
 /** Order shown in the language picker. */
-export const LOCALE_OPTIONS: LocalePref[] = ["auto", "en", "zh_CN", "zh_TW"];
+export const LOCALE_OPTIONS: LocalePref[] = ["en", "zh_CN", "zh_TW"];
 /** chrome.storage.local key holding the LocalePref. */
 export const LOCALE_KEY = "locale";
+/** Locale used when the user hasn't explicitly picked one. */
+export const DEFAULT_LOCALE: LocalePref = "en";
 
-/** Map the browser UI language to one of our catalogs (en fallback). */
-function resolveAuto(): string {
-  let ui = "en";
-  try {
-    const g = globalThis as unknown as { chrome?: { i18n?: { getUILanguage?: () => string } } };
-    ui = g.chrome?.i18n?.getUILanguage?.() || "en";
-  } catch {
-    ui = "en";
-  }
-  const lc = ui.toLowerCase();
-  if (lc.startsWith("zh")) {
-    // Traditional for Taiwan / Hong Kong / Macau / explicit Hant script.
-    return /hant|-tw|-hk|-mo/.test(lc) ? "zh_TW" : "zh_CN";
-  }
-  return "en";
+/** Normalize an arbitrary stored value to a known locale (en fallback). Also
+ * absorbs the legacy "auto" preference, which no longer exists. */
+function normalize(pref: unknown): LocalePref {
+  return typeof pref === "string" && pref in CATALOGS ? (pref as LocalePref) : DEFAULT_LOCALE;
 }
 
-let currentLocale = resolveAuto();
+let currentLocale: LocalePref = DEFAULT_LOCALE;
 
 /** Apply a preference immediately (synchronous). */
 export function setLocale(pref: LocalePref): void {
-  currentLocale = pref === "auto" ? resolveAuto() : pref;
+  currentLocale = normalize(pref);
 }
 
 /**
- * Load the stored preference and apply it. Resolves to the stored pref
- * ("auto" when unset or storage is unavailable) so callers can reflect it in a
- * picker. Safe to call repeatedly.
+ * Load the stored preference and apply it. Resolves to the effective locale
+ * (DEFAULT_LOCALE when unset, unrecognized, or storage is unavailable) so
+ * callers can reflect it in a picker. Safe to call repeatedly.
  */
 export function initLocale(): Promise<LocalePref> {
   return new Promise((resolve) => {
     try {
       chrome.storage.local.get([LOCALE_KEY], (result) => {
-        const pref = (result?.[LOCALE_KEY] as LocalePref) || "auto";
+        const pref = normalize(result?.[LOCALE_KEY]);
         setLocale(pref);
         resolve(pref);
       });
     } catch {
-      resolve("auto");
+      resolve(DEFAULT_LOCALE);
     }
   });
 }
