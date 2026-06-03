@@ -5,6 +5,7 @@
 // the browser locale) and can be changed at runtime via setLocale().
 import enMessages from "../_locales/en/messages.json";
 import zhCNMessages from "../_locales/zh_CN/messages.json";
+import zhTWMessages from "../_locales/zh_TW/messages.json";
 
 interface MessageEntry {
   message: string;
@@ -15,12 +16,13 @@ type Catalog = Record<string, MessageEntry>;
 const CATALOGS: Record<string, Catalog> = {
   en: enMessages as unknown as Catalog,
   zh_CN: zhCNMessages as unknown as Catalog,
+  zh_TW: zhTWMessages as unknown as Catalog,
 };
 
 /** Locale preference: "auto" follows the browser, or a concrete catalog id. */
-export type LocalePref = "auto" | "en" | "zh_CN";
+export type LocalePref = "auto" | "en" | "zh_CN" | "zh_TW";
 /** Order shown in the language picker. */
-export const LOCALE_OPTIONS: LocalePref[] = ["auto", "en", "zh_CN"];
+export const LOCALE_OPTIONS: LocalePref[] = ["auto", "en", "zh_CN", "zh_TW"];
 /** chrome.storage.local key holding the LocalePref. */
 export const LOCALE_KEY = "locale";
 
@@ -33,7 +35,12 @@ function resolveAuto(): string {
   } catch {
     ui = "en";
   }
-  return /^zh/i.test(ui) ? "zh_CN" : "en";
+  const lc = ui.toLowerCase();
+  if (lc.startsWith("zh")) {
+    // Traditional for Taiwan / Hong Kong / Macau / explicit Hant script.
+    return /hant|-tw|-hk|-mo/.test(lc) ? "zh_TW" : "zh_CN";
+  }
+  return "en";
 }
 
 let currentLocale = resolveAuto();

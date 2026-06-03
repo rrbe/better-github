@@ -18,6 +18,13 @@ describe("i18n", () => {
     expect(t("langFollowBrowser")).toBe("跟随浏览器");
   });
 
+  it("switches to Traditional Chinese via setLocale", () => {
+    setLocale("zh_TW");
+    expect(t("approveNow")).toBe("立即核准");
+    expect(t("settingsTitle")).toBe("設定");
+    expect(t("featPrCollapseExpandName")).toBe("摺疊/展開所有檔案");
+  });
+
   it("substitutes positional placeholders in both locales", () => {
     setLocale("en");
     expect(t("tokenValid", "octocat")).toBe("Valid — authenticated as octocat");

@@ -1,0 +1,193 @@
+{
+  "appName": {
+    "message": "Better GitHub",
+    "description": "Extension name, shown in the Chrome Web Store and extension manager."
+  },
+  "appDesc": {
+    "message": "改善 GitHub PR、Issue 等頁面的使用體驗",
+    "description": "Extension description, shown in the Chrome Web Store and extension manager."
+  },
+  "actionTitle": {
+    "message": "Better GitHub - 點擊查看設定",
+    "description": "Toolbar button tooltip."
+  },
+
+  "settingsTitle": { "message": "設定" },
+  "language": { "message": "語言" },
+  "langFollowBrowser": { "message": "跟隨瀏覽器" },
+  "openSourced": { "message": "本專案已開源！" },
+  "viewOnGithub": { "message": "在 GitHub 上查看" },
+  "tokenLabel": { "message": "GitHub 個人存取權杖" },
+  "save": { "message": "儲存" },
+  "tokenHintIntro": {
+    "message": "⬆️ 存取私有儲存庫需要權杖。擴充功能本身絕不會儲存你的權杖或存取你的資料。"
+  },
+  "tokenClassicTitle": { "message": "建立帶有 <b>scopes</b> 的傳統權杖" },
+  "tokenFineTitle": { "message": "建立帶有 <b>permissions</b> 的細粒度權杖" },
+  "tokenOr": { "message": "或" },
+
+  "features": { "message": "功能" },
+  "searchFeatures": { "message": "搜尋功能" },
+  "searchFeaturesPlaceholder": { "message": "搜尋功能…" },
+  "closeSearch": { "message": "關閉搜尋" },
+
+  "groupHome": { "message": "首頁" },
+  "groupPRsIssues": { "message": "PR 和 Issue" },
+  "groupPRDetails": { "message": "PR 詳情" },
+  "groupCommits": { "message": "提交" },
+  "groupRepository": { "message": "儲存庫" },
+
+  "featBetterTopReposName": { "message": "增強的熱門儲存庫" },
+  "featBetterTopReposDesc": {
+    "message": "自動展開「熱門儲存庫」清單，並將你喜愛的儲存庫置頂。"
+  },
+  "featDefaultSortName": { "message": "預設依更新時間排序" },
+  "featDefaultSortDesc": {
+    "message": "PR 和 Issue 清單依最近更新排序，而非建立時間。"
+  },
+  "featPrBranchNamesName": { "message": "PR 分支名稱" },
+  "featPrBranchNamesDesc": {
+    "message": "在每個 PR 標題旁顯示來源分支名稱，點擊徽章即可複製。"
+  },
+  "featPrReviewStatusName": { "message": "PR 審查狀態" },
+  "featPrReviewStatusDesc": {
+    "message": "在 PR 清單上顯示審查對話的解決狀態（已解決 / 未解決）。需要權杖。"
+  },
+  "featPrDiffStatsName": { "message": "PR 差異統計" },
+  "featPrDiffStatsDesc": {
+    "message": "在 PR 清單上顯示新增、刪除行數和檔案數（如 +223 −114 · 5 files）。需要權杖。"
+  },
+  "featPrLabelPositionName": { "message": "PR 標籤位置" },
+  "featPrLabelPositionDesc": {
+    "message": "將標籤移到 PR 標題前面，便於查看和掃讀。"
+  },
+  "featPrApproveNowName": { "message": "PR 快速核准" },
+  "featPrApproveNowDesc": {
+    "message": "在 PR 詳情頁的 Reviewers 側邊欄新增「立即核准」快速入口。需要權杖。"
+  },
+  "featPrCollapseExpandName": { "message": "摺疊/展開所有檔案" },
+  "featPrCollapseExpandDesc": {
+    "message": "在 PR、提交和比較頁面新增一個摺疊或展開所有檔案差異的按鈕。"
+  },
+  "featCommitTagsName": { "message": "提交標籤" },
+  "featCommitTagsDesc": {
+    "message": "在提交清單頁顯示 git 標籤，便於識別。"
+  },
+  "featCommitDiffStatsName": { "message": "提交差異統計" },
+  "featCommitDiffStatsDesc": {
+    "message": "在提交清單頁顯示新增、刪除行數和檔案數（如 +223 −114 · 5 files）。需要權杖。"
+  },
+  "featReleaseTabName": { "message": "發佈分頁" },
+  "featReleaseTabDesc": {
+    "message": "在儲存庫導覽列新增一個 Releases 分頁，方便快速存取。"
+  },
+  "featWatchForkStarName": { "message": "Watch/Fork/Star 彈出視窗" },
+  "featWatchForkStarDesc": {
+    "message": "將游標停在 Watch、Fork 或 Star 數字上，即可在彈出視窗中預覽清單。"
+  },
+
+  "validatingToken": { "message": "正在驗證權杖…" },
+  "tokenValid": {
+    "message": "有效 — 已驗證為 $user$",
+    "placeholders": { "user": { "content": "$1", "example": "octocat" } }
+  },
+  "tokenInvalid": { "message": "無效權杖 — 驗證失敗" },
+  "tokenValidationFailed": {
+    "message": "驗證失敗（HTTP $status$）",
+    "placeholders": { "status": { "content": "$1", "example": "500" } }
+  },
+  "tokenNetworkError": { "message": "網路錯誤 — 無法連線 GitHub API" },
+  "saveFailed": { "message": "儲存失敗" },
+  "saved": { "message": "已儲存！" },
+
+  "releases": { "message": "發佈" },
+  "approveNow": { "message": "立即核准" },
+  "approveDialogTitle": { "message": "核准此 Pull Request？" },
+  "approveCommentPlaceholder": { "message": "新增留言（選填）" },
+  "cancel": { "message": "取消" },
+  "approve": { "message": "核准" },
+  "approving": { "message": "核准中…" },
+  "approveFailed": {
+    "message": "核准 PR 失敗：$error$",
+    "placeholders": { "error": { "content": "$1", "example": "Not Found" } }
+  },
+
+  "commitTagTitle": {
+    "message": "標籤：$name$",
+    "placeholders": { "name": { "content": "$1", "example": "v1.0.0" } }
+  },
+  "copied": { "message": "已複製！" },
+  "branchCopyTitle": { "message": "點擊複製分支名稱" },
+
+  "pinRepository": { "message": "置頂儲存庫" },
+  "unpinRepository": { "message": "取消置頂" },
+
+  "watchers": { "message": "關注者" },
+  "forks": { "message": "復刻" },
+  "stargazers": { "message": "星標使用者" },
+  "viewAll": { "message": "查看全部" },
+  "noWatchers": { "message": "尚無關注者" },
+  "noStargazers": { "message": "尚無星標使用者" },
+  "noForks": { "message": "尚無復刻" },
+  "failedToLoad": { "message": "載入失敗" },
+
+  "collapseTree": { "message": "摺疊目錄樹" },
+  "expandTree": { "message": "展開目錄樹" },
+  "collapseTreeTitle": { "message": "摺疊檔案樹中的所有資料夾" },
+  "expandTreeTitle": { "message": "展開檔案樹中的所有資料夾" },
+  "expandAllFiles": { "message": "展開所有檔案" },
+  "collapseAllFiles": { "message": "摺疊所有檔案" },
+  "expandAllFilesTitle": { "message": "展開所有檔案差異" },
+  "collapseAllFilesTitle": { "message": "摺疊所有檔案差異" },
+
+  "reviewAllResolved": { "message": "✓ 全部已解決" },
+  "reviewAllResolvedTitle": {
+    "message": "$count$ 則審查對話，全部已解決",
+    "placeholders": { "count": { "content": "$1", "example": "4" } }
+  },
+  "reviewUnresolved": {
+    "message": "$count$ 則未解決",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reviewHeaderOne": {
+    "message": "$count$ 則未解決的對話",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reviewHeaderOther": {
+    "message": "$count$ 則未解決的對話",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reviewOutdated": { "message": "已過時" },
+  "reviewGeneralComment": { "message": "整體留言" },
+  "reviewNoComment": { "message": "（無留言）" },
+  "reviewMore": {
+    "message": "還有 $count$ 則",
+    "placeholders": { "count": { "content": "$1", "example": "5" } }
+  },
+  "reviewLoadFailed": { "message": "無法載入對話詳情。" },
+  "loading": { "message": "載入中…" },
+
+  "diffFilesOne": {
+    "message": "$count$ 個檔案",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "diffFilesOther": {
+    "message": "$count$ 個檔案",
+    "placeholders": { "count": { "content": "$1", "example": "5" } }
+  },
+  "diffStatsTitle": {
+    "message": "新增 $add$ 行，刪除 $del$ 行",
+    "placeholders": {
+      "add": { "content": "$1", "example": "223" },
+      "del": { "content": "$2", "example": "114" }
+    }
+  },
+  "diffStatsTitleWithFiles": {
+    "message": "新增 $add$ 行，刪除 $del$ 行，共 $files$",
+    "placeholders": {
+      "add": { "content": "$1", "example": "223" },
+      "del": { "content": "$2", "example": "114" },
+      "files": { "content": "$3", "example": "5 個檔案" }
+    }
+  }
+}
