@@ -149,6 +149,15 @@ a.better-github-review-popover-item:hover {
   border-top: 1px solid var(--borderColor-muted, var(--color-border-muted, #d8dee4));
 }
 
+/* Transient states: "Loading…" while the detail query runs, "couldn't load" on
+   failure. */
+.better-github-review-popover-message {
+  padding: 8px 12px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--fgColor-muted, var(--color-fg-muted, #656d76));
+}
+
 .better-github-review-popover-loc {
   display: flex;
   align-items: center;

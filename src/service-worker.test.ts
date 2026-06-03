@@ -231,9 +231,10 @@ describe("service worker", () => {
     );
   });
 
-  it("clears review-status caches after approving a PR", async () => {
+  it("clears both review caches after approving a PR", async () => {
     const state = await loadWorker("token");
     state.sessionStore["cache:reviews:owner/repo:1,2"] = { data: [], timestamp: 1 };
+    state.sessionStore["cache:reviewdetails:owner/repo:1"] = { data: [], timestamp: 1 };
     state.sessionStore["cache:branches:owner/repo:open:1"] = { data: [], timestamp: 1 };
     vi.mocked(fetch).mockResolvedValue(jsonResponse({}));
 
@@ -247,7 +248,10 @@ describe("service worker", () => {
     await Promise.resolve();
 
     expect(response).toEqual({ ok: true, data: { success: true } });
+    // Both the count cache and the detail cache for this repo are invalidated...
     expect(state.sessionStore["cache:reviews:owner/repo:1,2"]).toBeUndefined();
+    expect(state.sessionStore["cache:reviewdetails:owner/repo:1"]).toBeUndefined();
+    // ...but unrelated caches survive.
     expect(state.sessionStore["cache:branches:owner/repo:open:1"]).toBeDefined();
   });
 
@@ -275,7 +279,7 @@ describe("service worker", () => {
     expect(state.sessionStore["cache:branches:owner/repo:open:1"]).toBeDefined();
   });
 
-  it("maps GraphQL review threads into counts plus unresolved-thread details", async () => {
+  it("maps GraphQL review threads into counts only (no eager detail payload)", async () => {
     const state = await loadWorker("token");
     vi.mocked(fetch).mockResolvedValue(
       jsonResponse({
@@ -284,6 +288,41 @@ describe("service worker", () => {
             pr_1: {
               reviewThreads: {
                 totalCount: 3,
+                // The list query asks for `isResolved` only — no path/author/body.
+                nodes: [{ isResolved: true }, { isResolved: true }, { isResolved: false }],
+              },
+            },
+          },
+        },
+      }),
+    );
+
+    const response = await sendMessage(state.messageListeners[0], {
+      type: "FETCH_PR_REVIEW_STATUSES",
+      owner: "owner",
+      repo: "repo",
+      prNumbers: [1],
+    });
+
+    expect(response).toEqual({
+      ok: true,
+      data: [{ number: 1, totalThreads: 3, resolvedThreads: 2 }],
+    });
+    expect(vi.mocked(fetch).mock.calls[0][0]).toBe("https://api.github.com/graphql");
+    // The list query must NOT pull the heavy per-thread fields.
+    const listBody = JSON.parse(vi.mocked(fetch).mock.calls[0][1]?.body as string).query as string;
+    expect(listBody).not.toContain("bodyText");
+    expect(listBody).not.toContain("comments(");
+  });
+
+  it("fetches a single PR's unresolved thread details on demand", async () => {
+    const state = await loadWorker("token");
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse({
+        data: {
+          repository: {
+            pr_1: {
+              reviewThreads: {
                 nodes: [
                   { isResolved: true, isOutdated: false, path: "a.ts", line: 1, originalLine: 1, comments: { nodes: [{ author: { login: "alice" }, bodyText: "done", url: "u1" }] } },
                   { isResolved: true, isOutdated: false, path: "b.ts", line: 2, originalLine: 2, comments: { nodes: [{ author: { login: "bob" }, bodyText: "ok", url: "u2" }] } },
@@ -298,30 +337,23 @@ describe("service worker", () => {
     );
 
     const response = await sendMessage(state.messageListeners[0], {
-      type: "FETCH_PR_REVIEW_STATUSES",
+      type: "FETCH_PR_REVIEW_THREAD_DETAILS",
       owner: "owner",
       repo: "repo",
-      prNumbers: [1],
+      prNumber: 1,
     });
 
+    // Only the single unresolved thread is returned; resolved ones are dropped.
     expect(response).toEqual({
       ok: true,
       data: [
-        {
-          number: 1,
-          totalThreads: 3,
-          resolvedThreads: 2,
-          // Only the single unresolved thread is detailed; resolved ones are dropped.
-          unresolved: [
-            { path: "src/c.ts", line: 42, isOutdated: true, author: "carol", snippet: "needs a null check", url: "u3" },
-          ],
-        },
+        { path: "src/c.ts", line: 42, isOutdated: true, author: "carol", snippet: "needs a null check", url: "u3" },
       ],
     });
     expect(vi.mocked(fetch).mock.calls[0][0]).toBe("https://api.github.com/graphql");
   });
 
-  it("tolerates threads with missing author / path / comments", async () => {
+  it("tolerates detail threads with missing author / path / comments", async () => {
     const state = await loadWorker("token");
     vi.mocked(fetch).mockResolvedValue(
       jsonResponse({
@@ -329,7 +361,6 @@ describe("service worker", () => {
           repository: {
             pr_1: {
               reviewThreads: {
-                totalCount: 1,
                 nodes: [
                   { isResolved: false, isOutdated: false, path: null, line: null, comments: { nodes: [{ author: null, bodyText: "", url: "" }] } },
                 ],
@@ -341,22 +372,15 @@ describe("service worker", () => {
     );
 
     const response = await sendMessage(state.messageListeners[0], {
-      type: "FETCH_PR_REVIEW_STATUSES",
+      type: "FETCH_PR_REVIEW_THREAD_DETAILS",
       owner: "owner",
       repo: "repo",
-      prNumbers: [1],
+      prNumber: 1,
     });
 
     expect(response).toEqual({
       ok: true,
-      data: [
-        {
-          number: 1,
-          totalThreads: 1,
-          resolvedThreads: 0,
-          unresolved: [{ path: "", line: null, isOutdated: false, author: "", snippet: "", url: "" }],
-        },
-      ],
+      data: [{ path: "", line: null, isOutdated: false, author: "", snippet: "", url: "" }],
     });
   });
 
