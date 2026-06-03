@@ -33,7 +33,7 @@
   "groupHome": { "message": "首页" },
   "groupPRsIssues": { "message": "PR 和 Issue" },
   "groupPRDetails": { "message": "PR 详情" },
-  "groupCommits": { "message": "提交" },
+  "groupCommits": { "message": "Commits" },
   "groupRepository": { "message": "仓库" },
 
   "featBetterTopReposName": { "message": "增强的热门仓库" },
@@ -66,17 +66,17 @@
   },
   "featPrCollapseExpandName": { "message": "折叠/展开所有文件" },
   "featPrCollapseExpandDesc": {
-    "message": "在 PR、提交和对比页面添加一个折叠或展开所有文件差异的按钮。"
+    "message": "在 PR、Commit 和对比页面添加一个折叠或展开所有文件差异的按钮。"
   },
-  "featCommitTagsName": { "message": "提交标签" },
+  "featCommitTagsName": { "message": "Commit Tags" },
   "featCommitTagsDesc": {
-    "message": "在提交列表页显示 git 标签，便于识别。"
+    "message": "在 Commits 列表页显示 git tags，便于识别。"
   },
-  "featCommitDiffStatsName": { "message": "提交差异统计" },
+  "featCommitDiffStatsName": { "message": "Commit 差异统计" },
   "featCommitDiffStatsDesc": {
-    "message": "在提交列表页显示新增、删除行数和文件数（如 +223 −114 · 5 files）。需要令牌。"
+    "message": "在 Commits 列表页显示新增、删除行数和文件数（如 +223 −114 · 5 files）。需要令牌。"
   },
-  "featReleaseTabName": { "message": "发布标签页" },
+  "featReleaseTabName": { "message": "Releases 标签页" },
   "featReleaseTabDesc": {
     "message": "在仓库导航栏添加一个 Releases 标签页，方便快速访问。"
   },
@@ -99,7 +99,7 @@
   "saveFailed": { "message": "保存失败" },
   "saved": { "message": "已保存！" },
 
-  "releases": { "message": "发布" },
+  "releases": { "message": "Releases" },
   "approveNow": { "message": "立即批准" },
   "approveDialogTitle": { "message": "批准此 Pull Request？" },
   "approveCommentPlaceholder": { "message": "添加评论（可选）" },
@@ -112,7 +112,7 @@
   },
 
   "commitTagTitle": {
-    "message": "标签：$name$",
+    "message": "Tag: $name$",
     "placeholders": { "name": { "content": "$1", "example": "v1.0.0" } }
   },
   "copied": { "message": "已复制！" },
@@ -121,13 +121,13 @@
   "pinRepository": { "message": "置顶仓库" },
   "unpinRepository": { "message": "取消置顶" },
 
-  "watchers": { "message": "关注者" },
-  "forks": { "message": "复刻" },
-  "stargazers": { "message": "星标用户" },
+  "watchers": { "message": "Watchers" },
+  "forks": { "message": "Forks" },
+  "stargazers": { "message": "Stargazers" },
   "viewAll": { "message": "查看全部" },
-  "noWatchers": { "message": "暂无关注者" },
-  "noStargazers": { "message": "暂无星标用户" },
-  "noForks": { "message": "暂无复刻" },
+  "noWatchers": { "message": "暂无 Watchers" },
+  "noStargazers": { "message": "暂无 Stargazers" },
+  "noForks": { "message": "暂无 Forks" },
   "failedToLoad": { "message": "加载失败" },
 
   "collapseTree": { "message": "折叠目录树" },

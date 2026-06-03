@@ -33,7 +33,7 @@
   "groupHome": { "message": "首頁" },
   "groupPRsIssues": { "message": "PR 和 Issue" },
   "groupPRDetails": { "message": "PR 詳情" },
-  "groupCommits": { "message": "提交" },
+  "groupCommits": { "message": "Commits" },
   "groupRepository": { "message": "儲存庫" },
 
   "featBetterTopReposName": { "message": "增強的熱門儲存庫" },
@@ -66,17 +66,17 @@
   },
   "featPrCollapseExpandName": { "message": "摺疊/展開所有檔案" },
   "featPrCollapseExpandDesc": {
-    "message": "在 PR、提交和比較頁面新增一個摺疊或展開所有檔案差異的按鈕。"
+    "message": "在 PR、Commit 和比較頁面新增一個摺疊或展開所有檔案差異的按鈕。"
   },
-  "featCommitTagsName": { "message": "提交標籤" },
+  "featCommitTagsName": { "message": "Commit Tags" },
   "featCommitTagsDesc": {
-    "message": "在提交清單頁顯示 git 標籤，便於識別。"
+    "message": "在 Commits 清單頁顯示 git tags，便於識別。"
   },
-  "featCommitDiffStatsName": { "message": "提交差異統計" },
+  "featCommitDiffStatsName": { "message": "Commit 差異統計" },
   "featCommitDiffStatsDesc": {
-    "message": "在提交清單頁顯示新增、刪除行數和檔案數（如 +223 −114 · 5 files）。需要權杖。"
+    "message": "在 Commits 清單頁顯示新增、刪除行數和檔案數（如 +223 −114 · 5 files）。需要權杖。"
   },
-  "featReleaseTabName": { "message": "發佈分頁" },
+  "featReleaseTabName": { "message": "Releases 分頁" },
   "featReleaseTabDesc": {
     "message": "在儲存庫導覽列新增一個 Releases 分頁，方便快速存取。"
   },
@@ -99,7 +99,7 @@
   "saveFailed": { "message": "儲存失敗" },
   "saved": { "message": "已儲存！" },
 
-  "releases": { "message": "發佈" },
+  "releases": { "message": "Releases" },
   "approveNow": { "message": "立即核准" },
   "approveDialogTitle": { "message": "核准此 Pull Request？" },
   "approveCommentPlaceholder": { "message": "新增留言（選填）" },
@@ -112,7 +112,7 @@
   },
 
   "commitTagTitle": {
-    "message": "標籤：$name$",
+    "message": "Tag: $name$",
     "placeholders": { "name": { "content": "$1", "example": "v1.0.0" } }
   },
   "copied": { "message": "已複製！" },
@@ -121,13 +121,13 @@
   "pinRepository": { "message": "置頂儲存庫" },
   "unpinRepository": { "message": "取消置頂" },
 
-  "watchers": { "message": "關注者" },
-  "forks": { "message": "復刻" },
-  "stargazers": { "message": "星標使用者" },
+  "watchers": { "message": "Watchers" },
+  "forks": { "message": "Forks" },
+  "stargazers": { "message": "Stargazers" },
   "viewAll": { "message": "查看全部" },
-  "noWatchers": { "message": "尚無關注者" },
-  "noStargazers": { "message": "尚無星標使用者" },
-  "noForks": { "message": "尚無復刻" },
+  "noWatchers": { "message": "尚無 Watchers" },
+  "noStargazers": { "message": "尚無 Stargazers" },
+  "noForks": { "message": "尚無 Forks" },
   "failedToLoad": { "message": "載入失敗" },
 
   "collapseTree": { "message": "摺疊目錄樹" },

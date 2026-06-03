@@ -31,7 +31,7 @@ describe("i18n", () => {
       "1,234 additions, 56 deletions across 3 files",
     );
     setLocale("zh_CN");
-    expect(t("commitTagTitle", "v1.0.0")).toBe("标签：v1.0.0");
+    expect(t("commitTagTitle", "v1.0.0")).toBe("Tag: v1.0.0");
   });
 
   it("falls back to English for a legacy/unknown preference", () => {
