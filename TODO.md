@@ -1,3 +1,0 @@
-- [x] service worker 是否能提升性能
-- [x] 设置多语言支持，根据系统语言设定默认语言
-- [ ] graphql 替换 rest api 访问提升性能
