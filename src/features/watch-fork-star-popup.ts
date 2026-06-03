@@ -1,6 +1,7 @@
 import { getRepoInfo } from "../lib/page-detect";
 import { fetchStargazers, fetchWatchers, fetchForks } from "../lib/github-api";
 import { escapeHtml } from "../lib/utils";
+import { t } from "../lib/i18n";
 import type { ForkInfo } from "../lib/github-api";
 
 const WRAP_CLASS = "bg-wfs-counter-wrap";
@@ -61,7 +62,7 @@ function createPopupElement(config: PopupConfig): HTMLDivElement {
       ${createSkeletonRows()}
     </div>
     <div class="bg-wfs-popup-footer">
-      <a href="${config.viewAllUrl}">View all</a>
+      <a href="${config.viewAllUrl}">${t("viewAll")}</a>
     </div>
   `;
   return popup;
@@ -89,7 +90,7 @@ function renderUserList(
 
 function renderForks(list: HTMLElement, items: ForkInfo[]): void {
   if (items.length === 0) {
-    list.innerHTML = `<div class="bg-wfs-popup-empty">No forks yet</div>`;
+    list.innerHTML = `<div class="bg-wfs-popup-empty">${t("noForks")}</div>`;
     return;
   }
   list.innerHTML = items.map((fork) => `
@@ -122,7 +123,7 @@ function setupHover(
       loaded = true;
       loadData().catch(() => {
         const list = popup.querySelector(".bg-wfs-popup-list");
-        if (list) list.innerHTML = `<div class="bg-wfs-popup-empty">Failed to load</div>`;
+        if (list) list.innerHTML = `<div class="bg-wfs-popup-empty">${t("failedToLoad")}</div>`;
       });
     }
   }
@@ -209,12 +210,12 @@ export function injectWatchForkStarPopup(): void {
   if (watchCounter) {
     const countText = watchCounter.textContent?.trim() || "0";
     attachPopup(watchCounter, {
-      title: "Watchers",
+      title: t("watchers"),
       countText,
       viewAllUrl: `/${owner}/${repo}/watchers`,
     }, async (list) => {
       const data = await fetchWatchers(owner, repo);
-      renderUserList(list, data, "No watchers yet");
+      renderUserList(list, data, t("noWatchers"));
     });
   }
 
@@ -223,7 +224,7 @@ export function injectWatchForkStarPopup(): void {
   if (forkCounter) {
     const countText = forkCounter.textContent?.trim() || "0";
     attachPopup(forkCounter, {
-      title: "Forks",
+      title: t("forks"),
       countText,
       viewAllUrl: `/${owner}/${repo}/forks`,
     }, async (list) => {
@@ -240,12 +241,12 @@ export function injectWatchForkStarPopup(): void {
   for (const starCounter of starCounters) {
     const countText = starCounter.textContent?.trim() || "0";
     attachPopup(starCounter as HTMLElement, {
-      title: "Stargazers",
+      title: t("stargazers"),
       countText,
       viewAllUrl: `/${owner}/${repo}/stargazers`,
     }, async (list) => {
       if (!starData) starData = await fetchStargazers(owner, repo);
-      renderUserList(list, starData, "No stargazers yet");
+      renderUserList(list, starData, t("noStargazers"));
     });
   }
 }

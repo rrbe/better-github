@@ -1,5 +1,6 @@
 import { getRepoInfo, isPRDetailPage, getPRNumber } from "../lib/page-detect";
 import { approvePR } from "../lib/github-api";
+import { t } from "../lib/i18n";
 
 const APPROVE_BTN_CLASS = "better-github-approve-now";
 const DIALOG_OVERLAY_CLASS = "better-github-approve-dialog-overlay";
@@ -21,7 +22,7 @@ export async function injectPRApproveNow(): Promise<void> {
 
   const link = document.createElement("a");
   link.className = APPROVE_BTN_CLASS;
-  link.textContent = "approve now";
+  link.textContent = t("approveNow");
   link.href = "#";
   link.addEventListener("click", (e) => {
     e.preventDefault();
@@ -77,23 +78,23 @@ function showApproveDialog(owner: string, repo: string, prNumber: number): void 
   dialog.className = "better-github-approve-dialog";
 
   const title = document.createElement("h3");
-  title.textContent = "Approve this pull request?";
+  title.textContent = t("approveDialogTitle");
 
   const input = document.createElement("input");
   input.type = "text";
   input.className = "better-github-approve-input";
-  input.placeholder = "Leave a comment (optional)";
+  input.placeholder = t("approveCommentPlaceholder");
 
   const actions = document.createElement("div");
   actions.className = "better-github-approve-actions";
 
   const cancelBtn = document.createElement("button");
   cancelBtn.className = "better-github-approve-cancel";
-  cancelBtn.textContent = "Cancel";
+  cancelBtn.textContent = t("cancel");
 
   const submitBtn = document.createElement("button");
   submitBtn.className = "better-github-approve-submit";
-  submitBtn.textContent = "Approve";
+  submitBtn.textContent = t("approve");
 
   actions.append(cancelBtn, submitBtn);
   dialog.append(title, input, actions);
@@ -112,7 +113,7 @@ function showApproveDialog(owner: string, repo: string, prNumber: number): void 
   const handleSubmit = async () => {
     const body = input.value.trim();
     submitBtn.disabled = true;
-    submitBtn.textContent = "Approving...";
+    submitBtn.textContent = t("approving");
 
     const result = await approvePR(owner, repo, prNumber, body);
     if (result.success) {
@@ -120,8 +121,8 @@ function showApproveDialog(owner: string, repo: string, prNumber: number): void 
       location.reload();
     } else {
       submitBtn.disabled = false;
-      submitBtn.textContent = "Approve";
-      alert(`Failed to approve PR: ${result.error}`);
+      submitBtn.textContent = t("approve");
+      alert(t("approveFailed", result.error ?? ""));
     }
   };
 

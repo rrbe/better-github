@@ -1,14 +1,15 @@
 {
   "manifest_version": 3,
-  "name": "Better GitHub",
+  "name": "__MSG_appName__",
   "version": "1.9.0",
-  "description": "Improve usability of GitHub PR, issue, and other pages",
+  "description": "__MSG_appDesc__",
+  "default_locale": "en",
   "permissions": ["storage"],
   "background": {
     "service_worker": "service-worker.js"
   },
   "action": {
-    "default_title": "Better GitHub - Click to view settings"
+    "default_title": "__MSG_actionTitle__"
   },
   "options_ui": {
     "page": "options.html",

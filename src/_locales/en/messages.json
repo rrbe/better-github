@@ -1,0 +1,193 @@
+{
+  "appName": {
+    "message": "Better GitHub",
+    "description": "Extension name, shown in the Chrome Web Store and extension manager."
+  },
+  "appDesc": {
+    "message": "Improve usability of GitHub PR, issue, and other pages",
+    "description": "Extension description, shown in the Chrome Web Store and extension manager."
+  },
+  "actionTitle": {
+    "message": "Better GitHub - Click to view settings",
+    "description": "Toolbar button tooltip."
+  },
+
+  "settingsTitle": { "message": "Settings" },
+  "language": { "message": "Language" },
+  "langFollowBrowser": { "message": "Follow browser" },
+  "openSourced": { "message": "It's open sourced!" },
+  "viewOnGithub": { "message": "View on GitHub" },
+  "tokenLabel": { "message": "GitHub Personal Access Token" },
+  "save": { "message": "Save" },
+  "tokenHintIntro": {
+    "message": "⬆️ A token is required for accessing private repositories. The plugin itself will never store your token or access your data."
+  },
+  "tokenClassicTitle": { "message": "Create a classic token with <b>scopes</b>" },
+  "tokenFineTitle": { "message": "Create a fine-grained token with <b>permissions</b>" },
+  "tokenOr": { "message": "or" },
+
+  "features": { "message": "Features" },
+  "searchFeatures": { "message": "Search features" },
+  "searchFeaturesPlaceholder": { "message": "Search features..." },
+  "closeSearch": { "message": "Close search" },
+
+  "groupHome": { "message": "Home" },
+  "groupPRsIssues": { "message": "PRs and issues" },
+  "groupPRDetails": { "message": "PR details" },
+  "groupCommits": { "message": "Commits" },
+  "groupRepository": { "message": "Repository" },
+
+  "featBetterTopReposName": { "message": "Better Top Repositories" },
+  "featBetterTopReposDesc": {
+    "message": "Auto-expand the \"Top repositories\" list and pin your favorite repos to the top."
+  },
+  "featDefaultSortName": { "message": "Default Sort by Updated" },
+  "featDefaultSortDesc": {
+    "message": "Sort PR and issue lists by recently updated instead of creation time."
+  },
+  "featPrBranchNamesName": { "message": "PR Branch Names" },
+  "featPrBranchNamesDesc": {
+    "message": "Display source branch name next to each PR title. Click the badge to copy."
+  },
+  "featPrReviewStatusName": { "message": "PR Review Status" },
+  "featPrReviewStatusDesc": {
+    "message": "Show review thread resolution status (resolved / unresolved) on the PR list. Requires a token."
+  },
+  "featPrDiffStatsName": { "message": "PR Diff Stats" },
+  "featPrDiffStatsDesc": {
+    "message": "Show additions, deletions, and file count (e.g. +223 −114 · 5 files) on the PR list. Requires a token."
+  },
+  "featPrLabelPositionName": { "message": "PR Label Position" },
+  "featPrLabelPositionDesc": {
+    "message": "Move labels to the front of PR titles for better visibility and scanning."
+  },
+  "featPrApproveNowName": { "message": "PR Approve Now" },
+  "featPrApproveNowDesc": {
+    "message": "Add an \"approve now\" shortcut to the Reviewers sidebar on PR detail pages. Requires a token."
+  },
+  "featPrCollapseExpandName": { "message": "Collapse/Expand All Files" },
+  "featPrCollapseExpandDesc": {
+    "message": "Add a button to collapse or expand all file diffs on PR, commit, and compare pages."
+  },
+  "featCommitTagsName": { "message": "Commit Tags" },
+  "featCommitTagsDesc": {
+    "message": "Show git tags on the commits list page for easy identification."
+  },
+  "featCommitDiffStatsName": { "message": "Commit Diff Stats" },
+  "featCommitDiffStatsDesc": {
+    "message": "Show additions, deletions, and file count (e.g. +223 −114 · 5 files) on the commits list page. Requires a token."
+  },
+  "featReleaseTabName": { "message": "Releases Tab" },
+  "featReleaseTabDesc": {
+    "message": "Add a Releases tab to the repository navigation bar for quick access."
+  },
+  "featWatchForkStarName": { "message": "Watch/Fork/Star Popup" },
+  "featWatchForkStarDesc": {
+    "message": "Hover over Watch, Fork, or Star counts to preview the list in a popup."
+  },
+
+  "validatingToken": { "message": "Validating token…" },
+  "tokenValid": {
+    "message": "Valid — authenticated as $user$",
+    "placeholders": { "user": { "content": "$1", "example": "octocat" } }
+  },
+  "tokenInvalid": { "message": "Invalid token — authentication failed" },
+  "tokenValidationFailed": {
+    "message": "Validation failed (HTTP $status$)",
+    "placeholders": { "status": { "content": "$1", "example": "500" } }
+  },
+  "tokenNetworkError": { "message": "Network error — could not reach GitHub API" },
+  "saveFailed": { "message": "Save failed" },
+  "saved": { "message": "Saved!" },
+
+  "releases": { "message": "Releases" },
+  "approveNow": { "message": "approve now" },
+  "approveDialogTitle": { "message": "Approve this pull request?" },
+  "approveCommentPlaceholder": { "message": "Leave a comment (optional)" },
+  "cancel": { "message": "Cancel" },
+  "approve": { "message": "Approve" },
+  "approving": { "message": "Approving..." },
+  "approveFailed": {
+    "message": "Failed to approve PR: $error$",
+    "placeholders": { "error": { "content": "$1", "example": "Not Found" } }
+  },
+
+  "commitTagTitle": {
+    "message": "Tag: $name$",
+    "placeholders": { "name": { "content": "$1", "example": "v1.0.0" } }
+  },
+  "copied": { "message": "Copied!" },
+  "branchCopyTitle": { "message": "Click to copy branch name" },
+
+  "pinRepository": { "message": "Pin repository" },
+  "unpinRepository": { "message": "Unpin repository" },
+
+  "watchers": { "message": "Watchers" },
+  "forks": { "message": "Forks" },
+  "stargazers": { "message": "Stargazers" },
+  "viewAll": { "message": "View all" },
+  "noWatchers": { "message": "No watchers yet" },
+  "noStargazers": { "message": "No stargazers yet" },
+  "noForks": { "message": "No forks yet" },
+  "failedToLoad": { "message": "Failed to load" },
+
+  "collapseTree": { "message": "Collapse tree" },
+  "expandTree": { "message": "Expand tree" },
+  "collapseTreeTitle": { "message": "Collapse all folders in file tree" },
+  "expandTreeTitle": { "message": "Expand all folders in file tree" },
+  "expandAllFiles": { "message": "Expand all files" },
+  "collapseAllFiles": { "message": "Collapse all files" },
+  "expandAllFilesTitle": { "message": "Expand all file diffs" },
+  "collapseAllFilesTitle": { "message": "Collapse all file diffs" },
+
+  "reviewAllResolved": { "message": "✓ All resolved" },
+  "reviewAllResolvedTitle": {
+    "message": "$count$ review thread(s), all resolved",
+    "placeholders": { "count": { "content": "$1", "example": "4" } }
+  },
+  "reviewUnresolved": {
+    "message": "$count$ unresolved",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reviewHeaderOne": {
+    "message": "$count$ unresolved thread",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reviewHeaderOther": {
+    "message": "$count$ unresolved threads",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reviewOutdated": { "message": "outdated" },
+  "reviewGeneralComment": { "message": "general comment" },
+  "reviewNoComment": { "message": "(no comment)" },
+  "reviewMore": {
+    "message": "+$count$ more",
+    "placeholders": { "count": { "content": "$1", "example": "5" } }
+  },
+  "reviewLoadFailed": { "message": "Couldn't load thread details." },
+  "loading": { "message": "Loading…" },
+
+  "diffFilesOne": {
+    "message": "$count$ file",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "diffFilesOther": {
+    "message": "$count$ files",
+    "placeholders": { "count": { "content": "$1", "example": "5" } }
+  },
+  "diffStatsTitle": {
+    "message": "$add$ additions, $del$ deletions",
+    "placeholders": {
+      "add": { "content": "$1", "example": "223" },
+      "del": { "content": "$2", "example": "114" }
+    }
+  },
+  "diffStatsTitleWithFiles": {
+    "message": "$add$ additions, $del$ deletions across $files$",
+    "placeholders": {
+      "add": { "content": "$1", "example": "223" },
+      "del": { "content": "$2", "example": "114" },
+      "files": { "content": "$3", "example": "5 files" }
+    }
+  }
+}

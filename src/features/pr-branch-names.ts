@@ -2,6 +2,7 @@ import { isPRListPage, getRepoInfo, getPRListParams } from "../lib/page-detect";
 import { fetchPRBranches } from "../lib/github-api";
 import { getOrCreateInfoRow } from "../lib/info-row";
 import { clearSkeletons } from "../lib/info-row-skeleton";
+import { t } from "../lib/i18n";
 
 const BADGE_CLASS = "better-github-branch-badge";
 const COPIED_CLASS = "better-github-branch-copied";
@@ -26,7 +27,7 @@ function attachDelegatedClickHandler(): void {
     try {
       await navigator.clipboard.writeText(branchName);
       badge.classList.add(COPIED_CLASS);
-      badge.textContent = "Copied!";
+      badge.textContent = t("copied");
       setTimeout(() => {
         badge.textContent = badge.dataset.branch || branchName;
         badge.classList.remove(COPIED_CLASS);
@@ -75,7 +76,7 @@ export async function injectPRBranchNames(): Promise<void> {
       badge.className = BADGE_CLASS;
       badge.textContent = branchName;
       badge.dataset.branch = branchName;
-      badge.title = "Click to copy branch name";
+      badge.title = t("branchCopyTitle");
 
       infoRow.appendChild(badge);
     }

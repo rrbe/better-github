@@ -1,3 +1,21 @@
+import { t, localizePage, initLocale, setLocale, LOCALE_KEY, type LocalePref } from "./lib/i18n";
+
+const langSelect = document.getElementById("langSelect") as HTMLSelectElement | null;
+
+// Resolve the stored locale preference, reflect it in the picker, then localize.
+initLocale().then((pref) => {
+  if (langSelect) langSelect.value = pref;
+  localizePage();
+});
+
+// Manual override: persist the choice and re-localize the page in place.
+langSelect?.addEventListener("change", () => {
+  const pref = langSelect.value as LocalePref;
+  chrome.storage.local.set({ [LOCALE_KEY]: pref });
+  setLocale(pref);
+  localizePage();
+});
+
 const tokenInput = document.getElementById("token") as HTMLInputElement;
 const tokenStatus = document.getElementById("tokenStatus") as HTMLDivElement;
 const saveBtn = document.getElementById("save") as HTMLButtonElement;
@@ -48,7 +66,7 @@ async function validateToken(token: string) {
   if (token === lastValidatedToken) return;
 
   tokenStatus.className = "token-status checking";
-  tokenStatus.textContent = "Validating token…";
+  tokenStatus.textContent = t("validatingToken");
 
   try {
     const response = await fetch("https://api.github.com/user", {
@@ -58,20 +76,20 @@ async function validateToken(token: string) {
     if (response.ok) {
       const user = await response.json();
       tokenStatus.className = "token-status valid";
-      tokenStatus.textContent = `Valid — authenticated as ${user.login}`;
+      tokenStatus.textContent = t("tokenValid", user.login);
       lastValidatedToken = token;
     } else if (response.status === 401) {
       tokenStatus.className = "token-status invalid";
-      tokenStatus.textContent = "Invalid token — authentication failed";
+      tokenStatus.textContent = t("tokenInvalid");
       lastValidatedToken = "";
     } else {
       tokenStatus.className = "token-status invalid";
-      tokenStatus.textContent = `Validation failed (HTTP ${response.status})`;
+      tokenStatus.textContent = t("tokenValidationFailed", String(response.status));
       lastValidatedToken = "";
     }
   } catch {
     tokenStatus.className = "token-status invalid";
-    tokenStatus.textContent = "Network error — could not reach GitHub API";
+    tokenStatus.textContent = t("tokenNetworkError");
     lastValidatedToken = "";
   }
 }
@@ -104,9 +122,9 @@ saveBtn.addEventListener("click", () => {
 
   chrome.storage.local.set(settings, () => {
     if (chrome.runtime.lastError) {
-      showStatus("error", chrome.runtime.lastError.message ?? "Save failed");
+      showStatus("error", chrome.runtime.lastError.message ?? t("saveFailed"));
     } else {
-      showStatus("success", "Saved!");
+      showStatus("success", t("saved"));
     }
   });
 });

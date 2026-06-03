@@ -1,4 +1,5 @@
 import { onPageReady, startNavigation } from "./lib/navigation";
+import { initLocale, setLocale, LOCALE_KEY, type LocalePref } from "./lib/i18n";
 import { injectPRBranchNames } from "./features/pr-branch-names";
 import { injectPRReviewStatus } from "./features/pr-review-status";
 import { injectPRDiffStats } from "./features/pr-diff-stats";
@@ -125,6 +126,10 @@ function injectFeature(key: FeatureKey): void {
 if (isExtensionValid()) {
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area !== "local") return;
+    // Picked-up on the next injection/navigation; a refresh re-renders all text.
+    if (LOCALE_KEY in changes) {
+      setLocale((changes[LOCALE_KEY].newValue as LocalePref) ?? "auto");
+    }
     for (const key of FEATURE_KEYS) {
       if (!(key in changes)) continue;
       const enabled = changes[key].newValue !== false;
@@ -148,6 +153,9 @@ onPageReady(async () => {
   // Keep <html data-bg-page> in sync with the current URL so
   // skeleton-reserve.css matches the right row selector after SPA navs.
   applyPageMarker();
+
+  // Resolve the stored language preference before any UI text is injected.
+  await initLocale();
 
   // Always-on features
   injectFileAgeColor();

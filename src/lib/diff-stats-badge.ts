@@ -1,4 +1,4 @@
-import { pluralize } from "./utils";
+import { t } from "./i18n";
 
 export interface DiffStats {
   additions: number;
@@ -11,14 +11,14 @@ export function buildDiffStatsBadge(stats: DiffStats, wrapperClass: string): HTM
   const delStr = stats.deletions.toLocaleString();
   const filesStr =
     stats.changedFiles !== null
-      ? `${stats.changedFiles.toLocaleString()} ${pluralize(stats.changedFiles, "file")}`
+      ? t(stats.changedFiles === 1 ? "diffFilesOne" : "diffFilesOther", stats.changedFiles.toLocaleString())
       : null;
 
   const badge = document.createElement("span");
   badge.className = wrapperClass;
   badge.title = filesStr
-    ? `${addStr} additions, ${delStr} deletions across ${filesStr}`
-    : `${addStr} additions, ${delStr} deletions`;
+    ? t("diffStatsTitleWithFiles", [addStr, delStr, filesStr])
+    : t("diffStatsTitle", [addStr, delStr]);
 
   const add = document.createElement("span");
   add.className = "better-github-diff-stats-add";

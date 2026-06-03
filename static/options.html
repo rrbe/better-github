@@ -52,6 +52,32 @@
       .brand-link:hover {
         color: #24292f;
       }
+
+      /* Language picker */
+      .lang-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      .lang-label {
+        font-weight: 600;
+      }
+      .lang-select {
+        margin-left: auto;
+        padding: 5px 8px;
+        border: 1px solid #d0d7de;
+        border-radius: 6px;
+        font-size: 13px;
+        background: #fff;
+        color: #24292f;
+        cursor: pointer;
+      }
+      .lang-select:focus {
+        outline: none;
+        border-color: #0969da;
+        box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.3);
+      }
       h2 {
         margin: 0 0 10px;
         font-size: 16px;
@@ -414,14 +440,15 @@
   <body>
     <div class="brand-row">
       <img class="brand-icon" src="icons/icon48.png" alt="" />
-      <h2 class="brand-title">Settings</h2>
+      <h2 class="brand-title" data-i18n="settingsTitle">Settings</h2>
       <a
         class="brand-link"
         href="https://github.com/rrbe/better-github"
         target="_blank"
         title="View on GitHub"
+        data-i18n-title="viewOnGithub"
       >
-        <span>It's open sourced!</span>
+        <span data-i18n="openSourced">It's open sourced!</span>
         <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
           <path
             d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
@@ -430,15 +457,25 @@
       </a>
     </div>
 
-    <label for="token">GitHub Personal Access Token</label>
+    <div class="lang-row">
+      <span class="lang-label" data-i18n="language">Language</span>
+      <select id="langSelect" class="lang-select">
+        <option value="auto" data-i18n="langFollowBrowser">Follow browser</option>
+        <option value="en">English</option>
+        <option value="zh_CN">简体中文</option>
+        <option value="zh_TW">繁體中文</option>
+      </select>
+    </div>
+
+    <label for="token" data-i18n="tokenLabel">GitHub Personal Access Token</label>
     <input type="password" id="token" placeholder="ghp_xxxxxxxxxxxx" />
     <div id="tokenStatus" class="token-status"></div>
     <div class="save-row">
-      <button id="save">Save</button>
+      <button id="save" data-i18n="save">Save</button>
       <div class="status" id="status"></div>
     </div>
     <div class="hint">
-      <p class="hint-intro">
+      <p class="hint-intro" data-i18n="tokenHintIntro">
         ⬆️ A token is required for accessing private repositories. The plugin itself will never
         store your token or access your data.
       </p>
@@ -449,7 +486,9 @@
         target="_blank"
       >
         <div class="token-card-header">
-          <span class="token-card-title">Create a classic token with <b>scopes</b></span>
+          <span class="token-card-title" data-i18n-html="tokenClassicTitle"
+            >Create a classic token with <b>scopes</b></span
+          >
           <svg
             class="token-card-arrow"
             width="12"
@@ -469,7 +508,7 @@
         </dl>
       </a>
 
-      <div class="token-divider"><span>or</span></div>
+      <div class="token-divider"><span data-i18n="tokenOr">or</span></div>
 
       <a
         class="token-card"
@@ -477,7 +516,9 @@
         target="_blank"
       >
         <div class="token-card-header">
-          <span class="token-card-title">Create a fine-grained token with <b>permissions</b></span>
+          <span class="token-card-title" data-i18n-html="tokenFineTitle"
+            >Create a fine-grained token with <b>permissions</b></span
+          >
           <svg
             class="token-card-arrow"
             width="12"
@@ -503,8 +544,8 @@
     </div>
 
     <div class="features-header">
-      <div class="section-title">Features</div>
-      <button class="search-btn" id="searchBtn" title="Search features">
+      <div class="section-title" data-i18n="features">Features</div>
+      <button class="search-btn" id="searchBtn" title="Search features" data-i18n-title="searchFeatures">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
           <path
             d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 7a4.499 4.499 0 1 0-8.997 0A4.499 4.499 0 0 0 11.5 7Z"
@@ -513,8 +554,13 @@
       </button>
     </div>
     <div class="search-bar" id="searchBar">
-      <input type="text" id="searchInput" placeholder="Search features..." />
-      <button class="search-close" id="searchClose" title="Close search">
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="Search features..."
+        data-i18n-placeholder="searchFeaturesPlaceholder"
+      />
+      <button class="search-close" id="searchClose" title="Close search" data-i18n-title="closeSearch">
         <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
           <path
             d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"
@@ -524,12 +570,12 @@
     </div>
 
     <details class="feature-group">
-      <summary>Home</summary>
+      <summary data-i18n="groupHome">Home</summary>
       <ul class="feature-list">
         <li class="feature-item">
           <div class="feature-info">
-            <div class="feature-name">Better Top Repositories</div>
-            <div class="feature-desc">
+            <div class="feature-name" data-i18n="featBetterTopReposName">Better Top Repositories</div>
+            <div class="feature-desc" data-i18n="featBetterTopReposDesc">
               Auto-expand the "Top repositories" list and pin your favorite repos to the top.
             </div>
           </div>
@@ -542,12 +588,12 @@
     </details>
 
     <details class="feature-group">
-      <summary>PRs and issues</summary>
+      <summary data-i18n="groupPRsIssues">PRs and issues</summary>
       <ul class="feature-list">
         <li class="feature-item">
           <div class="feature-info">
-            <div class="feature-name">Default Sort by Updated</div>
-            <div class="feature-desc">
+            <div class="feature-name" data-i18n="featDefaultSortName">Default Sort by Updated</div>
+            <div class="feature-desc" data-i18n="featDefaultSortDesc">
               Sort PR and issue lists by recently updated instead of creation time.
             </div>
           </div>
@@ -558,8 +604,8 @@
         </li>
         <li class="feature-item">
           <div class="feature-info">
-            <div class="feature-name">PR Branch Names</div>
-            <div class="feature-desc">
+            <div class="feature-name" data-i18n="featPrBranchNamesName">PR Branch Names</div>
+            <div class="feature-desc" data-i18n="featPrBranchNamesDesc">
               Display source branch name next to each PR title. Click the badge to copy.
             </div>
           </div>
@@ -570,8 +616,8 @@
         </li>
         <li class="feature-item">
           <div class="feature-info">
-            <div class="feature-name">PR Review Status</div>
-            <div class="feature-desc">
+            <div class="feature-name" data-i18n="featPrReviewStatusName">PR Review Status</div>
+            <div class="feature-desc" data-i18n="featPrReviewStatusDesc">
               Show review thread resolution status (resolved / unresolved) on the PR list. Requires
               a token.
             </div>
@@ -583,8 +629,8 @@
         </li>
         <li class="feature-item">
           <div class="feature-info">
-            <div class="feature-name">PR Diff Stats</div>
-            <div class="feature-desc">
+            <div class="feature-name" data-i18n="featPrDiffStatsName">PR Diff Stats</div>
+            <div class="feature-desc" data-i18n="featPrDiffStatsDesc">
               Show additions, deletions, and file count (e.g. +223 −114 · 5 files) on the PR list.
               Requires a token.
             </div>
@@ -596,8 +642,8 @@
         </li>
         <li class="feature-item">
           <div class="feature-info">
-            <div class="feature-name">PR Label Position</div>
-            <div class="feature-desc">
+            <div class="feature-name" data-i18n="featPrLabelPositionName">PR Label Position</div>
+            <div class="feature-desc" data-i18n="featPrLabelPositionDesc">
               Move labels to the front of PR titles for better visibility and scanning.
             </div>
           </div>
@@ -610,12 +656,12 @@
     </details>
 
     <details class="feature-group">
-      <summary>PR details</summary>
+      <summary data-i18n="groupPRDetails">PR details</summary>
       <ul class="feature-list">
         <li class="feature-item">
           <div class="feature-info">
-            <div class="feature-name">PR Approve Now</div>
-            <div class="feature-desc">
+            <div class="feature-name" data-i18n="featPrApproveNowName">PR Approve Now</div>
+            <div class="feature-desc" data-i18n="featPrApproveNowDesc">
               Add an "approve now" shortcut to the Reviewers sidebar on PR detail pages. Requires a
               token.
             </div>
@@ -627,8 +673,8 @@
         </li>
         <li class="feature-item">
           <div class="feature-info">
-            <div class="feature-name">Collapse/Expand All Files</div>
-            <div class="feature-desc">
+            <div class="feature-name" data-i18n="featPrCollapseExpandName">Collapse/Expand All Files</div>
+            <div class="feature-desc" data-i18n="featPrCollapseExpandDesc">
               Add a button to collapse or expand all file diffs on PR, commit, and compare pages.
             </div>
           </div>
@@ -641,12 +687,12 @@
     </details>
 
     <details class="feature-group">
-      <summary>Commits</summary>
+      <summary data-i18n="groupCommits">Commits</summary>
       <ul class="feature-list">
         <li class="feature-item">
           <div class="feature-info">
-            <div class="feature-name">Commit Tags</div>
-            <div class="feature-desc">
+            <div class="feature-name" data-i18n="featCommitTagsName">Commit Tags</div>
+            <div class="feature-desc" data-i18n="featCommitTagsDesc">
               Show git tags on the commits list page for easy identification.
             </div>
           </div>
@@ -657,8 +703,8 @@
         </li>
         <li class="feature-item">
           <div class="feature-info">
-            <div class="feature-name">Commit Diff Stats</div>
-            <div class="feature-desc">
+            <div class="feature-name" data-i18n="featCommitDiffStatsName">Commit Diff Stats</div>
+            <div class="feature-desc" data-i18n="featCommitDiffStatsDesc">
               Show additions, deletions, and file count (e.g. +223 −114 · 5 files) on the commits
               list page. Requires a token.
             </div>
@@ -672,12 +718,12 @@
     </details>
 
     <details class="feature-group">
-      <summary>Repository</summary>
+      <summary data-i18n="groupRepository">Repository</summary>
       <ul class="feature-list">
         <li class="feature-item">
           <div class="feature-info">
-            <div class="feature-name">Releases Tab</div>
-            <div class="feature-desc">
+            <div class="feature-name" data-i18n="featReleaseTabName">Releases Tab</div>
+            <div class="feature-desc" data-i18n="featReleaseTabDesc">
               Add a Releases tab to the repository navigation bar for quick access.
             </div>
           </div>
@@ -688,8 +734,8 @@
         </li>
         <li class="feature-item">
           <div class="feature-info">
-            <div class="feature-name">Watch/Fork/Star Popup</div>
-            <div class="feature-desc">
+            <div class="feature-name" data-i18n="featWatchForkStarName">Watch/Fork/Star Popup</div>
+            <div class="feature-desc" data-i18n="featWatchForkStarDesc">
               Hover over Watch, Fork, or Star counts to preview the list in a popup.
             </div>
           </div>

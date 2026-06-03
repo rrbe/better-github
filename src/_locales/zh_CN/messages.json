@@ -1,0 +1,193 @@
+{
+  "appName": {
+    "message": "Better GitHub",
+    "description": "Extension name, shown in the Chrome Web Store and extension manager."
+  },
+  "appDesc": {
+    "message": "改善 GitHub PR、Issue 等页面的使用体验",
+    "description": "Extension description, shown in the Chrome Web Store and extension manager."
+  },
+  "actionTitle": {
+    "message": "Better GitHub - 点击查看设置",
+    "description": "Toolbar button tooltip."
+  },
+
+  "settingsTitle": { "message": "设置" },
+  "language": { "message": "语言" },
+  "langFollowBrowser": { "message": "跟随浏览器" },
+  "openSourced": { "message": "本项目已开源！" },
+  "viewOnGithub": { "message": "在 GitHub 上查看" },
+  "tokenLabel": { "message": "GitHub 个人访问令牌" },
+  "save": { "message": "保存" },
+  "tokenHintIntro": {
+    "message": "⬆️ 访问私有仓库需要令牌。插件本身绝不会存储你的令牌或访问你的数据。"
+  },
+  "tokenClassicTitle": { "message": "创建带 <b>scopes</b> 的经典令牌" },
+  "tokenFineTitle": { "message": "创建带 <b>permissions</b> 的细粒度令牌" },
+  "tokenOr": { "message": "或" },
+
+  "features": { "message": "功能" },
+  "searchFeatures": { "message": "搜索功能" },
+  "searchFeaturesPlaceholder": { "message": "搜索功能…" },
+  "closeSearch": { "message": "关闭搜索" },
+
+  "groupHome": { "message": "首页" },
+  "groupPRsIssues": { "message": "PR 和 Issue" },
+  "groupPRDetails": { "message": "PR 详情" },
+  "groupCommits": { "message": "提交" },
+  "groupRepository": { "message": "仓库" },
+
+  "featBetterTopReposName": { "message": "增强的热门仓库" },
+  "featBetterTopReposDesc": {
+    "message": "自动展开「热门仓库」列表，并将你喜爱的仓库置顶。"
+  },
+  "featDefaultSortName": { "message": "默认按更新时间排序" },
+  "featDefaultSortDesc": {
+    "message": "PR 和 Issue 列表按最近更新排序，而非创建时间。"
+  },
+  "featPrBranchNamesName": { "message": "PR 分支名" },
+  "featPrBranchNamesDesc": {
+    "message": "在每个 PR 标题旁显示源分支名，点击徽标即可复制。"
+  },
+  "featPrReviewStatusName": { "message": "PR 评审状态" },
+  "featPrReviewStatusDesc": {
+    "message": "在 PR 列表上显示评审对话的解决状态（已解决 / 未解决）。需要令牌。"
+  },
+  "featPrDiffStatsName": { "message": "PR 差异统计" },
+  "featPrDiffStatsDesc": {
+    "message": "在 PR 列表上显示新增、删除行数和文件数（如 +223 −114 · 5 files）。需要令牌。"
+  },
+  "featPrLabelPositionName": { "message": "PR 标签位置" },
+  "featPrLabelPositionDesc": {
+    "message": "将标签移到 PR 标题前面，便于查看和扫读。"
+  },
+  "featPrApproveNowName": { "message": "PR 快速批准" },
+  "featPrApproveNowDesc": {
+    "message": "在 PR 详情页的 Reviewers 侧边栏添加「立即批准」快捷入口。需要令牌。"
+  },
+  "featPrCollapseExpandName": { "message": "折叠/展开所有文件" },
+  "featPrCollapseExpandDesc": {
+    "message": "在 PR、提交和对比页面添加一个折叠或展开所有文件差异的按钮。"
+  },
+  "featCommitTagsName": { "message": "提交标签" },
+  "featCommitTagsDesc": {
+    "message": "在提交列表页显示 git 标签，便于识别。"
+  },
+  "featCommitDiffStatsName": { "message": "提交差异统计" },
+  "featCommitDiffStatsDesc": {
+    "message": "在提交列表页显示新增、删除行数和文件数（如 +223 −114 · 5 files）。需要令牌。"
+  },
+  "featReleaseTabName": { "message": "发布标签页" },
+  "featReleaseTabDesc": {
+    "message": "在仓库导航栏添加一个 Releases 标签页，方便快速访问。"
+  },
+  "featWatchForkStarName": { "message": "Watch/Fork/Star 弹窗" },
+  "featWatchForkStarDesc": {
+    "message": "悬停在 Watch、Fork 或 Star 数字上，即可在弹窗中预览列表。"
+  },
+
+  "validatingToken": { "message": "正在验证令牌…" },
+  "tokenValid": {
+    "message": "有效 — 已认证为 $user$",
+    "placeholders": { "user": { "content": "$1", "example": "octocat" } }
+  },
+  "tokenInvalid": { "message": "无效令牌 — 认证失败" },
+  "tokenValidationFailed": {
+    "message": "验证失败（HTTP $status$）",
+    "placeholders": { "status": { "content": "$1", "example": "500" } }
+  },
+  "tokenNetworkError": { "message": "网络错误 — 无法连接 GitHub API" },
+  "saveFailed": { "message": "保存失败" },
+  "saved": { "message": "已保存！" },
+
+  "releases": { "message": "发布" },
+  "approveNow": { "message": "立即批准" },
+  "approveDialogTitle": { "message": "批准此 Pull Request？" },
+  "approveCommentPlaceholder": { "message": "添加评论（可选）" },
+  "cancel": { "message": "取消" },
+  "approve": { "message": "批准" },
+  "approving": { "message": "批准中…" },
+  "approveFailed": {
+    "message": "批准 PR 失败：$error$",
+    "placeholders": { "error": { "content": "$1", "example": "Not Found" } }
+  },
+
+  "commitTagTitle": {
+    "message": "标签：$name$",
+    "placeholders": { "name": { "content": "$1", "example": "v1.0.0" } }
+  },
+  "copied": { "message": "已复制！" },
+  "branchCopyTitle": { "message": "点击复制分支名" },
+
+  "pinRepository": { "message": "置顶仓库" },
+  "unpinRepository": { "message": "取消置顶" },
+
+  "watchers": { "message": "关注者" },
+  "forks": { "message": "复刻" },
+  "stargazers": { "message": "星标用户" },
+  "viewAll": { "message": "查看全部" },
+  "noWatchers": { "message": "暂无关注者" },
+  "noStargazers": { "message": "暂无星标用户" },
+  "noForks": { "message": "暂无复刻" },
+  "failedToLoad": { "message": "加载失败" },
+
+  "collapseTree": { "message": "折叠目录树" },
+  "expandTree": { "message": "展开目录树" },
+  "collapseTreeTitle": { "message": "折叠文件树中的所有文件夹" },
+  "expandTreeTitle": { "message": "展开文件树中的所有文件夹" },
+  "expandAllFiles": { "message": "展开所有文件" },
+  "collapseAllFiles": { "message": "折叠所有文件" },
+  "expandAllFilesTitle": { "message": "展开所有文件差异" },
+  "collapseAllFilesTitle": { "message": "折叠所有文件差异" },
+
+  "reviewAllResolved": { "message": "✓ 全部已解决" },
+  "reviewAllResolvedTitle": {
+    "message": "$count$ 条评审对话，全部已解决",
+    "placeholders": { "count": { "content": "$1", "example": "4" } }
+  },
+  "reviewUnresolved": {
+    "message": "$count$ 条未解决",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reviewHeaderOne": {
+    "message": "$count$ 条未解决的对话",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reviewHeaderOther": {
+    "message": "$count$ 条未解决的对话",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reviewOutdated": { "message": "已过时" },
+  "reviewGeneralComment": { "message": "总体评论" },
+  "reviewNoComment": { "message": "（无评论）" },
+  "reviewMore": {
+    "message": "还有 $count$ 条",
+    "placeholders": { "count": { "content": "$1", "example": "5" } }
+  },
+  "reviewLoadFailed": { "message": "无法加载对话详情。" },
+  "loading": { "message": "加载中…" },
+
+  "diffFilesOne": {
+    "message": "$count$ 个文件",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "diffFilesOther": {
+    "message": "$count$ 个文件",
+    "placeholders": { "count": { "content": "$1", "example": "5" } }
+  },
+  "diffStatsTitle": {
+    "message": "新增 $add$ 行，删除 $del$ 行",
+    "placeholders": {
+      "add": { "content": "$1", "example": "223" },
+      "del": { "content": "$2", "example": "114" }
+    }
+  },
+  "diffStatsTitleWithFiles": {
+    "message": "新增 $add$ 行，删除 $del$ 行，共 $files$",
+    "placeholders": {
+      "add": { "content": "$1", "example": "223" },
+      "del": { "content": "$2", "example": "114" },
+      "files": { "content": "$3", "example": "5 个文件" }
+    }
+  }
+}

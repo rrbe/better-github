@@ -2,6 +2,7 @@ import { isCommitsListPage, getRepoInfo } from "../lib/page-detect";
 import { fetchRepoTags } from "../lib/github-api";
 import { escapeHtml } from "../lib/utils";
 import { collectCommitRows, MAIN_CONTENT_INNER_SELECTOR } from "../lib/commit-dom";
+import { t } from "../lib/i18n";
 
 const TAG_CLASS = "better-github-commit-tag";
 const TAG_ROW_CLASS = "better-github-commit-tag-row";
@@ -61,7 +62,7 @@ export async function injectCommitTags(): Promise<void> {
       const badge = document.createElement("a");
       badge.className = TAG_CLASS;
       badge.href = `/${info.owner}/${info.repo}/releases/tag/${encodeURIComponent(tagName)}`;
-      badge.title = `Tag: ${tagName}`;
+      badge.title = t("commitTagTitle", tagName);
       badge.innerHTML = `${TAG_ICON}<span>${escapeHtml(tagName)}</span>`;
       tagRow.appendChild(badge);
     }

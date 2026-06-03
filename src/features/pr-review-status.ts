@@ -2,6 +2,8 @@ import { isPRListPage, getRepoInfo } from "../lib/page-detect";
 import { fetchPRReviewStatuses, fetchReviewThreadDetails } from "../lib/github-api";
 import type { ReviewThreadDetail } from "../lib/messages";
 import { getOrCreateInfoRow } from "../lib/info-row";
+// Aliased to `i18n` because this module already uses `t` as a thread loop var.
+import { t as i18n } from "../lib/i18n";
 
 const STATUS_CLASS = "better-github-review-status";
 const POPOVER_CLASS = "better-github-review-popover";
@@ -137,7 +139,10 @@ function buildThreadRows(threads: ReviewThreadDetail[]): Node[] {
   icon.className = "better-github-review-popover-header-icon";
   icon.innerHTML = COMMENT_ICON;
   const headerLabel = document.createElement("span");
-  headerLabel.textContent = `${threads.length} unresolved thread${threads.length === 1 ? "" : "s"}`;
+  headerLabel.textContent = i18n(
+    threads.length === 1 ? "reviewHeaderOne" : "reviewHeaderOther",
+    String(threads.length),
+  );
   header.append(icon, headerLabel);
   nodes.push(header);
 
@@ -152,7 +157,7 @@ function buildThreadRows(threads: ReviewThreadDetail[]): Node[] {
 
     const head = document.createElement("div");
     head.className = "better-github-review-popover-loc";
-    const file = t.path ? basename(t.path) : "general comment";
+    const file = t.path ? basename(t.path) : i18n("reviewGeneralComment");
     const locText = document.createElement("span");
     locText.className = "better-github-review-popover-loc-text";
     locText.textContent = t.line != null ? `${file}:${t.line}` : file;
@@ -163,7 +168,7 @@ function buildThreadRows(threads: ReviewThreadDetail[]): Node[] {
     if (t.isOutdated) {
       const tag = document.createElement("span");
       tag.className = "better-github-review-popover-outdated";
-      tag.textContent = "outdated";
+      tag.textContent = i18n("reviewOutdated");
       head.appendChild(tag);
     }
 
@@ -171,7 +176,8 @@ function buildThreadRows(threads: ReviewThreadDetail[]): Node[] {
     body.className = "better-github-review-popover-body";
     const author = t.author ? `@${t.author}` : "";
     const snippet = t.snippet.trim();
-    body.textContent = author && snippet ? `${author}: ${snippet}` : author || snippet || "(no comment)";
+    body.textContent =
+      author && snippet ? `${author}: ${snippet}` : author || snippet || i18n("reviewNoComment");
 
     item.appendChild(head);
     item.appendChild(body);
@@ -181,7 +187,7 @@ function buildThreadRows(threads: ReviewThreadDetail[]): Node[] {
   if (threads.length > MAX_POPOVER_ITEMS) {
     const more = document.createElement("div");
     more.className = "better-github-review-popover-more";
-    more.textContent = `+${threads.length - MAX_POPOVER_ITEMS} more`;
+    more.textContent = i18n("reviewMore", String(threads.length - MAX_POPOVER_ITEMS));
     nodes.push(more);
   }
 
@@ -209,7 +215,7 @@ function setupPopover(
   const load = async () => {
     if (state !== "idle") return; // in flight or already populated
     state = "loading";
-    setPopoverBody(popover, buildMessage("Loading…"));
+    setPopoverBody(popover, buildMessage(i18n("loading")));
 
     let details: ReviewThreadDetail[] = [];
     try {
@@ -222,7 +228,7 @@ function setupPopover(
     // thread, so an empty result means the detail fetch failed (or the threads
     // were resolved since the list query). Either way, let a later click retry.
     if (details.length === 0) {
-      setPopoverBody(popover, buildMessage("Couldn't load thread details."));
+      setPopoverBody(popover, buildMessage(i18n("reviewLoadFailed")));
       state = "idle";
       return;
     }
@@ -281,11 +287,11 @@ export async function injectPRReviewStatus(): Promise<void> {
 
     if (allResolved) {
       badge.classList.add("better-github-review-resolved");
-      badge.textContent = `✓ All resolved`;
-      badge.title = `${status.totalThreads} review thread(s), all resolved`;
+      badge.textContent = i18n("reviewAllResolved");
+      badge.title = i18n("reviewAllResolvedTitle", String(status.totalThreads));
     } else {
       badge.classList.add("better-github-review-unresolved");
-      badge.textContent = `${unresolved} unresolved`;
+      badge.textContent = i18n("reviewUnresolved", String(unresolved));
       // The click popover is the richer summary and is loaded lazily on open;
       // we deliberately set no native `title` here, as it would hover-overlap
       // the open popover.
