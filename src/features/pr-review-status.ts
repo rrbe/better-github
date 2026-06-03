@@ -35,7 +35,8 @@ function ensureGlobalListeners(): void {
 function makeBadgeInteractive(badge: HTMLElement): void {
   badge.setAttribute("role", "button");
   badge.setAttribute("tabindex", "0");
-  badge.setAttribute("aria-haspopup", "true");
+  // "dialog" rather than "true"/"menu": the popover is a list of links, not a menu.
+  badge.setAttribute("aria-haspopup", "dialog");
   badge.setAttribute("aria-expanded", "false");
 
   const toggle = () => {

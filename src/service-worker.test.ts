@@ -285,9 +285,10 @@ describe("service worker", () => {
               reviewThreads: {
                 totalCount: 3,
                 nodes: [
-                  { isResolved: true, isOutdated: false, path: "a.ts", line: 1, comments: { nodes: [{ author: { login: "alice" }, bodyText: "done", url: "u1" }] } },
-                  { isResolved: true, isOutdated: false, path: "b.ts", line: 2, comments: { nodes: [{ author: { login: "bob" }, bodyText: "ok", url: "u2" }] } },
-                  { isResolved: false, isOutdated: true, path: "src/c.ts", line: 42, comments: { nodes: [{ author: { login: "carol" }, bodyText: "needs a null check", url: "u3" }] } },
+                  { isResolved: true, isOutdated: false, path: "a.ts", line: 1, originalLine: 1, comments: { nodes: [{ author: { login: "alice" }, bodyText: "done", url: "u1" }] } },
+                  { isResolved: true, isOutdated: false, path: "b.ts", line: 2, originalLine: 2, comments: { nodes: [{ author: { login: "bob" }, bodyText: "ok", url: "u2" }] } },
+                  // Outdated: `line` is null, so the position falls back to `originalLine`.
+                  { isResolved: false, isOutdated: true, path: "src/c.ts", line: null, originalLine: 42, comments: { nodes: [{ author: { login: "carol" }, bodyText: "needs a null check", url: "u3" }] } },
                 ],
               },
             },
