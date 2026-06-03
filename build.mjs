@@ -8,6 +8,8 @@ mkdirSync("dist", { recursive: true });
 // Copy static files to dist
 cpSync("static", "dist", { recursive: true });
 cpSync("src/styles", "dist/styles", { recursive: true });
+// Chrome reads _locales from the extension root for manifest __MSG__ resolution.
+cpSync("src/_locales", "dist/_locales", { recursive: true });
 
 const sharedOptions = {
   bundle: true,

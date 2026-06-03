@@ -1,4 +1,5 @@
 import { isRepoPage, getRepoInfo, isReleasesPage } from "../lib/page-detect";
+import { t } from "../lib/i18n";
 
 const TAB_CLASS = "better-github-releases-tab";
 
@@ -64,16 +65,17 @@ export function injectReleasesTab(): void {
   }
 
   // Update text content - find the text span
+  const releasesLabel = t("releases");
   const textSpan = releasesTab.querySelector("[data-content]") as HTMLElement;
   if (textSpan) {
-    textSpan.textContent = "Releases";
-    textSpan.setAttribute("data-content", "Releases");
+    textSpan.textContent = releasesLabel;
+    textSpan.setAttribute("data-content", releasesLabel);
   } else {
     // Fallback: find span that contains text
     const spans = releasesTab.querySelectorAll("span");
     for (const span of spans) {
       if (span.children.length === 0 && span.textContent?.trim()) {
-        span.textContent = "Releases";
+        span.textContent = releasesLabel;
         break;
       }
     }

@@ -1,3 +1,5 @@
+import { t } from "../lib/i18n";
+
 const MIN_REPOS = 20;
 const MAX_SHOW_MORE_CLICKS = 5;
 const PIN_INJECTED_ATTR = "data-better-github-pin-injected";
@@ -186,7 +188,7 @@ function createPinButton(isPinned: boolean): HTMLButtonElement {
   btn.className = "better-github-pin-btn";
   if (isPinned) btn.classList.add("pinned");
   btn.innerHTML = isPinned ? PIN_SVG_FILLED : PIN_SVG_OUTLINE;
-  btn.title = isPinned ? "Unpin repository" : "Pin repository";
+  btn.title = isPinned ? t("unpinRepository") : t("pinRepository");
   btn.type = "button";
   return btn;
 }
@@ -199,12 +201,12 @@ async function togglePin(repoName: string, btn: HTMLButtonElement, list: RepoLis
     pinned.splice(index, 1);
     btn.classList.remove("pinned");
     btn.innerHTML = PIN_SVG_OUTLINE;
-    btn.title = "Pin repository";
+    btn.title = t("pinRepository");
   } else {
     pinned.push(repoName);
     btn.classList.add("pinned");
     btn.innerHTML = PIN_SVG_FILLED;
-    btn.title = "Unpin repository";
+    btn.title = t("unpinRepository");
   }
 
   savePinnedRepos(pinned);

@@ -1,4 +1,5 @@
 import { isDiffPage, isPRFilesChangedPage } from "../lib/page-detect";
+import { t } from "../lib/i18n";
 
 const TREE_BTN_CLASS = "better-github-toggle-tree";
 const DIFF_BTN_CLASS = "better-github-collapse-expand";
@@ -111,11 +112,9 @@ function injectTreeToggle(): void {
   function updateLabel(): void {
     const expanded = areMajorityExpanded();
     btn.innerHTML = expanded
-      ? `${makeIcon(ICON_FOLD_DOWN)} Collapse tree`
-      : `${makeIcon(ICON_UNFOLD)} Expand tree`;
-    btn.title = expanded
-      ? "Collapse all folders in file tree"
-      : "Expand all folders in file tree";
+      ? `${makeIcon(ICON_FOLD_DOWN)} ${t("collapseTree")}`
+      : `${makeIcon(ICON_UNFOLD)} ${t("expandTree")}`;
+    btn.title = expanded ? t("collapseTreeTitle") : t("expandTreeTitle");
   }
 
   updateLabel();
@@ -303,9 +302,7 @@ function updateDiffButtonLabel(btn: HTMLButtonElement): void {
   const collapsed =
     diffIntent !== null ? diffIntent === "collapsed" : getMajorityCollapsed();
   btn.innerHTML = collapsed
-    ? `${makeIcon(ICON_UNFOLD)} Expand all files`
-    : `${makeIcon(ICON_FOLD_DOWN)} Collapse all files`;
-  btn.title = collapsed
-    ? "Expand all file diffs"
-    : "Collapse all file diffs";
+    ? `${makeIcon(ICON_UNFOLD)} ${t("expandAllFiles")}`
+    : `${makeIcon(ICON_FOLD_DOWN)} ${t("collapseAllFiles")}`;
+  btn.title = collapsed ? t("expandAllFilesTitle") : t("collapseAllFilesTitle");
 }
