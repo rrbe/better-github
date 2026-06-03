@@ -3,10 +3,27 @@ export interface PRBranchInfo {
   headRef: string;
 }
 
+export interface ReviewThreadDetail {
+  /** File path the thread is anchored to (empty for file-level / outdated threads). */
+  path: string;
+  /** Line number in the diff, or null when the thread is outdated / not line-anchored. */
+  line: number | null;
+  /** Whether the diff the thread was left on has since changed. */
+  isOutdated: boolean;
+  /** Login of the author of the first comment in the thread. */
+  author: string;
+  /** Plain-text body of the first comment (already stripped of Markdown by the API). */
+  snippet: string;
+  /** Permalink to the first comment, for jumping straight to the thread. */
+  url: string;
+}
+
 export interface PRReviewStatus {
   number: number;
   totalThreads: number;
   resolvedThreads: number;
+  /** Details for the unresolved threads only (resolved ones are omitted to keep the payload small). */
+  unresolved?: ReviewThreadDetail[];
 }
 
 export interface PRDiffStats {

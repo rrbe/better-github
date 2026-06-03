@@ -275,13 +275,23 @@ describe("service worker", () => {
     expect(state.sessionStore["cache:branches:owner/repo:open:1"]).toBeDefined();
   });
 
-  it("maps GraphQL review threads into resolved/total counts", async () => {
+  it("maps GraphQL review threads into counts plus unresolved-thread details", async () => {
     const state = await loadWorker("token");
     vi.mocked(fetch).mockResolvedValue(
       jsonResponse({
         data: {
           repository: {
-            pr_1: { reviewThreads: { totalCount: 3, nodes: [{ isResolved: true }, { isResolved: true }, { isResolved: false }] } },
+            pr_1: {
+              reviewThreads: {
+                totalCount: 3,
+                nodes: [
+                  { isResolved: true, isOutdated: false, path: "a.ts", line: 1, originalLine: 1, comments: { nodes: [{ author: { login: "alice" }, bodyText: "done", url: "u1" }] } },
+                  { isResolved: true, isOutdated: false, path: "b.ts", line: 2, originalLine: 2, comments: { nodes: [{ author: { login: "bob" }, bodyText: "ok", url: "u2" }] } },
+                  // Outdated: `line` is null, so the position falls back to `originalLine`.
+                  { isResolved: false, isOutdated: true, path: "src/c.ts", line: null, originalLine: 42, comments: { nodes: [{ author: { login: "carol" }, bodyText: "needs a null check", url: "u3" }] } },
+                ],
+              },
+            },
           },
         },
       }),
@@ -294,8 +304,60 @@ describe("service worker", () => {
       prNumbers: [1],
     });
 
-    expect(response).toEqual({ ok: true, data: [{ number: 1, totalThreads: 3, resolvedThreads: 2 }] });
+    expect(response).toEqual({
+      ok: true,
+      data: [
+        {
+          number: 1,
+          totalThreads: 3,
+          resolvedThreads: 2,
+          // Only the single unresolved thread is detailed; resolved ones are dropped.
+          unresolved: [
+            { path: "src/c.ts", line: 42, isOutdated: true, author: "carol", snippet: "needs a null check", url: "u3" },
+          ],
+        },
+      ],
+    });
     expect(vi.mocked(fetch).mock.calls[0][0]).toBe("https://api.github.com/graphql");
+  });
+
+  it("tolerates threads with missing author / path / comments", async () => {
+    const state = await loadWorker("token");
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse({
+        data: {
+          repository: {
+            pr_1: {
+              reviewThreads: {
+                totalCount: 1,
+                nodes: [
+                  { isResolved: false, isOutdated: false, path: null, line: null, comments: { nodes: [{ author: null, bodyText: "", url: "" }] } },
+                ],
+              },
+            },
+          },
+        },
+      }),
+    );
+
+    const response = await sendMessage(state.messageListeners[0], {
+      type: "FETCH_PR_REVIEW_STATUSES",
+      owner: "owner",
+      repo: "repo",
+      prNumbers: [1],
+    });
+
+    expect(response).toEqual({
+      ok: true,
+      data: [
+        {
+          number: 1,
+          totalThreads: 1,
+          resolvedThreads: 0,
+          unresolved: [{ path: "", line: null, isOutdated: false, author: "", snippet: "", url: "" }],
+        },
+      ],
+    });
   });
 
   it("normalizes commit SHAs and parses GraphQL commit diff stats", async () => {

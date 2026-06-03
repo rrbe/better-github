@@ -59,6 +59,140 @@
   background-color: var(--bgColor-attention-muted, var(--color-attention-subtle, #fff8c5));
 }
 
+/* Unresolved-thread details popover (click) — styled after GitHub's hovercard /
+   commit-status checks dropdown: caret + bordered header + tidy rows. */
+.better-github-review-has-popover {
+  position: relative;
+  cursor: pointer;
+}
+
+.better-github-review-popover {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 100;
+  margin-top: 8px;
+  width: 340px;
+  font-weight: 400;
+  text-align: left;
+  white-space: normal;
+  cursor: auto;
+  background-color: var(--overlay-bgColor, var(--color-canvas-overlay, #fff));
+  border: 1px solid var(--borderColor-default, var(--color-border-default, #d0d7de));
+  border-radius: 6px;
+  box-shadow: var(--shadow-floating-large, var(--color-shadow-large, 0 8px 24px rgba(140, 149, 159, 0.2)));
+}
+
+.better-github-review-popover-open .better-github-review-popover {
+  display: block;
+}
+
+/* Upward caret: a rotated square exposing only its top + left borders. */
+.better-github-review-popover-caret {
+  position: absolute;
+  top: -5px;
+  left: 18px;
+  width: 9px;
+  height: 9px;
+  background-color: var(--overlay-bgColor, var(--color-canvas-overlay, #fff));
+  border: 1px solid var(--borderColor-default, var(--color-border-default, #d0d7de));
+  border-right: 0;
+  border-bottom: 0;
+  transform: rotate(45deg);
+}
+
+.better-github-review-popover-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+  color: var(--fgColor-default, var(--color-fg-default, #1f2328));
+  border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted, #d8dee4));
+}
+
+.better-github-review-popover-header-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  color: var(--fgColor-muted, var(--color-fg-muted, #656d76));
+}
+
+.better-github-review-popover-header-icon svg {
+  fill: currentColor;
+}
+
+.better-github-review-popover-item {
+  display: block;
+  padding: 8px 12px;
+  text-decoration: none;
+  color: inherit;
+  border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted, #d8dee4));
+}
+
+.better-github-review-popover-item:last-child {
+  border-bottom: none;
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+a.better-github-review-popover-item:hover {
+  background-color: var(--bgColor-muted, var(--color-canvas-subtle, #f6f8fa));
+}
+
+.better-github-review-popover-more {
+  padding: 6px 12px;
+  font-size: 12px;
+  color: var(--fgColor-muted, var(--color-fg-muted, #656d76));
+  border-top: 1px solid var(--borderColor-muted, var(--color-border-muted, #d8dee4));
+}
+
+.better-github-review-popover-loc {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+  color: var(--fgColor-accent, var(--color-accent-fg, #0969da));
+}
+
+/* The file:line run truncates with an ellipsis; the outdated tag stays visible. */
+.better-github-review-popover-loc-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.better-github-review-popover-outdated {
+  flex: 0 0 auto;
+  padding: 0 6px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--fgColor-muted, var(--color-fg-muted, #656d76));
+  background-color: var(--bgColor-muted, var(--color-canvas-subtle, #f6f8fa));
+  border-radius: 2em;
+}
+
+.better-github-review-popover-body {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--fgColor-default, var(--color-fg-default, #1f2328));
+  word-break: break-word;
+}
+
 /* Diff Stats Badge — used by PR list and commits list */
 .better-github-diff-stats,
 .better-github-commit-diff-stats {

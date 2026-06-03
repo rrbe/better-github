@@ -163,16 +163,56 @@ async function fetchPRReviewStatuses(
     repo,
     keys: [...prNumbers].sort((a, b) => a - b),
     aliasFor: (n) => `pr_${n}`,
+    // We fetch path/line/comments for *every* thread even though only unresolved
+    // ones are detailed below — GraphQL can't filter reviewThreads by isResolved
+    // server-side, and totalCount is needed for the resolved/total count anyway.
     buildNodeQuery: (n) => `pullRequest(number: ${n}) {
       reviewThreads(first: 100) {
         totalCount
-        nodes { isResolved }
+        nodes {
+          isResolved
+          isOutdated
+          path
+          line
+          originalLine
+          comments(first: 1) {
+            nodes {
+              author { login }
+              bodyText
+              url
+            }
+          }
+        }
       }
     }`,
     parseNode: (n, pr) => {
-      const threads = pr.reviewThreads as { totalCount: number; nodes: Array<{ isResolved: boolean }> };
+      const threads = pr.reviewThreads as {
+        totalCount: number;
+        nodes: Array<{
+          isResolved: boolean;
+          isOutdated: boolean;
+          path: string | null;
+          line: number | null;
+          originalLine: number | null;
+          comments: { nodes: Array<{ author: { login: string } | null; bodyText: string; url: string }> };
+        }>;
+      };
       const resolvedThreads = threads.nodes.filter((t) => t.isResolved).length;
-      return { number: n, totalThreads: threads.totalCount, resolvedThreads };
+      const unresolved = threads.nodes
+        .filter((t) => !t.isResolved)
+        .map((t) => {
+          const first = t.comments?.nodes?.[0];
+          return {
+            path: t.path ?? "",
+            // Outdated threads carry their position in `originalLine`, not `line`.
+            line: t.line ?? t.originalLine ?? null,
+            isOutdated: t.isOutdated,
+            author: first?.author?.login ?? "",
+            snippet: first?.bodyText ?? "",
+            url: first?.url ?? "",
+          };
+        });
+      return { number: n, totalThreads: threads.totalCount, resolvedThreads, unresolved };
     },
   });
 }
