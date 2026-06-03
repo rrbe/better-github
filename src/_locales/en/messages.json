@@ -14,7 +14,6 @@
 
   "settingsTitle": { "message": "Settings" },
   "language": { "message": "Language" },
-  "langFollowBrowser": { "message": "Follow browser" },
   "openSourced": { "message": "It's open sourced!" },
   "viewOnGithub": { "message": "View on GitHub" },
   "tokenLabel": { "message": "GitHub Personal Access Token" },
