@@ -1,4 +1,4 @@
-import type { ServiceWorkerRequest, ServiceWorkerResponse, PRBranchInfo, PRReviewStatus, PRDiffStats, CommitDiffStats, PRApproveResult, TagInfo, StargazerInfo, WatcherInfo, ForkInfo } from "./lib/messages";
+import type { ServiceWorkerRequest, ServiceWorkerResponse, PRBranchInfo, PRReviewStatus, ReviewThreadDetail, PRDiffStats, CommitDiffStats, PRApproveResult, TagInfo, StargazerInfo, WatcherInfo, ForkInfo } from "./lib/messages";
 
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
@@ -152,6 +152,13 @@ ${entries}
   });
 }
 
+// Per-PR cap on how many review threads we enumerate, for both the count query
+// and the detail query. GraphQL can't filter reviewThreads by isResolved
+// server-side, so the detail query over-fetches up to this many and drops the
+// resolved ones client-side; `totalCount` keeps the badge count accurate even
+// when a PR has more threads than this.
+const MAX_REVIEW_THREADS = 100;
+
 async function fetchPRReviewStatuses(
   owner: string,
   repo: string,
@@ -163,12 +170,42 @@ async function fetchPRReviewStatuses(
     repo,
     keys: [...prNumbers].sort((a, b) => a - b),
     aliasFor: (n) => `pr_${n}`,
-    // We fetch path/line/comments for *every* thread even though only unresolved
-    // ones are detailed below — GraphQL can't filter reviewThreads by isResolved
-    // server-side, and totalCount is needed for the resolved/total count anyway.
+    // List-page badges only need counts, so this batch query stays cheap: just
+    // `totalCount` plus a per-thread `isResolved`. The heavy path/author/body
+    // details are fetched lazily, one PR at a time, when a badge's popover is
+    // actually opened (see fetchPRReviewThreadDetails).
     buildNodeQuery: (n) => `pullRequest(number: ${n}) {
-      reviewThreads(first: 100) {
+      reviewThreads(first: ${MAX_REVIEW_THREADS}) {
         totalCount
+        nodes {
+          isResolved
+        }
+      }
+    }`,
+    parseNode: (n, pr) => {
+      const threads = pr.reviewThreads as {
+        totalCount: number;
+        nodes: Array<{ isResolved: boolean }>;
+      };
+      const resolvedThreads = threads.nodes.filter((t) => t.isResolved).length;
+      return { number: n, totalThreads: threads.totalCount, resolvedThreads };
+    },
+  });
+}
+
+async function fetchPRReviewThreadDetails(
+  owner: string,
+  repo: string,
+  prNumber: number,
+): Promise<ReviewThreadDetail[]> {
+  const batched = await fetchGraphQLBatch<number, ReviewThreadDetail[]>({
+    cachePrefix: "reviewdetails",
+    owner,
+    repo,
+    keys: [prNumber],
+    aliasFor: (n) => `pr_${n}`,
+    buildNodeQuery: (n) => `pullRequest(number: ${n}) {
+      reviewThreads(first: ${MAX_REVIEW_THREADS}) {
         nodes {
           isResolved
           isOutdated
@@ -185,9 +222,8 @@ async function fetchPRReviewStatuses(
         }
       }
     }`,
-    parseNode: (n, pr) => {
+    parseNode: (_n, pr) => {
       const threads = pr.reviewThreads as {
-        totalCount: number;
         nodes: Array<{
           isResolved: boolean;
           isOutdated: boolean;
@@ -197,8 +233,7 @@ async function fetchPRReviewStatuses(
           comments: { nodes: Array<{ author: { login: string } | null; bodyText: string; url: string }> };
         }>;
       };
-      const resolvedThreads = threads.nodes.filter((t) => t.isResolved).length;
-      const unresolved = threads.nodes
+      return threads.nodes
         .filter((t) => !t.isResolved)
         .map((t) => {
           const first = t.comments?.nodes?.[0];
@@ -212,9 +247,9 @@ async function fetchPRReviewStatuses(
             url: first?.url ?? "",
           };
         });
-      return { number: n, totalThreads: threads.totalCount, resolvedThreads, unresolved };
     },
   });
+  return batched[0] ?? [];
 }
 
 async function fetchPRDiffStats(
@@ -303,9 +338,13 @@ async function approvePR(
       return { success: false, error: msg };
     }
 
-    // Fire-and-forget: invalidate review caches for this repo
+    // Fire-and-forget: invalidate both review caches (counts + detail) for this repo
     chrome.storage.session.get(null).then((all) => {
-      const keys = Object.keys(all).filter((k) => k.startsWith(`cache:reviews:${owner}/${repo}:`));
+      const keys = Object.keys(all).filter(
+        (k) =>
+          k.startsWith(`cache:reviews:${owner}/${repo}:`) ||
+          k.startsWith(`cache:reviewdetails:${owner}/${repo}:`),
+      );
       if (keys.length > 0) chrome.storage.session.remove(keys);
     }).catch(() => {});
 
@@ -521,6 +560,8 @@ async function handleMessage(request: ServiceWorkerRequest): Promise<ServiceWork
       return { ok: true, data: await fetchPRBranches(request.owner, request.repo, request.state, request.page) };
     case "FETCH_PR_REVIEW_STATUSES":
       return { ok: true, data: await fetchPRReviewStatuses(request.owner, request.repo, request.prNumbers) };
+    case "FETCH_PR_REVIEW_THREAD_DETAILS":
+      return { ok: true, data: await fetchPRReviewThreadDetails(request.owner, request.repo, request.prNumber) };
     case "FETCH_PR_DIFF_STATS":
       return { ok: true, data: await fetchPRDiffStats(request.owner, request.repo, request.prNumbers) };
     case "FETCH_COMMIT_DIFF_STATS":

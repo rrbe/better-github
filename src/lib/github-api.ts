@@ -1,4 +1,4 @@
-import type { ServiceWorkerRequest, PRBranchInfo, PRReviewStatus, PRDiffStats, CommitDiffStats, PRApproveResult, TagInfo, StargazerInfo, WatcherInfo, ForkInfo } from "./messages";
+import type { ServiceWorkerRequest, PRBranchInfo, PRReviewStatus, ReviewThreadDetail, PRDiffStats, CommitDiffStats, PRApproveResult, TagInfo, StargazerInfo, WatcherInfo, ForkInfo } from "./messages";
 
 function sendMessage<T>(request: ServiceWorkerRequest): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -25,7 +25,7 @@ function sendMessage<T>(request: ServiceWorkerRequest): Promise<T> {
   });
 }
 
-export type { PRReviewStatus, PRDiffStats, CommitDiffStats, PRApproveResult, TagInfo, StargazerInfo, WatcherInfo, ForkInfo };
+export type { PRReviewStatus, ReviewThreadDetail, PRDiffStats, CommitDiffStats, PRApproveResult, TagInfo, StargazerInfo, WatcherInfo, ForkInfo };
 
 export async function fetchPRBranches(
   owner: string,
@@ -63,6 +63,23 @@ export async function fetchPRReviewStatuses(
     console.error("[Better GitHub] Failed to fetch review statuses:", err);
     return [];
   }
+}
+
+export async function fetchReviewThreadDetails(
+  owner: string,
+  repo: string,
+  prNumber: number,
+): Promise<ReviewThreadDetail[]> {
+  // Unlike the list-level fetchers above, this one lets errors propagate so the
+  // popover can surface a "couldn't load" state and retry on the next open,
+  // rather than swallowing the failure into an empty list that reads as
+  // "no threads". The count badge already stands on its own.
+  return sendMessage<ReviewThreadDetail[]>({
+    type: "FETCH_PR_REVIEW_THREAD_DETAILS",
+    owner,
+    repo,
+    prNumber,
+  });
 }
 
 export async function fetchPRDiffStats(

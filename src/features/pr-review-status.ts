@@ -1,5 +1,5 @@
 import { isPRListPage, getRepoInfo } from "../lib/page-detect";
-import { fetchPRReviewStatuses } from "../lib/github-api";
+import { fetchPRReviewStatuses, fetchReviewThreadDetails } from "../lib/github-api";
 import type { ReviewThreadDetail } from "../lib/messages";
 import { getOrCreateInfoRow } from "../lib/info-row";
 
@@ -31,8 +31,12 @@ function ensureGlobalListeners(): void {
   });
 }
 
-/** Wire a badge to open/close its popover on click (and keyboard). */
-function makeBadgeInteractive(badge: HTMLElement): void {
+/**
+ * Wire a badge to open/close its popover on click (and keyboard). `onOpen` runs
+ * every time the popover transitions to open, so the caller can lazily load and
+ * cache its contents (and retry after a failed load).
+ */
+function makeBadgeInteractive(badge: HTMLElement, onOpen: () => void): void {
   badge.setAttribute("role", "button");
   badge.setAttribute("tabindex", "0");
   // "dialog" rather than "true"/"menu": the popover is a list of links, not a menu.
@@ -44,6 +48,7 @@ function makeBadgeInteractive(badge: HTMLElement): void {
     closeAllPopovers();
     badge.classList.toggle(OPEN_CLASS, willOpen);
     badge.setAttribute("aria-expanded", String(willOpen));
+    if (willOpen) onOpen();
   };
 
   // Only react to events on the badge itself; events bubbling up from inside the
@@ -79,13 +84,11 @@ function basename(path: string): string {
 }
 
 /**
- * Build the click-to-open popover listing each unresolved thread. Styled after
- * GitHub's own hovercard / checks dropdown: a caret, a bordered header, and tidy
- * rows. Long text is tamed entirely in CSS (path → basename + ellipsis, body →
- * 2-line clamp), so the popover keeps a fixed width no matter how verbose a
- * comment is. Each row links to its first comment's `#discussion_r…` anchor.
+ * Empty popover shell: just the caret and the click-trap. Its body is filled in
+ * later (loading message → thread rows, or an error message) so the actual
+ * thread details can be fetched lazily on first open.
  */
-function buildPopover(threads: ReviewThreadDetail[]): HTMLElement {
+function createPopoverShell(): HTMLElement {
   const popover = document.createElement("div");
   popover.className = POPOVER_CLASS;
 
@@ -93,10 +96,39 @@ function buildPopover(threads: ReviewThreadDetail[]): HTMLElement {
   // it stays open while a thread link navigates (and selecting text won't close it).
   popover.addEventListener("click", (e) => e.stopPropagation());
 
-  // Upward caret pointing back at the badge.
+  // Upward caret pointing back at the badge — stays put across content swaps.
   const caret = document.createElement("span");
   caret.className = "better-github-review-popover-caret";
   popover.appendChild(caret);
+
+  return popover;
+}
+
+/** Swap the popover body, preserving the caret (its first child). */
+function setPopoverBody(popover: HTMLElement, ...nodes: Node[]): void {
+  while (popover.childNodes.length > 1) {
+    popover.removeChild(popover.lastChild as ChildNode);
+  }
+  popover.append(...nodes);
+}
+
+/** A single muted status line (loading / load-failed) inside the popover. */
+function buildMessage(text: string): HTMLElement {
+  const message = document.createElement("div");
+  message.className = "better-github-review-popover-message";
+  message.textContent = text;
+  return message;
+}
+
+/**
+ * Build the rows listing each unresolved thread. Styled after GitHub's own
+ * hovercard / checks dropdown: a bordered header and tidy rows. Long text is
+ * tamed entirely in CSS (path → basename + ellipsis, body → 2-line clamp), so
+ * the popover keeps a fixed width no matter how verbose a comment is. Each row
+ * links to its first comment's `#discussion_r…` anchor.
+ */
+function buildThreadRows(threads: ReviewThreadDetail[]): Node[] {
+  const nodes: Node[] = [];
 
   // Header row, like "3 unresolved threads" with a comment glyph.
   const header = document.createElement("div");
@@ -107,7 +139,7 @@ function buildPopover(threads: ReviewThreadDetail[]): HTMLElement {
   const headerLabel = document.createElement("span");
   headerLabel.textContent = `${threads.length} unresolved thread${threads.length === 1 ? "" : "s"}`;
   header.append(icon, headerLabel);
-  popover.appendChild(header);
+  nodes.push(header);
 
   for (const t of threads.slice(0, MAX_POPOVER_ITEMS)) {
     // An <a> so clicking jumps straight to the thread; falls back to a div when
@@ -124,7 +156,9 @@ function buildPopover(threads: ReviewThreadDetail[]): HTMLElement {
     const locText = document.createElement("span");
     locText.className = "better-github-review-popover-loc-text";
     locText.textContent = t.line != null ? `${file}:${t.line}` : file;
-    if (t.path) locText.title = t.line != null ? `${t.path}:${t.line}` : t.path;
+    // Full path goes on `aria-label`, not `title`: a native tooltip here would
+    // hover-overlap the very popover this feature is meant to keep clean.
+    if (t.path) locText.setAttribute("aria-label", t.line != null ? `${t.path}:${t.line}` : t.path);
     head.appendChild(locText);
     if (t.isOutdated) {
       const tag = document.createElement("span");
@@ -141,17 +175,63 @@ function buildPopover(threads: ReviewThreadDetail[]): HTMLElement {
 
     item.appendChild(head);
     item.appendChild(body);
-    popover.appendChild(item);
+    nodes.push(item);
   }
 
   if (threads.length > MAX_POPOVER_ITEMS) {
     const more = document.createElement("div");
     more.className = "better-github-review-popover-more";
     more.textContent = `+${threads.length - MAX_POPOVER_ITEMS} more`;
-    popover.appendChild(more);
+    nodes.push(more);
   }
 
-  return popover;
+  return nodes;
+}
+
+/**
+ * Attach a lazily-loaded thread popover to an unresolved badge. The heavy
+ * detail query runs only when the badge is first opened; a failed or empty
+ * load shows a "couldn't load" message and is retried on the next open (the
+ * count on the badge itself never depended on this fetch).
+ */
+function setupPopover(
+  badge: HTMLElement,
+  owner: string,
+  repo: string,
+  prNumber: number,
+): void {
+  badge.classList.add("better-github-review-has-popover");
+
+  const popover = createPopoverShell();
+  badge.appendChild(popover);
+
+  let state: "idle" | "loading" | "loaded" = "idle";
+  const load = async () => {
+    if (state !== "idle") return; // in flight or already populated
+    state = "loading";
+    setPopoverBody(popover, buildMessage("Loading…"));
+
+    let details: ReviewThreadDetail[] = [];
+    try {
+      details = (await fetchReviewThreadDetails(owner, repo, prNumber)) ?? [];
+    } catch {
+      details = [];
+    }
+
+    // We only attach popovers to badges that already counted ≥1 unresolved
+    // thread, so an empty result means the detail fetch failed (or the threads
+    // were resolved since the list query). Either way, let a later click retry.
+    if (details.length === 0) {
+      setPopoverBody(popover, buildMessage("Couldn't load thread details."));
+      state = "idle";
+      return;
+    }
+
+    setPopoverBody(popover, ...buildThreadRows(details));
+    state = "loaded";
+  };
+
+  makeBadgeInteractive(badge, load);
 }
 
 export async function injectPRReviewStatus(): Promise<void> {
@@ -206,18 +286,10 @@ export async function injectPRReviewStatus(): Promise<void> {
     } else {
       badge.classList.add("better-github-review-unresolved");
       badge.textContent = `${unresolved} unresolved`;
-
-      const details = status.unresolved ?? [];
-      if (details.length > 0) {
-        // The click popover is the richer summary; a native `title` on the same
-        // badge would just hover-overlap the open popover, so we drop it here.
-        badge.classList.add("better-github-review-has-popover");
-        badge.appendChild(buildPopover(details));
-        makeBadgeInteractive(badge);
-      } else {
-        // No expandable details → the native tooltip is the only summary, keep it.
-        badge.title = `${status.resolvedThreads}/${status.totalThreads} review thread(s) resolved`;
-      }
+      // The click popover is the richer summary and is loaded lazily on open;
+      // we deliberately set no native `title` here, as it would hover-overlap
+      // the open popover.
+      setupPopover(badge, info.owner, info.repo, prNumber);
     }
 
     infoRow.appendChild(badge);

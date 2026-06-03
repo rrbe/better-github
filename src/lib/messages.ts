@@ -22,8 +22,6 @@ export interface PRReviewStatus {
   number: number;
   totalThreads: number;
   resolvedThreads: number;
-  /** Details for the unresolved threads only (resolved ones are omitted to keep the payload small). */
-  unresolved?: ReviewThreadDetail[];
 }
 
 export interface PRDiffStats {
@@ -74,6 +72,7 @@ export interface ForkInfo {
 export type ServiceWorkerRequest =
   | { type: "FETCH_PR_BRANCHES"; owner: string; repo: string; state: string; page: number }
   | { type: "FETCH_PR_REVIEW_STATUSES"; owner: string; repo: string; prNumbers: number[] }
+  | { type: "FETCH_PR_REVIEW_THREAD_DETAILS"; owner: string; repo: string; prNumber: number }
   | { type: "FETCH_PR_DIFF_STATS"; owner: string; repo: string; prNumbers: number[] }
   | { type: "FETCH_COMMIT_DIFF_STATS"; owner: string; repo: string; shas: string[] }
   | { type: "APPROVE_PR"; owner: string; repo: string; prNumber: number; body?: string }
