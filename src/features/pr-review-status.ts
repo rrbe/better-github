@@ -206,13 +206,17 @@ export async function injectPRReviewStatus(): Promise<void> {
     } else {
       badge.classList.add("better-github-review-unresolved");
       badge.textContent = `${unresolved} unresolved`;
-      badge.title = `${status.resolvedThreads}/${status.totalThreads} review thread(s) resolved`;
 
       const details = status.unresolved ?? [];
       if (details.length > 0) {
+        // The click popover is the richer summary; a native `title` on the same
+        // badge would just hover-overlap the open popover, so we drop it here.
         badge.classList.add("better-github-review-has-popover");
         badge.appendChild(buildPopover(details));
         makeBadgeInteractive(badge);
+      } else {
+        // No expandable details → the native tooltip is the only summary, keep it.
+        badge.title = `${status.resolvedThreads}/${status.totalThreads} review thread(s) resolved`;
       }
     }
 

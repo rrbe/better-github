@@ -78,6 +78,10 @@ describe("injectPRReviewStatus", () => {
     const badge = document.querySelector("#issue_7 .better-github-review-status") as HTMLElement;
     expect(badge.classList.contains("better-github-review-has-popover")).toBe(true);
 
+    // The popover supersedes the native tooltip — a badge with a popover must not
+    // also carry a `title`, or the browser tooltip overlaps the open popover.
+    expect(badge.hasAttribute("title")).toBe(false);
+
     const items = badge.querySelectorAll(".better-github-review-popover-item");
     expect(items).toHaveLength(2);
 

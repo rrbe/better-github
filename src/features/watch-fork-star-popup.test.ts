@@ -63,6 +63,34 @@ describe("watch/fork/star popup", () => {
     vi.useRealTimers();
   });
 
+  it("hides the counter's native title on hover and restores it on leave", () => {
+    injectWatchForkStarPopup();
+    const star = document.getElementById("star-counter")!;
+    // GitHub ships the exact count as a native `title` on the counter span.
+    star.setAttribute("title", "1,234");
+
+    // Hover → native tooltip suppressed so it can't overlap our popup.
+    star.dispatchEvent(new Event("mouseenter"));
+    expect(star.hasAttribute("title")).toBe(false);
+
+    // Leave → the native title comes back untouched.
+    star.dispatchEvent(new Event("mouseleave"));
+    expect(star.getAttribute("title")).toBe("1,234");
+  });
+
+  it("restores a mid-hover stashed title on cleanup", () => {
+    injectWatchForkStarPopup();
+    const star = document.getElementById("star-counter")!;
+    star.setAttribute("title", "1,234");
+
+    star.dispatchEvent(new Event("mouseenter"));
+    expect(star.hasAttribute("title")).toBe(false);
+
+    // Tear down while still hovered — the title must not be lost.
+    cleanupWatchForkStarPopup();
+    expect(star.getAttribute("title")).toBe("1,234");
+  });
+
   afterEach(() => {
     vi.restoreAllMocks();
   });

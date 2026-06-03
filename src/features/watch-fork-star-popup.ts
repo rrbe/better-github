@@ -6,8 +6,30 @@ import type { ForkInfo } from "../lib/github-api";
 const WRAP_CLASS = "bg-wfs-counter-wrap";
 const POPUP_CLASS = "bg-wfs-popup";
 
+// GitHub puts the exact count in a native `title` on the counter span (e.g.
+// title="1,234" behind a visible "1.2k"). Our popup attaches to that same span,
+// so the browser tooltip would otherwise overlap it. We stash the title here
+// while the pointer is over the counter and restore it on leave / cleanup.
+const STASH_ATTR = "data-bg-wfs-title";
+
 const HOVER_OPEN_DELAY = 300;
 const HOVER_CLOSE_DELAY = 200;
+
+/** Hide the counter's native `title` tooltip so it can't overlap our popup. */
+function suppressNativeTitle(wrap: HTMLElement): void {
+  const title = wrap.getAttribute("title");
+  if (title === null) return;
+  wrap.setAttribute(STASH_ATTR, title);
+  wrap.removeAttribute("title");
+}
+
+/** Put the stashed native `title` back once the popup is no longer in play. */
+function restoreNativeTitle(wrap: HTMLElement): void {
+  const stashed = wrap.getAttribute(STASH_ATTR);
+  if (stashed === null) return;
+  wrap.setAttribute("title", stashed);
+  wrap.removeAttribute(STASH_ATTR);
+}
 
 interface PopupConfig {
   title: string;
@@ -116,10 +138,16 @@ function setupHover(
   }
 
   wrap.addEventListener("mouseenter", () => {
+    // Drop the native tooltip up front — our popup opens at HOVER_OPEN_DELAY,
+    // which beats the browser's title delay, so it never gets a chance to show.
+    suppressNativeTitle(wrap);
     openTimer = setTimeout(show, HOVER_OPEN_DELAY);
   });
 
   wrap.addEventListener("mouseleave", () => {
+    // mouseleave only fires once the pointer leaves the counter *and* the popup
+    // (a descendant), so by here the popup is dismissed and the title is safe.
+    restoreNativeTitle(wrap);
     hide();
   });
 
@@ -225,6 +253,8 @@ export function injectWatchForkStarPopup(): void {
 export function cleanupWatchForkStarPopup(): void {
   for (const counter of document.querySelectorAll<HTMLElement>(`.${WRAP_CLASS}`)) {
     counter.classList.remove(WRAP_CLASS);
+    // If we tear down mid-hover, give the counter its native title back.
+    restoreNativeTitle(counter);
     counter.querySelectorAll(`.${POPUP_CLASS}`).forEach((popup) => popup.remove());
   }
 }
