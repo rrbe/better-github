@@ -315,6 +315,12 @@ a.better-github-review-popover-item:hover {
   /* Oldest — stays default muted color, no override needed */
 }
 
+/* PR Number Highlight — tint the leading "#1234" a light amber-yellow so it
+   reads as a soft accent on the muted meta line, no bold. */
+.better-github-pr-number {
+  color: #e0a800 !important;
+}
+
 /* PR Label Position */
 @keyframes better-github-detect-labels {
   from { }
