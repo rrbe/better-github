@@ -258,7 +258,13 @@ a.better-github-review-popover-item:hover {
   font-size: 12px;
   line-height: 18px;
   text-align: right;
-  color: var(--fgColor-muted, var(--color-fg-muted, #656d76));
+  text-decoration: none;
+  color: var(--fgColor-muted, var(--color-fg-muted, #656d76)) !important;
+}
+
+/* It's a link to the asset's download URL — surface that on hover. */
+.better-github-asset-downloads:hover {
+  text-decoration: underline;
 }
 
 .better-github-asset-downloads svg {
@@ -266,38 +272,35 @@ a.better-github-review-popover-item:hover {
 }
 
 /* Download heat — tint the count by volume: quiet (muted) for few downloads,
-   intensifying toward GitHub's theme-aware success green for the most-
-   downloaded assets. Same color-mix blend as the file-age map, keyed to
-   magnitude. Level 1 (fewest) stays the default muted, so it needs no rule. */
-:root {
-  --better-github-downloads-color: var(--fgColor-success, var(--color-success-fg, #1a7f37));
-}
+   intensifying toward the same heat color as the file-age map for the most-
+   downloaded assets. Same color-mix blend, keyed to magnitude instead of
+   recency. Level 1 (fewest) stays the default muted, so it needs no rule. */
 .better-github-asset-downloads[data-better-github-dl-heat="2"] {
-  color: color-mix(in srgb, var(--better-github-downloads-color) 12%, var(--fgColor-muted, var(--color-fg-muted, #656d76))) !important;
+  color: color-mix(in srgb, var(--better-github-heat-color) 12%, var(--fgColor-muted, var(--color-fg-muted, #656d76))) !important;
 }
 .better-github-asset-downloads[data-better-github-dl-heat="3"] {
-  color: color-mix(in srgb, var(--better-github-downloads-color) 22%, var(--fgColor-muted, var(--color-fg-muted, #656d76))) !important;
+  color: color-mix(in srgb, var(--better-github-heat-color) 22%, var(--fgColor-muted, var(--color-fg-muted, #656d76))) !important;
 }
 .better-github-asset-downloads[data-better-github-dl-heat="4"] {
-  color: color-mix(in srgb, var(--better-github-downloads-color) 33%, var(--fgColor-muted, var(--color-fg-muted, #656d76))) !important;
+  color: color-mix(in srgb, var(--better-github-heat-color) 33%, var(--fgColor-muted, var(--color-fg-muted, #656d76))) !important;
 }
 .better-github-asset-downloads[data-better-github-dl-heat="5"] {
-  color: color-mix(in srgb, var(--better-github-downloads-color) 44%, var(--fgColor-muted, var(--color-fg-muted, #656d76))) !important;
+  color: color-mix(in srgb, var(--better-github-heat-color) 44%, var(--fgColor-muted, var(--color-fg-muted, #656d76))) !important;
 }
 .better-github-asset-downloads[data-better-github-dl-heat="6"] {
-  color: color-mix(in srgb, var(--better-github-downloads-color) 56%, var(--fgColor-muted, var(--color-fg-muted, #656d76))) !important;
+  color: color-mix(in srgb, var(--better-github-heat-color) 56%, var(--fgColor-muted, var(--color-fg-muted, #656d76))) !important;
 }
 .better-github-asset-downloads[data-better-github-dl-heat="7"] {
-  color: color-mix(in srgb, var(--better-github-downloads-color) 67%, var(--fgColor-muted, var(--color-fg-muted, #656d76))) !important;
+  color: color-mix(in srgb, var(--better-github-heat-color) 67%, var(--fgColor-muted, var(--color-fg-muted, #656d76))) !important;
 }
 .better-github-asset-downloads[data-better-github-dl-heat="8"] {
-  color: color-mix(in srgb, var(--better-github-downloads-color) 78%, var(--fgColor-muted, var(--color-fg-muted, #656d76))) !important;
+  color: color-mix(in srgb, var(--better-github-heat-color) 78%, var(--fgColor-muted, var(--color-fg-muted, #656d76))) !important;
 }
 .better-github-asset-downloads[data-better-github-dl-heat="9"] {
-  color: color-mix(in srgb, var(--better-github-downloads-color) 89%, var(--fgColor-muted, var(--color-fg-muted, #656d76))) !important;
+  color: color-mix(in srgb, var(--better-github-heat-color) 89%, var(--fgColor-muted, var(--color-fg-muted, #656d76))) !important;
 }
 .better-github-asset-downloads[data-better-github-dl-heat="10"] {
-  color: var(--better-github-downloads-color) !important;
+  color: var(--better-github-heat-color) !important;
 }
 
 /* File Age Color — heat map for recent commits */

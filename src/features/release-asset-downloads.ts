@@ -82,10 +82,16 @@ export function getDownloadHeat(count: number): number {
   return level;
 }
 
-function buildBadge(count: number): HTMLSpanElement {
+// The badge is a link to the asset's own download URL, so the download icon is
+// real: clicking it downloads the file, same as clicking the asset name.
+function buildBadge(count: number, href: string): HTMLAnchorElement {
   const formatted = count.toLocaleString();
-  const badge = document.createElement("span");
+  const badge = document.createElement("a");
   badge.className = BADGE_CLASS;
+  badge.href = href;
+  badge.rel = "nofollow";
+  // Let the browser download the file instead of letting Turbo try to render it.
+  badge.setAttribute("data-turbo", "false");
   badge.dataset.betterGithubDlHeat = String(getDownloadHeat(count));
   badge.title = t("assetDownloadsTitle", formatted);
   badge.innerHTML = `${DOWNLOAD_ICON}<span>${escapeHtml(formatted)}</span>`;
@@ -119,12 +125,15 @@ export async function injectReleaseAssetDownloads(): Promise<void> {
     const count = counts.get(`${parsed.tag}/${parsed.name}`);
     if (count === undefined) continue;
 
+    const href = link.getAttribute("href");
+    if (!href) continue;
+
     const row = link.closest("li");
     if (!row || row.querySelector(`.${BADGE_CLASS}`)) continue;
 
     const nameCol = findNameColumn(link, row);
     if (!nameCol) continue;
 
-    nameCol.appendChild(buildBadge(count));
+    nameCol.appendChild(buildBadge(count, href));
   }
 }

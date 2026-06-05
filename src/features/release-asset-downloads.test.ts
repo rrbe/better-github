@@ -1,6 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { setUrl } from "../test-utils/url";
-import { injectReleaseAssetDownloads, parseAssetHref, getDownloadHeat } from "./release-asset-downloads";
+import {
+  injectReleaseAssetDownloads,
+  parseAssetHref,
+  getDownloadHeat,
+} from "./release-asset-downloads";
 import { fetchReleaseDownloads } from "../lib/github-api";
 
 // Run the feature on canned data instead of the content<->worker bridge.
@@ -96,14 +100,17 @@ describe("injectReleaseAssetDownloads", () => {
 
     await injectReleaseAssetDownloads();
 
-    const badge = document.querySelector(BADGE) as HTMLElement;
+    const badge = document.querySelector(BADGE) as HTMLAnchorElement;
     expect(badge).not.toBeNull();
+    expect(badge.tagName).toBe("A");
     expect(badge.textContent).toBe((1234).toLocaleString());
     expect(badge.title).toBe(`Downloaded ${(1234).toLocaleString()} times`);
-    // Lives in the same column as the download link (the name column), pushed to
+    // It links to the asset's own download URL, so the icon is clickable.
+    expect(badge.getAttribute("href")).toBe("/owner/repo/releases/download/v1.0.0/app.zip");
+    // Lives in the name column (the column holding the download link), pushed to
     // its end — decoupled from the digest / size / date columns.
-    const link = document.querySelector('a[href*="/releases/download/"]') as HTMLElement;
-    expect(badge.parentElement).toBe(link.parentElement);
+    const nameLink = badge.parentElement?.querySelector(".Truncate") as HTMLElement;
+    expect(nameLink).not.toBeNull();
     expect(badge.parentElement?.lastElementChild).toBe(badge);
     // Carries the heat level so CSS can tint it by download volume.
     expect(badge.dataset.betterGithubDlHeat).toBe(String(getDownloadHeat(1234)));
