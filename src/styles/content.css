@@ -243,6 +243,22 @@ a.better-github-review-popover-item:hover {
   color: var(--fgColor-muted, var(--color-fg-muted, #656d76));
 }
 
+/* Release Asset Downloads — count appended to each asset row */
+.better-github-asset-downloads {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  font-size: 12px;
+  line-height: 18px;
+  text-align: right;
+  color: var(--fgColor-muted, var(--color-fg-muted, #656d76));
+}
+
+.better-github-asset-downloads svg {
+  flex-shrink: 0;
+}
+
 /* File Age Color — heat map for recent commits */
 :root {
   --better-github-heat-color: #c24e00;

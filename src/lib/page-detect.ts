@@ -65,6 +65,24 @@ export function isReleasesPage(): boolean {
   return /^\/[^/]+\/[^/]+\/releases/.test(location.pathname);
 }
 
+/** A single release page, e.g. /owner/repo/releases/tag/v1.0.0 */
+export function isReleaseDetailPage(): boolean {
+  const info = getRepoInfo();
+  if (!info) return false;
+  return /^\/[^/]+\/[^/]+\/releases\/tag\//.test(location.pathname);
+}
+
+/** The decoded tag from a single release page, or null when not on one. */
+export function getReleaseTag(): string | null {
+  const match = location.pathname.match(/^\/[^/]+\/[^/]+\/releases\/tag\/(.+)$/);
+  if (!match) return null;
+  try {
+    return decodeURIComponent(match[1]);
+  } catch {
+    return match[1];
+  }
+}
+
 export function isPRDetailPage(): boolean {
   const info = getRepoInfo();
   if (!info) return false;

@@ -1,4 +1,4 @@
-import type { ServiceWorkerRequest, ServiceWorkerResponse, PRBranchInfo, PRReviewStatus, ReviewThreadDetail, PRDiffStats, CommitDiffStats, PRApproveResult, TagInfo, StargazerInfo, WatcherInfo, ForkInfo } from "./lib/messages";
+import type { ServiceWorkerRequest, ServiceWorkerResponse, PRBranchInfo, PRReviewStatus, ReviewThreadDetail, PRDiffStats, CommitDiffStats, PRApproveResult, TagInfo, StargazerInfo, WatcherInfo, ForkInfo, ReleaseAssetDownload } from "./lib/messages";
 
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
@@ -554,6 +554,65 @@ async function fetchForks(
   });
 }
 
+interface RawReleaseAsset {
+  name: string;
+  download_count: number;
+}
+
+interface RawRelease {
+  tag_name: string;
+  assets?: RawReleaseAsset[];
+}
+
+function mapReleaseAssets(releases: RawRelease[]): ReleaseAssetDownload[] {
+  const out: ReleaseAssetDownload[] = [];
+  for (const rel of releases) {
+    if (!rel?.tag_name || !Array.isArray(rel.assets)) continue;
+    for (const asset of rel.assets) {
+      out.push({ tag: rel.tag_name, name: asset.name, downloadCount: asset.download_count });
+    }
+  }
+  return out;
+}
+
+// Per-asset download counts. On a single release page we fetch just that release
+// (precise even for old releases); on the releases index we fetch the newest
+// page of releases in one request. Works anonymously on public repos; a token
+// only raises the rate limit.
+async function fetchReleaseDownloads(
+  owner: string,
+  repo: string,
+  tag?: string,
+): Promise<ReleaseAssetDownload[]> {
+  const cacheKey = tag
+    ? `cache:releasedl:${owner}/${repo}:tag:${tag}`
+    : `cache:releasedl:${owner}/${repo}:list`;
+  return cachedFetch<ReleaseAssetDownload[]>(cacheKey, async () => {
+    const token = await getToken();
+    const headers: Record<string, string> = {
+      Accept: "application/vnd.github+json",
+    };
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const url = tag
+      ? `https://api.github.com/repos/${owner}/${repo}/releases/tags/${encodeURIComponent(tag)}`
+      : `https://api.github.com/repos/${owner}/${repo}/releases?per_page=100`;
+
+    const response = await fetch(url, { headers });
+
+    if (!response.ok) {
+      console.error(`[Better GitHub] Release downloads API error: ${response.status} ${response.statusText}`);
+      return [];
+    }
+
+    const data = await response.json();
+    const releases: RawRelease[] = Array.isArray(data) ? data : [data];
+    return mapReleaseAssets(releases);
+  });
+}
+
 async function handleMessage(request: ServiceWorkerRequest): Promise<ServiceWorkerResponse<unknown>> {
   switch (request.type) {
     case "FETCH_PR_BRANCHES":
@@ -576,6 +635,8 @@ async function handleMessage(request: ServiceWorkerRequest): Promise<ServiceWork
       return { ok: true, data: await fetchWatchers(request.owner, request.repo) };
     case "FETCH_FORKS":
       return { ok: true, data: await fetchForks(request.owner, request.repo) };
+    case "FETCH_RELEASE_DOWNLOADS":
+      return { ok: true, data: await fetchReleaseDownloads(request.owner, request.repo, request.tag) };
     default:
       return { ok: false, error: "Unknown message type" };
   }

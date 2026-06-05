@@ -492,4 +492,79 @@ describe("service worker", () => {
     });
     expect(vi.mocked(fetch)).toHaveBeenCalledTimes(1);
   });
+
+  it("flattens the releases list payload into per-asset download counts", async () => {
+    const state = await loadWorker("token");
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse([
+        {
+          tag_name: "v2.0.0",
+          assets: [
+            { name: "app-linux.tar.gz", download_count: 1500 },
+            { name: "app-macos.zip", download_count: 42 },
+          ],
+        },
+        { tag_name: "v1.0.0", assets: [{ name: "app.zip", download_count: 7 }] },
+      ]),
+    );
+
+    const response = await sendMessage(state.messageListeners[0], {
+      type: "FETCH_RELEASE_DOWNLOADS",
+      owner: "owner",
+      repo: "repo",
+    });
+
+    expect(response).toEqual({
+      ok: true,
+      data: [
+        { tag: "v2.0.0", name: "app-linux.tar.gz", downloadCount: 1500 },
+        { tag: "v2.0.0", name: "app-macos.zip", downloadCount: 42 },
+        { tag: "v1.0.0", name: "app.zip", downloadCount: 7 },
+      ],
+    });
+    expect(vi.mocked(fetch).mock.calls[0][0]).toBe(
+      "https://api.github.com/repos/owner/repo/releases?per_page=100",
+    );
+  });
+
+  it("fetches a single release by tag and wraps the object payload", async () => {
+    const state = await loadWorker("token");
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse({
+        tag_name: "v1.0.0",
+        assets: [{ name: "app.zip", download_count: 99 }],
+      }),
+    );
+
+    const response = await sendMessage(state.messageListeners[0], {
+      type: "FETCH_RELEASE_DOWNLOADS",
+      owner: "owner",
+      repo: "repo",
+      tag: "v1.0.0",
+    });
+
+    expect(response).toEqual({
+      ok: true,
+      data: [{ tag: "v1.0.0", name: "app.zip", downloadCount: 99 }],
+    });
+    expect(vi.mocked(fetch).mock.calls[0][0]).toBe(
+      "https://api.github.com/repos/owner/repo/releases/tags/v1.0.0",
+    );
+  });
+
+  it("works anonymously and tolerates releases with no assets", async () => {
+    const state = await loadWorker();
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse([{ tag_name: "v1.0.0" }, { tag_name: "v0.9.0", assets: [] }]),
+    );
+
+    const response = await sendMessage(state.messageListeners[0], {
+      type: "FETCH_RELEASE_DOWNLOADS",
+      owner: "owner",
+      repo: "repo",
+    });
+
+    expect(response).toEqual({ ok: true, data: [] });
+    expect(vi.mocked(fetch)).toHaveBeenCalledTimes(1);
+  });
 });
