@@ -575,18 +575,16 @@ function mapReleaseAssets(releases: RawRelease[]): ReleaseAssetDownload[] {
   return out;
 }
 
-// Per-asset download counts. On a single release page we fetch just that release
-// (precise even for old releases); on the releases index we fetch the newest
-// page of releases in one request. Works anonymously on public repos; a token
-// only raises the rate limit.
+// Per-asset download counts for a single release, fetched by tag. The content
+// script asks only for tags whose assets are actually visible (the latest
+// release, plus any the user expands), so we never over-fetch the whole release
+// history. Works anonymously on public repos; a token only raises the rate limit.
 async function fetchReleaseDownloads(
   owner: string,
   repo: string,
-  tag?: string,
+  tag: string,
 ): Promise<ReleaseAssetDownload[]> {
-  const cacheKey = tag
-    ? `cache:releasedl:${owner}/${repo}:tag:${tag}`
-    : `cache:releasedl:${owner}/${repo}:list`;
+  const cacheKey = `cache:releasedl:${owner}/${repo}:tag:${tag}`;
   return cachedFetch<ReleaseAssetDownload[]>(cacheKey, async () => {
     const token = await getToken();
     const headers: Record<string, string> = {
@@ -596,10 +594,7 @@ async function fetchReleaseDownloads(
       headers["Authorization"] = `Bearer ${token}`;
     }
 
-    const url = tag
-      ? `https://api.github.com/repos/${owner}/${repo}/releases/tags/${encodeURIComponent(tag)}`
-      : `https://api.github.com/repos/${owner}/${repo}/releases?per_page=100`;
-
+    const url = `https://api.github.com/repos/${owner}/${repo}/releases/tags/${encodeURIComponent(tag)}`;
     const response = await fetch(url, { headers });
 
     if (!response.ok) {
@@ -607,9 +602,8 @@ async function fetchReleaseDownloads(
       return [];
     }
 
-    const data = await response.json();
-    const releases: RawRelease[] = Array.isArray(data) ? data : [data];
-    return mapReleaseAssets(releases);
+    const release: RawRelease = await response.json();
+    return mapReleaseAssets([release]);
   });
 }
 

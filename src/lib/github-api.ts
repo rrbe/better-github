@@ -206,7 +206,7 @@ export async function fetchForks(
 export async function fetchReleaseDownloads(
   owner: string,
   repo: string,
-  tag?: string,
+  tag: string,
 ): Promise<ReleaseAssetDownload[]> {
   try {
     return await sendMessage<ReleaseAssetDownload[]>({

@@ -1,9 +1,4 @@
-import {
-  isReleasesPage,
-  isReleaseDetailPage,
-  getReleaseTag,
-  getRepoInfo,
-} from "../lib/page-detect";
+import { isReleasesPage, getRepoInfo, type RepoInfo } from "../lib/page-detect";
 import { fetchReleaseDownloads } from "../lib/github-api";
 import { escapeHtml } from "../lib/utils";
 import { t } from "../lib/i18n";
@@ -94,39 +89,31 @@ function buildBadge(count: number, href: string): HTMLAnchorElement {
   badge.setAttribute("data-turbo", "false");
   badge.dataset.betterGithubDlHeat = String(getDownloadHeat(count));
   badge.title = t("assetDownloadsTitle", formatted);
-  badge.innerHTML = `${DOWNLOAD_ICON}<span>${escapeHtml(formatted)}</span>`;
+  badge.innerHTML = `${escapeHtml(formatted)}<span>${DOWNLOAD_ICON}</span>`;
   return badge;
 }
 
-export async function injectReleaseAssetDownloads(): Promise<void> {
-  if (!isReleasesPage()) return;
+interface PendingAsset {
+  link: HTMLAnchorElement;
+  name: string;
+  href: string;
+}
 
-  const info = getRepoInfo();
-  if (!info) return;
+let observer: MutationObserver | null = null;
 
-  const links = document.querySelectorAll<HTMLAnchorElement>('a[href*="/releases/download/"]');
-  if (links.length === 0) return;
-
-  // Single release page → fetch just that release (accurate for any age);
-  // the index → fetch the newest page of releases in one request.
-  const tag = isReleaseDetailPage() ? (getReleaseTag() ?? undefined) : undefined;
+// Fetch counts for a single release tag, then badge each of its visible assets.
+// One fetch per tag (the service worker caches + coalesces), so the latest
+// release costs ~45 KB instead of pulling the whole release history.
+async function injectTag(info: RepoInfo, tag: string, items: PendingAsset[]): Promise<void> {
   const downloads = await fetchReleaseDownloads(info.owner, info.repo, tag);
   if (downloads.length === 0) return;
 
   const counts = new Map<string, number>();
-  for (const d of downloads) {
-    counts.set(`${d.tag}/${d.name}`, d.downloadCount);
-  }
+  for (const d of downloads) counts.set(d.name, d.downloadCount);
 
-  for (const link of links) {
-    const parsed = parseAssetHref(link.getAttribute("href"), info.owner, info.repo);
-    if (!parsed) continue;
-
-    const count = counts.get(`${parsed.tag}/${parsed.name}`);
+  for (const { link, name, href } of items) {
+    const count = counts.get(name);
     if (count === undefined) continue;
-
-    const href = link.getAttribute("href");
-    if (!href) continue;
 
     const row = link.closest("li");
     if (!row || row.querySelector(`.${BADGE_CLASS}`)) continue;
@@ -136,4 +123,59 @@ export async function injectReleaseAssetDownloads(): Promise<void> {
 
     nameCol.appendChild(buildBadge(count, href));
   }
+}
+
+// Badge every asset link not yet handled, grouped by release tag. Each link is
+// claimed (data attribute) synchronously, before any await, so the observer
+// firing mid-fetch never double-processes a row. Resolves once this pass's tag
+// fetches have settled, so callers/tests can await it.
+async function processVisibleAssets(info: RepoInfo): Promise<void> {
+  const links = document.querySelectorAll<HTMLAnchorElement>(
+    `a[href*="/releases/download/"]:not(.${BADGE_CLASS}):not([data-bg-dl-seen])`,
+  );
+  if (links.length === 0) return;
+
+  const byTag = new Map<string, PendingAsset[]>();
+  for (const link of links) {
+    link.dataset.bgDlSeen = "1";
+    const href = link.getAttribute("href");
+    const parsed = parseAssetHref(href, info.owner, info.repo);
+    if (!href || !parsed) continue;
+    const item: PendingAsset = { link, name: parsed.name, href };
+    const group = byTag.get(parsed.tag);
+    if (group) group.push(item);
+    else byTag.set(parsed.tag, [item]);
+  }
+
+  await Promise.all([...byTag].map(([tag, items]) => injectTag(info, tag, items)));
+}
+
+export async function injectReleaseAssetDownloads(): Promise<void> {
+  observer?.disconnect();
+  observer = null;
+
+  if (!isReleasesPage()) return;
+
+  const info = getRepoInfo();
+  if (!info) return;
+
+  // GitHub renders the latest release's assets eagerly but paginates them
+  // ("Show all N assets"), and lazy-loads every other release's assets via
+  // <include-fragment> on expand. Watch for those late-arriving rows, then
+  // process whatever is already on the page.
+  observer = new MutationObserver(() => {
+    void processVisibleAssets(info);
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  await processVisibleAssets(info);
+}
+
+export function cleanupReleaseAssetDownloads(): void {
+  observer?.disconnect();
+  observer = null;
+  // Drop claim markers so re-enabling the feature re-badges the same rows.
+  document.querySelectorAll<HTMLElement>("[data-bg-dl-seen]").forEach((el) => {
+    delete el.dataset.bgDlSeen;
+  });
 }

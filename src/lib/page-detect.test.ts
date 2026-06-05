@@ -7,8 +7,6 @@ import {
   isRepoPage,
   isRepoTree,
   isReleasesPage,
-  isReleaseDetailPage,
-  getReleaseTag,
   isPRDetailPage,
   isPRFilesChangedPage,
   isCommitPage,
@@ -114,29 +112,6 @@ describe("isReleasesPage", () => {
     expect(isReleasesPage()).toBe(true);
     setUrl(`${GH}/owner/repo/releases/tag/v1.0.0`);
     expect(isReleasesPage()).toBe(true);
-  });
-});
-
-describe("isReleaseDetailPage", () => {
-  it("matches a single release page but not the listing", () => {
-    setUrl(`${GH}/owner/repo/releases/tag/v1.0.0`);
-    expect(isReleaseDetailPage()).toBe(true);
-    setUrl(`${GH}/owner/repo/releases`);
-    expect(isReleaseDetailPage()).toBe(false);
-  });
-});
-
-describe("getReleaseTag", () => {
-  it("returns the decoded tag from a release page", () => {
-    setUrl(`${GH}/owner/repo/releases/tag/v1.0.0`);
-    expect(getReleaseTag()).toBe("v1.0.0");
-    setUrl(`${GH}/owner/repo/releases/tag/release%2F1.0`);
-    expect(getReleaseTag()).toBe("release/1.0");
-  });
-
-  it("returns null off a release page", () => {
-    setUrl(`${GH}/owner/repo/releases`);
-    expect(getReleaseTag()).toBeNull();
   });
 });
 

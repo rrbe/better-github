@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { setUrl } from "../test-utils/url";
 import {
   injectReleaseAssetDownloads,
+  cleanupReleaseAssetDownloads,
   parseAssetHref,
   getDownloadHeat,
 } from "./release-asset-downloads";
@@ -89,6 +90,8 @@ describe("injectReleaseAssetDownloads", () => {
   });
 
   afterEach(() => {
+    // Disconnect the MutationObserver and clear claim markers between tests.
+    cleanupReleaseAssetDownloads();
     vi.restoreAllMocks();
   });
 
@@ -127,15 +130,42 @@ describe("injectReleaseAssetDownloads", () => {
     expect(document.querySelectorAll(BADGE)).toHaveLength(1);
   });
 
-  it("does not match across tags with the same file name", async () => {
-    document.body.innerHTML = `<ul>${assetRow("v2.0.0", "app.zip")}</ul>`;
+  it("groups assets by release tag and fetches each release once", async () => {
+    document.body.innerHTML = `<ul>${assetRow("v2.0.0", "a.zip")}${assetRow("v2.0.0", "b.zip")}${assetRow("v1.0.0", "c.zip")}</ul>`;
+    vi.mocked(fetchReleaseDownloads).mockImplementation((_o, _r, tag) =>
+      Promise.resolve(
+        tag === "v2.0.0"
+          ? [
+              { tag, name: "a.zip", downloadCount: 11 },
+              { tag, name: "b.zip", downloadCount: 22 },
+            ]
+          : [{ tag, name: "c.zip", downloadCount: 33 }],
+      ),
+    );
+
+    await injectReleaseAssetDownloads();
+
+    // One fetch per distinct tag (not per asset), with the tag parsed from the link.
+    expect(fetchReleaseDownloads).toHaveBeenCalledTimes(2);
+    expect(fetchReleaseDownloads).toHaveBeenCalledWith("owner", "repo", "v2.0.0");
+    expect(fetchReleaseDownloads).toHaveBeenCalledWith("owner", "repo", "v1.0.0");
+    expect(Array.from(document.querySelectorAll(BADGE), (b) => b.textContent)).toEqual([
+      "11",
+      "22",
+      "33",
+    ]);
+  });
+
+  it("badges only assets whose name the fetched release returns", async () => {
+    document.body.innerHTML = `<ul>${assetRow("v1.0.0", "present.zip")}${assetRow("v1.0.0", "missing.zip")}</ul>`;
     vi.mocked(fetchReleaseDownloads).mockResolvedValue([
-      { tag: "v1.0.0", name: "app.zip", downloadCount: 99 },
+      { tag: "v1.0.0", name: "present.zip", downloadCount: 9 },
     ]);
 
     await injectReleaseAssetDownloads();
 
-    expect(document.querySelector(BADGE)).toBeNull();
+    expect(document.querySelectorAll(BADGE)).toHaveLength(1);
+    expect(document.querySelector(BADGE)?.textContent).toBe("9");
   });
 
   it("is idempotent across repeated runs", async () => {
@@ -150,23 +180,22 @@ describe("injectReleaseAssetDownloads", () => {
     expect(document.querySelectorAll(BADGE)).toHaveLength(1);
   });
 
-  it("fetches a single release by tag on a release detail page", async () => {
-    setUrl(`${GH}/owner/repo/releases/tag/v1.0.0`);
-    document.body.innerHTML = `<ul>${assetRow("v1.0.0", "app.zip")}</ul>`;
-    vi.mocked(fetchReleaseDownloads).mockResolvedValue([]);
+  it("badges assets that GitHub renders later, via the MutationObserver", async () => {
+    document.body.innerHTML = `<ul id="list"></ul>`;
+    vi.mocked(fetchReleaseDownloads).mockResolvedValue([
+      { tag: "v3.0.0", name: "late.zip", downloadCount: 42 },
+    ]);
 
     await injectReleaseAssetDownloads();
+    expect(document.querySelector(BADGE)).toBeNull();
+    expect(fetchReleaseDownloads).not.toHaveBeenCalled();
 
-    expect(fetchReleaseDownloads).toHaveBeenCalledWith("owner", "repo", "v1.0.0");
-  });
+    // Simulate GitHub lazy-loading a release's assets (Show all / expand).
+    document.getElementById("list")!.innerHTML = assetRow("v3.0.0", "late.zip");
 
-  it("fetches the release list (no tag) on the releases index", async () => {
-    document.body.innerHTML = `<ul>${assetRow("v1.0.0", "app.zip")}</ul>`;
-    vi.mocked(fetchReleaseDownloads).mockResolvedValue([]);
-
-    await injectReleaseAssetDownloads();
-
-    expect(fetchReleaseDownloads).toHaveBeenCalledWith("owner", "repo", undefined);
+    await vi.waitFor(() => expect(document.querySelector(BADGE)).not.toBeNull());
+    expect(document.querySelector(BADGE)?.textContent).toBe("42");
+    expect(fetchReleaseDownloads).toHaveBeenCalledWith("owner", "repo", "v3.0.0");
   });
 
   it("does nothing when there are no asset links", async () => {

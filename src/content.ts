@@ -4,7 +4,7 @@ import { injectPRBranchNames } from "./features/pr-branch-names";
 import { injectPRReviewStatus } from "./features/pr-review-status";
 import { injectPRDiffStats } from "./features/pr-diff-stats";
 import { injectReleasesTab } from "./features/release-tab";
-import { injectReleaseAssetDownloads } from "./features/release-asset-downloads";
+import { injectReleaseAssetDownloads, cleanupReleaseAssetDownloads } from "./features/release-asset-downloads";
 import { injectPRLabelPosition, cleanupPRLabelPosition } from "./features/pr-label-position";
 import { injectFileAgeColor } from "./features/file-age-color";
 import { injectPRNumberHighlight } from "./features/pr-number-highlight";
@@ -148,6 +148,9 @@ if (isExtensionValid()) {
         }
         if (key === "feature-watch-fork-star-popup") {
           cleanupWatchForkStarPopup();
+        }
+        if (key === "feature-release-downloads-count") {
+          cleanupReleaseAssetDownloads();
         }
         removeFeatureElements(key);
       }

@@ -89,7 +89,7 @@ export type ServiceWorkerRequest =
   | { type: "FETCH_STARGAZERS"; owner: string; repo: string }
   | { type: "FETCH_WATCHERS"; owner: string; repo: string }
   | { type: "FETCH_FORKS"; owner: string; repo: string }
-  | { type: "FETCH_RELEASE_DOWNLOADS"; owner: string; repo: string; tag?: string };
+  | { type: "FETCH_RELEASE_DOWNLOADS"; owner: string; repo: string; tag: string };
 
 export type ServiceWorkerResponse<T> =
   | { ok: true; data: T }
