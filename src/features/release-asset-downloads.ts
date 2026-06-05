@@ -69,10 +69,24 @@ function findNameColumn(link: Element, row: Element): HTMLElement | null {
   return null;
 }
 
+// Download counts span orders of magnitude, so bucket them on a roughly log
+// scale: every threshold crossed bumps the heat one level. 1 = quietest (few
+// downloads, stays muted), 10 = hottest (most-downloaded, full accent color).
+const DOWNLOAD_HEAT_THRESHOLDS = [100, 300, 1000, 3000, 10000, 30000, 100000, 300000, 1000000];
+
+export function getDownloadHeat(count: number): number {
+  let level = 1;
+  for (const threshold of DOWNLOAD_HEAT_THRESHOLDS) {
+    if (count >= threshold) level++;
+  }
+  return level;
+}
+
 function buildBadge(count: number): HTMLSpanElement {
   const formatted = count.toLocaleString();
   const badge = document.createElement("span");
-  badge.className = `${BADGE_CLASS} color-fg-muted`;
+  badge.className = BADGE_CLASS;
+  badge.dataset.betterGithubDlHeat = String(getDownloadHeat(count));
   badge.title = t("assetDownloadsTitle", formatted);
   badge.innerHTML = `${DOWNLOAD_ICON}<span>${escapeHtml(formatted)}</span>`;
   return badge;

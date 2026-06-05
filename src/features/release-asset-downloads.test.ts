@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { setUrl } from "../test-utils/url";
-import { injectReleaseAssetDownloads, parseAssetHref } from "./release-asset-downloads";
+import { injectReleaseAssetDownloads, parseAssetHref, getDownloadHeat } from "./release-asset-downloads";
 import { fetchReleaseDownloads } from "../lib/github-api";
 
 // Run the feature on canned data instead of the content<->worker bridge.
@@ -56,6 +56,27 @@ describe("parseAssetHref", () => {
   });
 });
 
+describe("getDownloadHeat", () => {
+  it("maps download volume onto a 1..10 heat scale", () => {
+    expect(getDownloadHeat(0)).toBe(1);
+    expect(getDownloadHeat(99)).toBe(1);
+    expect(getDownloadHeat(100)).toBe(2);
+    expect(getDownloadHeat(999)).toBe(3);
+    expect(getDownloadHeat(1000)).toBe(4);
+    expect(getDownloadHeat(1_000_000)).toBe(10);
+    expect(getDownloadHeat(50_000_000)).toBe(10);
+  });
+
+  it("is monotonic in the download count", () => {
+    let prev = 0;
+    for (const count of [0, 50, 200, 800, 2000, 8000, 20000, 80000, 200000, 800000, 5_000_000]) {
+      const heat = getDownloadHeat(count);
+      expect(heat).toBeGreaterThanOrEqual(prev);
+      prev = heat;
+    }
+  });
+});
+
 describe("injectReleaseAssetDownloads", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -84,6 +105,8 @@ describe("injectReleaseAssetDownloads", () => {
     const link = document.querySelector('a[href*="/releases/download/"]') as HTMLElement;
     expect(badge.parentElement).toBe(link.parentElement);
     expect(badge.parentElement?.lastElementChild).toBe(badge);
+    // Carries the heat level so CSS can tint it by download volume.
+    expect(badge.dataset.betterGithubDlHeat).toBe(String(getDownloadHeat(1234)));
   });
 
   it("leaves assets without a matching count untouched", async () => {
