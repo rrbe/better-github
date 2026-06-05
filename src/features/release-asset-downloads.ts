@@ -58,18 +58,21 @@ export function parseAssetHref(
   return { tag: decode(segments.join("/")), name: decode(nameSeg) };
 }
 
-// The metadata column of an asset row holds the size + date spans. We append the
-// download badge there, before the size, so it lines up with native columns.
-function findMetaContainer(row: Element): HTMLElement | null {
-  const sizeSpan = row.querySelector<HTMLElement>("span.flex-grow-0");
-  if (sizeSpan?.parentElement) return sizeSpan.parentElement;
-  return (row.lastElementChild as HTMLElement) ?? null;
+// The badge lives at the right edge of the asset-name column (pushed there with
+// margin-left:auto in CSS), deliberately decoupled from the digest / size / date
+// columns so the variable-width count never shifts their alignment. Return the
+// top-level row child that contains the download link.
+function findNameColumn(link: Element, row: Element): HTMLElement | null {
+  for (const child of Array.from(row.children)) {
+    if (child.contains(link)) return child as HTMLElement;
+  }
+  return null;
 }
 
 function buildBadge(count: number): HTMLSpanElement {
   const formatted = count.toLocaleString();
   const badge = document.createElement("span");
-  badge.className = `${BADGE_CLASS} color-fg-muted flex-shrink-0 flex-grow-0 ml-2 tmp-ml-2 ml-sm-3 tmp-ml-sm-3 ml-md-4 tmp-ml-md-4`;
+  badge.className = `${BADGE_CLASS} color-fg-muted`;
   badge.title = t("assetDownloadsTitle", formatted);
   badge.innerHTML = `${DOWNLOAD_ICON}<span>${escapeHtml(formatted)}</span>`;
   return badge;
@@ -105,15 +108,9 @@ export async function injectReleaseAssetDownloads(): Promise<void> {
     const row = link.closest("li");
     if (!row || row.querySelector(`.${BADGE_CLASS}`)) continue;
 
-    const meta = findMetaContainer(row);
-    if (!meta) continue;
+    const nameCol = findNameColumn(link, row);
+    if (!nameCol) continue;
 
-    const badge = buildBadge(count);
-    const sizeSpan = meta.querySelector<HTMLElement>("span.flex-grow-0");
-    if (sizeSpan) {
-      meta.insertBefore(badge, sizeSpan);
-    } else {
-      meta.appendChild(badge);
-    }
+    nameCol.appendChild(buildBadge(count));
   }
 }

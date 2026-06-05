@@ -243,11 +243,17 @@ a.better-github-review-popover-item:hover {
   color: var(--fgColor-muted, var(--color-fg-muted, #656d76));
 }
 
-/* Release Asset Downloads — count appended to each asset row */
+/* Release Asset Downloads — count pinned to the right edge of the asset-name
+   column, right-aligned, so it never shifts the digest / size / date columns. */
 .better-github-asset-downloads {
   display: inline-flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 4px;
+  margin-left: auto;
+  padding-left: 16px;
+  padding-right: 16px;
+  flex-shrink: 0;
   white-space: nowrap;
   font-size: 12px;
   line-height: 18px;

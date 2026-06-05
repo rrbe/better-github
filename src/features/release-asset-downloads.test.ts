@@ -67,7 +67,7 @@ describe("injectReleaseAssetDownloads", () => {
     vi.restoreAllMocks();
   });
 
-  it("inserts a download badge before the size span, with formatted count", async () => {
+  it("appends the count to the asset-name column, right-aligned, with formatted count", async () => {
     document.body.innerHTML = `<ul>${assetRow("v1.0.0", "app.zip")}</ul>`;
     vi.mocked(fetchReleaseDownloads).mockResolvedValue([
       { tag: "v1.0.0", name: "app.zip", downloadCount: 1234 },
@@ -79,8 +79,11 @@ describe("injectReleaseAssetDownloads", () => {
     expect(badge).not.toBeNull();
     expect(badge.textContent).toBe((1234).toLocaleString());
     expect(badge.title).toBe(`Downloaded ${(1234).toLocaleString()} times`);
-    // Sits immediately before the native size span.
-    expect(badge.nextElementSibling?.classList.contains("size")).toBe(true);
+    // Lives in the same column as the download link (the name column), pushed to
+    // its end — decoupled from the digest / size / date columns.
+    const link = document.querySelector('a[href*="/releases/download/"]') as HTMLElement;
+    expect(badge.parentElement).toBe(link.parentElement);
+    expect(badge.parentElement?.lastElementChild).toBe(badge);
   });
 
   it("leaves assets without a matching count untouched", async () => {
