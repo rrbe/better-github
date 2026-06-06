@@ -81,7 +81,10 @@
   background-color: var(--overlay-bgColor, var(--color-canvas-overlay, #fff));
   border: 1px solid var(--borderColor-default, var(--color-border-default, #d0d7de));
   border-radius: 6px;
-  box-shadow: var(--shadow-floating-large, var(--color-shadow-large, 0 8px 24px rgba(140, 149, 159, 0.2)));
+  box-shadow: var(
+    --shadow-floating-large,
+    var(--color-shadow-large, 0 8px 24px rgba(140, 149, 159, 0.2))
+  );
 }
 
 .better-github-review-popover-open .better-github-review-popover {
@@ -243,6 +246,99 @@ a.better-github-review-popover-item:hover {
   color: var(--fgColor-muted, var(--color-fg-muted, #656d76));
 }
 
+/* Release Asset Downloads — count pinned to the right edge of the asset-name
+   column, right-aligned, so it never shifts the digest / size / date columns. */
+.better-github-asset-downloads {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-left: auto;
+  padding-left: 16px;
+  padding-right: 16px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  text-align: right;
+  text-decoration: none;
+  color: var(--fgColor-muted, var(--color-fg-muted, #656d76)) !important;
+}
+
+/* It's a link to the asset's download URL — surface that on hover. */
+.better-github-asset-downloads:hover {
+  text-decoration: underline;
+}
+
+.better-github-asset-downloads svg {
+  flex-shrink: 0;
+}
+
+/* Download heat — tint the count by volume: quiet (muted) for few downloads,
+   intensifying toward the same heat color as the file-age map for the most-
+   downloaded assets. Same color-mix blend, keyed to magnitude instead of
+   recency. Level 1 (fewest) stays the default muted, so it needs no rule. */
+.better-github-asset-downloads[data-better-github-dl-heat="2"] {
+  color: color-mix(
+    in srgb,
+    var(--better-github-heat-color) 12%,
+    var(--fgColor-muted, var(--color-fg-muted, #656d76))
+  ) !important;
+}
+.better-github-asset-downloads[data-better-github-dl-heat="3"] {
+  color: color-mix(
+    in srgb,
+    var(--better-github-heat-color) 22%,
+    var(--fgColor-muted, var(--color-fg-muted, #656d76))
+  ) !important;
+}
+.better-github-asset-downloads[data-better-github-dl-heat="4"] {
+  color: color-mix(
+    in srgb,
+    var(--better-github-heat-color) 33%,
+    var(--fgColor-muted, var(--color-fg-muted, #656d76))
+  ) !important;
+}
+.better-github-asset-downloads[data-better-github-dl-heat="5"] {
+  color: color-mix(
+    in srgb,
+    var(--better-github-heat-color) 44%,
+    var(--fgColor-muted, var(--color-fg-muted, #656d76))
+  ) !important;
+}
+.better-github-asset-downloads[data-better-github-dl-heat="6"] {
+  color: color-mix(
+    in srgb,
+    var(--better-github-heat-color) 56%,
+    var(--fgColor-muted, var(--color-fg-muted, #656d76))
+  ) !important;
+}
+.better-github-asset-downloads[data-better-github-dl-heat="7"] {
+  color: color-mix(
+    in srgb,
+    var(--better-github-heat-color) 67%,
+    var(--fgColor-muted, var(--color-fg-muted, #656d76))
+  ) !important;
+}
+.better-github-asset-downloads[data-better-github-dl-heat="8"] {
+  color: color-mix(
+    in srgb,
+    var(--better-github-heat-color) 78%,
+    var(--fgColor-muted, var(--color-fg-muted, #656d76))
+  ) !important;
+}
+.better-github-asset-downloads[data-better-github-dl-heat="9"] {
+  color: color-mix(
+    in srgb,
+    var(--better-github-heat-color) 89%,
+    var(--fgColor-muted, var(--color-fg-muted, #656d76))
+  ) !important;
+}
+.better-github-asset-downloads[data-better-github-dl-heat="10"] {
+  color: var(--better-github-heat-color) !important;
+}
+
 /* File Age Color — heat map for recent commits */
 :root {
   --better-github-heat-color: #c24e00;
@@ -325,8 +421,10 @@ a.better-github-review-popover-item:hover {
 
 /* PR Label Position */
 @keyframes better-github-detect-labels {
-  from { }
-  to { }
+  from {
+  }
+  to {
+  }
 }
 
 /* New React DOM: trigger animation when trailing badges container appears */
@@ -493,7 +591,9 @@ a.better-github-review-popover-item:hover {
   position: relative;
   cursor: pointer;
   pointer-events: auto !important;
-  transition: background-color 0.15s, color 0.15s;
+  transition:
+    background-color 0.15s,
+    color 0.15s;
 }
 
 .bg-wfs-counter-wrap:hover {
@@ -659,8 +759,13 @@ a.better-github-review-popover-item:hover {
 }
 
 @keyframes bg-wfs-skeleton-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
 }
 
 /* Height matches the real badges' outer box: line-height 18px + 1px border × 2 = 20px. */

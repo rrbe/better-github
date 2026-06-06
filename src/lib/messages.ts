@@ -69,6 +69,15 @@ export interface ForkInfo {
   stargazersCount: number;
 }
 
+export interface ReleaseAssetDownload {
+  /** The release tag the asset belongs to (raw `tag_name`, matches the download URL). */
+  tag: string;
+  /** Asset file name (matches the last segment of the download URL). */
+  name: string;
+  /** Number of times this asset file has been downloaded. */
+  downloadCount: number;
+}
+
 export type ServiceWorkerRequest =
   | { type: "FETCH_PR_BRANCHES"; owner: string; repo: string; state: string; page: number }
   | { type: "FETCH_PR_REVIEW_STATUSES"; owner: string; repo: string; prNumbers: number[] }
@@ -79,7 +88,8 @@ export type ServiceWorkerRequest =
   | { type: "FETCH_REPO_TAGS"; owner: string; repo: string }
   | { type: "FETCH_STARGAZERS"; owner: string; repo: string }
   | { type: "FETCH_WATCHERS"; owner: string; repo: string }
-  | { type: "FETCH_FORKS"; owner: string; repo: string };
+  | { type: "FETCH_FORKS"; owner: string; repo: string }
+  | { type: "FETCH_RELEASE_DOWNLOADS"; owner: string; repo: string; tag: string };
 
 export type ServiceWorkerResponse<T> =
   | { ok: true; data: T }

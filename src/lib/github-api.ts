@@ -1,4 +1,4 @@
-import type { ServiceWorkerRequest, PRBranchInfo, PRReviewStatus, ReviewThreadDetail, PRDiffStats, CommitDiffStats, PRApproveResult, TagInfo, StargazerInfo, WatcherInfo, ForkInfo } from "./messages";
+import type { ServiceWorkerRequest, PRBranchInfo, PRReviewStatus, ReviewThreadDetail, PRDiffStats, CommitDiffStats, PRApproveResult, TagInfo, StargazerInfo, WatcherInfo, ForkInfo, ReleaseAssetDownload } from "./messages";
 
 function sendMessage<T>(request: ServiceWorkerRequest): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -25,7 +25,7 @@ function sendMessage<T>(request: ServiceWorkerRequest): Promise<T> {
   });
 }
 
-export type { PRReviewStatus, ReviewThreadDetail, PRDiffStats, CommitDiffStats, PRApproveResult, TagInfo, StargazerInfo, WatcherInfo, ForkInfo };
+export type { PRReviewStatus, ReviewThreadDetail, PRDiffStats, CommitDiffStats, PRApproveResult, TagInfo, StargazerInfo, WatcherInfo, ForkInfo, ReleaseAssetDownload };
 
 export async function fetchPRBranches(
   owner: string,
@@ -199,6 +199,24 @@ export async function fetchForks(
     });
   } catch (err) {
     console.error("[Better GitHub] Failed to fetch forks:", err);
+    return [];
+  }
+}
+
+export async function fetchReleaseDownloads(
+  owner: string,
+  repo: string,
+  tag: string,
+): Promise<ReleaseAssetDownload[]> {
+  try {
+    return await sendMessage<ReleaseAssetDownload[]>({
+      type: "FETCH_RELEASE_DOWNLOADS",
+      owner,
+      repo,
+      tag,
+    });
+  } catch (err) {
+    console.error("[Better GitHub] Failed to fetch release downloads:", err);
     return [];
   }
 }

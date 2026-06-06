@@ -80,6 +80,10 @@
   "featReleaseTabDesc": {
     "message": "Add a Releases tab to the repository navigation bar for quick access."
   },
+  "featReleaseDownloadsName": { "message": "Release Asset Downloads" },
+  "featReleaseDownloadsDesc": {
+    "message": "Show how many times each release asset has been downloaded on the Releases page."
+  },
   "featWatchForkStarName": { "message": "Watch/Fork/Star Popup" },
   "featWatchForkStarDesc": {
     "message": "Hover over Watch, Fork, or Star counts to preview the list in a popup."
@@ -114,6 +118,10 @@
   "commitTagTitle": {
     "message": "Tag: $name$",
     "placeholders": { "name": { "content": "$1", "example": "v1.0.0" } }
+  },
+  "assetDownloadsTitle": {
+    "message": "Downloaded $count$ times",
+    "placeholders": { "count": { "content": "$1", "example": "1,234" } }
   },
   "copied": { "message": "Copied!" },
   "branchCopyTitle": { "message": "Click to copy branch name" },

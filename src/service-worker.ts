@@ -1,4 +1,4 @@
-import type { ServiceWorkerRequest, ServiceWorkerResponse, PRBranchInfo, PRReviewStatus, ReviewThreadDetail, PRDiffStats, CommitDiffStats, PRApproveResult, TagInfo, StargazerInfo, WatcherInfo, ForkInfo } from "./lib/messages";
+import type { ServiceWorkerRequest, ServiceWorkerResponse, PRBranchInfo, PRReviewStatus, ReviewThreadDetail, PRDiffStats, CommitDiffStats, PRApproveResult, TagInfo, StargazerInfo, WatcherInfo, ForkInfo, ReleaseAssetDownload } from "./lib/messages";
 
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
@@ -51,6 +51,15 @@ function getToken(): Promise<string> {
   });
 }
 
+// Headers for an anonymous-capable GitHub REST call: the given Accept media
+// type, plus a Bearer token when one is set (raises the rate limit on public
+// repos; required for private ones).
+function restHeaders(token: string, accept = "application/vnd.github.v3+json"): Record<string, string> {
+  const headers: Record<string, string> = { Accept: accept };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  return headers;
+}
+
 async function fetchPRBranches(
   owner: string,
   repo: string,
@@ -62,14 +71,7 @@ async function fetchPRBranches(
     const perPage = 30;
     const url = `https://api.github.com/repos/${owner}/${repo}/pulls?state=${state}&sort=updated&direction=desc&page=${page}&per_page=${perPage}`;
 
-    const token = await getToken();
-    const headers: Record<string, string> = {
-      Accept: "application/vnd.github.v3+json",
-    };
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
-
+    const headers = restHeaders(await getToken());
     const response = await fetch(url, { headers });
 
     if (!response.ok) {
@@ -360,12 +362,7 @@ async function fetchRepoTagsViaRest(
   repo: string,
   token: string,
 ): Promise<TagInfo[]> {
-  const headers: Record<string, string> = {
-    Accept: "application/vnd.github.v3+json",
-  };
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
+  const headers = restHeaders(token);
 
   const allTags: TagInfo[] = [];
   const maxPages = 3;
@@ -464,14 +461,7 @@ async function fetchStargazers(
 ): Promise<StargazerInfo[]> {
   const cacheKey = `cache:stargazers:${owner}/${repo}`;
   return cachedFetch<StargazerInfo[]>(cacheKey, async () => {
-    const token = await getToken();
-    const headers: Record<string, string> = {
-      Accept: "application/vnd.github.star+json",
-    };
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
-
+    const headers = restHeaders(await getToken(), "application/vnd.github.star+json");
     const url = `https://api.github.com/repos/${owner}/${repo}/stargazers?per_page=30`;
     const response = await fetch(url, { headers });
 
@@ -496,14 +486,7 @@ async function fetchWatchers(
 ): Promise<WatcherInfo[]> {
   const cacheKey = `cache:watchers:${owner}/${repo}`;
   return cachedFetch<WatcherInfo[]>(cacheKey, async () => {
-    const token = await getToken();
-    const headers: Record<string, string> = {
-      Accept: "application/vnd.github.v3+json",
-    };
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
-
+    const headers = restHeaders(await getToken());
     const url = `https://api.github.com/repos/${owner}/${repo}/subscribers?per_page=30`;
     const response = await fetch(url, { headers });
 
@@ -527,14 +510,7 @@ async function fetchForks(
 ): Promise<ForkInfo[]> {
   const cacheKey = `cache:forks:${owner}/${repo}`;
   return cachedFetch<ForkInfo[]>(cacheKey, async () => {
-    const token = await getToken();
-    const headers: Record<string, string> = {
-      Accept: "application/vnd.github.v3+json",
-    };
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
-
+    const headers = restHeaders(await getToken());
     const url = `https://api.github.com/repos/${owner}/${repo}/forks?sort=newest&per_page=30`;
     const response = await fetch(url, { headers });
 
@@ -551,6 +527,50 @@ async function fetchForks(
       description: fork.description,
       stargazersCount: fork.stargazers_count,
     }));
+  });
+}
+
+interface RawReleaseAsset {
+  name: string;
+  download_count: number;
+}
+
+interface RawRelease {
+  tag_name: string;
+  assets?: RawReleaseAsset[];
+}
+
+function mapReleaseAssets(release: RawRelease): ReleaseAssetDownload[] {
+  if (!release?.tag_name || !Array.isArray(release.assets)) return [];
+  return release.assets.map((asset) => ({
+    tag: release.tag_name,
+    name: asset.name,
+    downloadCount: asset.download_count,
+  }));
+}
+
+// Per-asset download counts for a single release, fetched by tag. The content
+// script asks only for tags whose assets are actually visible (the latest
+// release, plus any the user expands), so we never over-fetch the whole release
+// history. Works anonymously on public repos; a token only raises the rate limit.
+async function fetchReleaseDownloads(
+  owner: string,
+  repo: string,
+  tag: string,
+): Promise<ReleaseAssetDownload[]> {
+  const cacheKey = `cache:releasedl:${owner}/${repo}:tag:${tag}`;
+  return cachedFetch<ReleaseAssetDownload[]>(cacheKey, async () => {
+    const headers = restHeaders(await getToken(), "application/vnd.github+json");
+    const url = `https://api.github.com/repos/${owner}/${repo}/releases/tags/${encodeURIComponent(tag)}`;
+    const response = await fetch(url, { headers });
+
+    if (!response.ok) {
+      console.error(`[Better GitHub] Release downloads API error: ${response.status} ${response.statusText}`);
+      return [];
+    }
+
+    const release: RawRelease = await response.json();
+    return mapReleaseAssets(release);
   });
 }
 
@@ -576,6 +596,8 @@ async function handleMessage(request: ServiceWorkerRequest): Promise<ServiceWork
       return { ok: true, data: await fetchWatchers(request.owner, request.repo) };
     case "FETCH_FORKS":
       return { ok: true, data: await fetchForks(request.owner, request.repo) };
+    case "FETCH_RELEASE_DOWNLOADS":
+      return { ok: true, data: await fetchReleaseDownloads(request.owner, request.repo, request.tag) };
     default:
       return { ok: false, error: "Unknown message type" };
   }

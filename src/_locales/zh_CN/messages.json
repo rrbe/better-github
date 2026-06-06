@@ -80,6 +80,10 @@
   "featReleaseTabDesc": {
     "message": "在仓库导航栏添加一个 Releases 标签页，方便快速访问。"
   },
+  "featReleaseDownloadsName": { "message": "Release 资源下载量" },
+  "featReleaseDownloadsDesc": {
+    "message": "在 Releases 页面显示每个资源文件被下载的次数。"
+  },
   "featWatchForkStarName": { "message": "Watch/Fork/Star 弹窗" },
   "featWatchForkStarDesc": {
     "message": "悬停在 Watch、Fork 或 Star 数字上，即可在弹窗中预览列表。"
@@ -114,6 +118,10 @@
   "commitTagTitle": {
     "message": "Tag: $name$",
     "placeholders": { "name": { "content": "$1", "example": "v1.0.0" } }
+  },
+  "assetDownloadsTitle": {
+    "message": "已下载 $count$ 次",
+    "placeholders": { "count": { "content": "$1", "example": "1,234" } }
   },
   "copied": { "message": "已复制！" },
   "branchCopyTitle": { "message": "点击复制分支名" },

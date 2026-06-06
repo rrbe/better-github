@@ -4,6 +4,7 @@ import { injectPRBranchNames } from "./features/pr-branch-names";
 import { injectPRReviewStatus } from "./features/pr-review-status";
 import { injectPRDiffStats } from "./features/pr-diff-stats";
 import { injectReleasesTab } from "./features/release-tab";
+import { injectReleaseAssetDownloads, cleanupReleaseAssetDownloads } from "./features/release-asset-downloads";
 import { injectPRLabelPosition, cleanupPRLabelPosition } from "./features/pr-label-position";
 import { injectFileAgeColor } from "./features/file-age-color";
 import { injectPRNumberHighlight } from "./features/pr-number-highlight";
@@ -22,6 +23,7 @@ const FEATURE_KEYS = [
   "feature-pr-review-status",
   "feature-pr-diff-stats",
   "feature-release-tab",
+  "feature-release-downloads-count",
   "feature-pr-label-position",
   "feature-pr-approve-now",
   "feature-default-sort",
@@ -40,6 +42,7 @@ const FEATURE_CLASSES: Record<FeatureKey, string[]> = {
   "feature-pr-review-status": ["better-github-review-status"],
   "feature-pr-diff-stats": ["better-github-diff-stats", "bg-skeleton-pill--pr-diff"],
   "feature-release-tab": ["better-github-releases-tab"],
+  "feature-release-downloads-count": ["better-github-asset-downloads"],
   "feature-pr-label-position": ["better-github-label-prefix"],
   "feature-pr-approve-now": ["better-github-approve-now", "better-github-approve-dialog-overlay"],
   "feature-default-sort": [],
@@ -48,6 +51,15 @@ const FEATURE_CLASSES: Record<FeatureKey, string[]> = {
   "feature-better-top-repos": [],
   "feature-watch-fork-star-popup": ["bg-wfs-popup"],
   "feature-pr-collapse-expand": ["better-github-toggle-tree", "better-github-collapse-expand"],
+};
+
+// Features that hold teardown state (observers, listeners) beyond their injected
+// DOM run a cleanup hook on disable, before removeFeatureElements() strips their
+// elements by class.
+const FEATURE_CLEANUPS: Partial<Record<FeatureKey, () => void>> = {
+  "feature-pr-label-position": cleanupPRLabelPosition,
+  "feature-watch-fork-star-popup": cleanupWatchForkStarPopup,
+  "feature-release-downloads-count": cleanupReleaseAssetDownloads,
 };
 
 function isExtensionValid(): boolean {
@@ -96,6 +108,9 @@ function injectFeature(key: FeatureKey): void {
     case "feature-release-tab":
       injectReleasesTab();
       break;
+    case "feature-release-downloads-count":
+      injectReleaseAssetDownloads();
+      break;
     case "feature-pr-label-position":
       injectPRLabelPosition();
       break;
@@ -137,12 +152,7 @@ if (isExtensionValid()) {
       if (enabled) {
         injectFeature(key);
       } else {
-        if (key === "feature-pr-label-position") {
-          cleanupPRLabelPosition();
-        }
-        if (key === "feature-watch-fork-star-popup") {
-          cleanupWatchForkStarPopup();
-        }
+        FEATURE_CLEANUPS[key]?.();
         removeFeatureElements(key);
       }
     }
