@@ -53,6 +53,15 @@ const FEATURE_CLASSES: Record<FeatureKey, string[]> = {
   "feature-pr-collapse-expand": ["better-github-toggle-tree", "better-github-collapse-expand"],
 };
 
+// Features that hold teardown state (observers, listeners) beyond their injected
+// DOM run a cleanup hook on disable, before removeFeatureElements() strips their
+// elements by class.
+const FEATURE_CLEANUPS: Partial<Record<FeatureKey, () => void>> = {
+  "feature-pr-label-position": cleanupPRLabelPosition,
+  "feature-watch-fork-star-popup": cleanupWatchForkStarPopup,
+  "feature-release-downloads-count": cleanupReleaseAssetDownloads,
+};
+
 function isExtensionValid(): boolean {
   try {
     return !!chrome.runtime?.id;
@@ -143,15 +152,7 @@ if (isExtensionValid()) {
       if (enabled) {
         injectFeature(key);
       } else {
-        if (key === "feature-pr-label-position") {
-          cleanupPRLabelPosition();
-        }
-        if (key === "feature-watch-fork-star-popup") {
-          cleanupWatchForkStarPopup();
-        }
-        if (key === "feature-release-downloads-count") {
-          cleanupReleaseAssetDownloads();
-        }
+        FEATURE_CLEANUPS[key]?.();
         removeFeatureElements(key);
       }
     }
