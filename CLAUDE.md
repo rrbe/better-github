@@ -10,6 +10,20 @@ Use `pnpm`, not npm or yarn.
 pnpm build
 ```
 
+## Release / Version Bump
+
+When asked to bump the version (e.g. "发 1.11.0"), do **all** of these — the
+tag is part of the bump, not an optional extra:
+
+1. Update the version in **both** `package.json` and `static/manifest.json`
+   (they must stay in sync; the test mock in `options.test.ts` is unrelated).
+2. `pnpm build` and confirm `dist/manifest.json` shows the new version.
+3. Commit straight to `main` — no branch/PR for version bumps — with
+   `chore: bump version to X.Y.Z`, then `git push origin main`.
+4. **Create and push the matching tag**: `git tag vX.Y.Z <bump-commit>` then
+   `git push origin vX.Y.Z`. Tags are lightweight and point at the bump commit
+   (see `v1.10.1`, `v1.11.0`). Every release commit has one — don't skip it.
+
 ## Test
 
 Vitest, with `happy-dom`. Tests live next to the code as `*.test.ts`.
