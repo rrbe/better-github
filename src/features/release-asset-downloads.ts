@@ -100,6 +100,7 @@ interface PendingAsset {
 }
 
 let observer: MutationObserver | null = null;
+let rafId: number | null = null;
 
 // Fetch counts for a single release tag, then badge each of its visible assets.
 // One fetch per tag (the service worker caches + coalesces), so the latest
@@ -153,6 +154,10 @@ async function processVisibleAssets(info: RepoInfo): Promise<void> {
 export async function injectReleaseAssetDownloads(): Promise<void> {
   observer?.disconnect();
   observer = null;
+  if (rafId !== null) {
+    cancelAnimationFrame(rafId);
+    rafId = null;
+  }
 
   if (!isReleasesPage()) return;
 
@@ -163,8 +168,14 @@ export async function injectReleaseAssetDownloads(): Promise<void> {
   // ("Show all N assets"), and lazy-loads every other release's assets via
   // <include-fragment> on expand. Watch for those late-arriving rows, then
   // process whatever is already on the page.
+  // Coalesce mutation bursts (lazy-loads fire many in a row) into a single
+  // full-page scan per frame, instead of re-scanning on every batch.
   observer = new MutationObserver(() => {
-    void processVisibleAssets(info);
+    if (rafId !== null) return;
+    rafId = requestAnimationFrame(() => {
+      rafId = null;
+      void processVisibleAssets(info);
+    });
   });
   observer.observe(document.body, { childList: true, subtree: true });
 
@@ -174,6 +185,10 @@ export async function injectReleaseAssetDownloads(): Promise<void> {
 export function cleanupReleaseAssetDownloads(): void {
   observer?.disconnect();
   observer = null;
+  if (rafId !== null) {
+    cancelAnimationFrame(rafId);
+    rafId = null;
+  }
   // Drop claim markers so re-enabling the feature re-badges the same rows.
   document.querySelectorAll<HTMLElement>("[data-bg-dl-seen]").forEach((el) => {
     delete el.dataset.bgDlSeen;
