@@ -7,7 +7,6 @@ import { injectReleasesTab } from "./features/release-tab";
 import { injectReleaseAssetDownloads, cleanupReleaseAssetDownloads } from "./features/release-asset-downloads";
 import { injectPRLabelPosition, cleanupPRLabelPosition } from "./features/pr-label-position";
 import { injectFileAgeColor } from "./features/file-age-color";
-import { injectPRNumberHighlight } from "./features/pr-number-highlight";
 import { injectPRApproveNow } from "./features/pr-approve-now";
 import { applyDefaultSort } from "./features/default-sort";
 import { injectCommitTags } from "./features/commit-tags";
@@ -170,7 +169,6 @@ onPageReady(async () => {
 
   // Always-on features
   injectFileAgeColor();
-  injectPRNumberHighlight();
 
   // Toggleable features
   const flags = await getFeatureFlags();
