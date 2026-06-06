@@ -315,14 +315,6 @@ a.better-github-review-popover-item:hover {
   /* Oldest — stays default muted color, no override needed */
 }
 
-/* PR Number Highlight — tint the leading "#1234" with GitHub's native
-   attention yellow so it adapts to light/dark like the rest of the
-   extension. Same variable/fallback chain as .better-github-review-unresolved.
-   No bold, so it reads as a soft accent on the muted meta line. */
-.better-github-pr-number {
-  color: var(--fgColor-attention, var(--color-attention-fg, #9a6700)) !important;
-}
-
 /* PR Label Position */
 @keyframes better-github-detect-labels {
   from { }
