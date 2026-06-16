@@ -112,6 +112,35 @@ describe("injectContributorCard", () => {
     expect(text).not.toContain("PR ·"); // history row omitted when prTotal is 0
   });
 
+  it("re-injects after GitHub swaps the content node (avatar→username for same user)", async () => {
+    fetchContributorInfo.mockResolvedValue(baseInfo());
+    injectContributorCard();
+    const card = hovercard("octocat");
+    document.body.appendChild(card);
+    await flush();
+    expect(document.querySelectorAll(BLOCK)).toHaveLength(1); // appeared
+
+    // GitHub destroys the old content node (+ our block) and swaps in a fresh
+    // one for the same user — the "flash then gone" the user reported.
+    const message = card.querySelector<HTMLElement>(".Popover-message")!;
+    message.replaceChildren();
+    expect(document.querySelector(BLOCK)).toBeNull(); // momentarily gone
+    const fresh = document.createElement("div");
+    fresh.setAttribute(
+      "data-hydro-view",
+      JSON.stringify({
+        event_type: "user-hovercard-hover",
+        payload: { card_user_login: "octocat" },
+      }),
+    );
+    fresh.innerHTML = '<div class="content">card</div>';
+    message.appendChild(fresh);
+    await flush();
+
+    // Re-injected into the new node (synchronously, from the per-login cache).
+    expect(document.querySelectorAll(BLOCK)).toHaveLength(1);
+  });
+
   it("ignores non-user hovercards (repo/issue cards reuse the same container)", async () => {
     fetchContributorInfo.mockResolvedValue(baseInfo());
     injectContributorCard();

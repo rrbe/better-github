@@ -102,34 +102,49 @@ function buildBlock(info: ContributorInfo): HTMLElement {
   return block;
 }
 
-// Fetch first, then append the finished block exactly once. We deliberately do
-// NOT show a loading row and then swap it: tearing out a node under the cursor
-// (replaceChildren) mid-hover fires a spurious mouseout that GitHub reads as
-// "left the card", dismissing it. A single append never removes a hovered node.
-// `data-bg-card` on the content node is a synchronous re-entry guard so two
-// scans in the same populate don't both fetch.
-async function decorate(content: HTMLElement, login: string): Promise<void> {
-  if (content.dataset.bgCard) return;
-  content.dataset.bgCard = login;
+// GitHub swaps in a fresh content node whenever you move between a user's avatar
+// and username (and may re-render again as the card settles), which destroys any
+// child we appended. So we must (re)inject whenever our block is missing — never
+// mark GitHub's node as "done", or one wipe leaves it gone for good. Data is
+// cached per login in-page so re-injection is synchronous and flicker-free; a
+// pending set stops duplicate fetches for the same login.
+const infoCache = new Map<string, ContributorInfo | null>();
+const fetching = new Set<string>();
 
-  const info = getRepoInfo();
-  const data = await fetchContributorInfo(login, info?.owner, info?.repo);
+function currentContent(): HTMLElement | null {
+  const message = document.querySelector<HTMLElement>(".js-hovercard-content .Popover-message");
+  return message?.querySelector<HTMLElement>("[data-hydro-view]") ?? null;
+}
 
-  // The hovercard may have closed or switched users while we fetched.
-  if (!content.isConnected || userLogin(content) !== login) return;
-  if (!data) return;
+function inject(content: HTMLElement | null, login: string): void {
+  // Bail if disabled, the card closed, switched users, or we're already in it.
+  if (!observer || !content || userLogin(content) !== login) return;
+  if (content.querySelector(`.${BLOCK_CLASS}`)) return;
+  const data = infoCache.get(login);
+  if (!data) return; // not fetched yet, or fetched with no data
   content.appendChild(buildBlock(data));
 }
 
 function scan(): void {
-  const message = document.querySelector<HTMLElement>(".js-hovercard-content .Popover-message");
-  if (!message) return;
-  const content = message.querySelector<HTMLElement>("[data-hydro-view]");
+  const content = currentContent();
   if (!content) return;
-  if (content.dataset.bgCard) return; // pending or already decorated this populate
   const login = userLogin(content);
   if (!login) return;
-  void decorate(content, login);
+  if (content.querySelector(`.${BLOCK_CLASS}`)) return; // already shown on this card
+  if (infoCache.has(login)) {
+    inject(content, login);
+    return;
+  }
+  if (fetching.has(login)) return;
+  fetching.add(login);
+  const repo = getRepoInfo();
+  fetchContributorInfo(login, repo?.owner, repo?.repo)
+    .then((data) => {
+      fetching.delete(login);
+      infoCache.set(login, data ?? null);
+      inject(currentContent(), login); // inject into whatever card is up now
+    })
+    .catch(() => fetching.delete(login));
 }
 
 let observer: MutationObserver | null = null;
@@ -158,5 +173,7 @@ export function cleanupContributorCard(): void {
     cancelAnimationFrame(rafId);
     rafId = 0;
   }
+  fetching.clear();
+  infoCache.clear();
   document.querySelectorAll(`.${BLOCK_CLASS}`).forEach((el) => el.remove());
 }
