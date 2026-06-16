@@ -14,6 +14,7 @@ const FEATURE_KEYS = [
   "feature-better-top-repos",
   "feature-watch-fork-star-popup",
   "feature-pr-collapse-expand",
+  "feature-contributor-card",
 ] as const;
 
 interface ChromeStub {

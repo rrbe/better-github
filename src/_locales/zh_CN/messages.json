@@ -60,6 +60,31 @@
   "featPrLabelPositionDesc": {
     "message": "将标签移到 PR 标题前面，便于查看和扫读。"
   },
+  "featContributorCardName": { "message": "贡献者背景卡" },
+  "featContributorCardDesc": {
+    "message": "在 hover 用户名弹出的卡片里追加客观事实（账号年龄、与本仓库关系、历史 merge 率、活跃度），帮你判断账号。只摆事实、不打分。活跃度需要令牌。"
+  },
+  "ccAge": { "message": "账号年龄" },
+  "ccRepo": { "message": "本仓库" },
+  "ccHistory": { "message": "历史 PR" },
+  "ccActivity": { "message": "活跃度" },
+  "ccUnitDay": { "message": "天" },
+  "ccUnitDays": { "message": "天" },
+  "ccUnitMonth": { "message": "个月" },
+  "ccUnitMonths": { "message": "个月" },
+  "ccUnitYear": { "message": "年" },
+  "ccUnitYears": { "message": "年" },
+  "ccFirstTime": { "message": "首次贡献者" },
+  "ccReturning": {
+    "message": "已有 $count$ 个合并 PR",
+    "placeholders": { "count": { "content": "$1", "example": "4" } }
+  },
+  "ccMerged": { "message": "合并" },
+  "ccContribs": {
+    "message": "近一年 $count$ 次贡献",
+    "placeholders": { "count": { "content": "$1", "example": "1,240" } }
+  },
+  "ccNeedToken": { "message": "🔒 连接令牌后可见" },
   "featPrApproveNowName": { "message": "PR 快速批准" },
   "featPrApproveNowDesc": {
     "message": "在 PR 详情页的 Reviewers 侧边栏添加「立即批准」快捷入口。需要令牌。"

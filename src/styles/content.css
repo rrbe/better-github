@@ -824,3 +824,41 @@ a.better-github-review-popover-item:hover {
   color: var(--fgColor-default, var(--color-fg-default, #24292f));
   background: var(--bgColor-muted, var(--color-canvas-subtle, #f6f8fa));
 }
+
+/* Contributor background card — a block of objective facts appended to the
+   bottom of GitHub's native user hovercard. Neutral, no scoring/red. */
+.better-github-contributor-card {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--borderColor-muted, var(--color-border-muted, #d8dee4));
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.better-github-contributor-card-header {
+  margin-bottom: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--fgColor-muted, var(--color-fg-muted, #656d76));
+}
+
+.better-github-contributor-card-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.better-github-contributor-card-label {
+  flex-shrink: 0;
+  min-width: 72px;
+  color: var(--fgColor-muted, var(--color-fg-muted, #656d76));
+}
+
+.better-github-contributor-card-value {
+  color: var(--fgColor-default, var(--color-fg-default, #24292f));
+}
+
+.better-github-contributor-card-loading {
+  color: var(--fgColor-muted, var(--color-fg-muted, #656d76));
+}

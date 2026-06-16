@@ -4,7 +4,10 @@ import { injectPRBranchNames } from "./features/pr-branch-names";
 import { injectPRReviewStatus } from "./features/pr-review-status";
 import { injectPRDiffStats } from "./features/pr-diff-stats";
 import { injectReleasesTab } from "./features/release-tab";
-import { injectReleaseAssetDownloads, cleanupReleaseAssetDownloads } from "./features/release-asset-downloads";
+import {
+  injectReleaseAssetDownloads,
+  cleanupReleaseAssetDownloads,
+} from "./features/release-asset-downloads";
 import { injectPRLabelPosition, cleanupPRLabelPosition } from "./features/pr-label-position";
 import { injectFileAgeColor } from "./features/file-age-color";
 import { injectPRApproveNow } from "./features/pr-approve-now";
@@ -12,8 +15,12 @@ import { applyDefaultSort } from "./features/default-sort";
 import { injectCommitTags } from "./features/commit-tags";
 import { injectCommitDiffStats } from "./features/commit-diff-stats";
 import { injectBetterTopRepos } from "./features/better-top-repos";
-import { cleanupWatchForkStarPopup, injectWatchForkStarPopup } from "./features/watch-fork-star-popup";
+import {
+  cleanupWatchForkStarPopup,
+  injectWatchForkStarPopup,
+} from "./features/watch-fork-star-popup";
 import { injectPRCollapseExpand } from "./features/pr-collapse-expand";
+import { injectContributorCard, cleanupContributorCard } from "./features/contributor-card";
 import { reserveInfoRowSkeletons } from "./lib/info-row-skeleton";
 import { applyPageMarker } from "./lib/page-marker";
 
@@ -31,6 +38,7 @@ const FEATURE_KEYS = [
   "feature-better-top-repos",
   "feature-watch-fork-star-popup",
   "feature-pr-collapse-expand",
+  "feature-contributor-card",
 ] as const;
 
 type FeatureKey = (typeof FEATURE_KEYS)[number];
@@ -50,6 +58,7 @@ const FEATURE_CLASSES: Record<FeatureKey, string[]> = {
   "feature-better-top-repos": [],
   "feature-watch-fork-star-popup": ["bg-wfs-popup"],
   "feature-pr-collapse-expand": ["better-github-toggle-tree", "better-github-collapse-expand"],
+  "feature-contributor-card": ["better-github-contributor-card"],
 };
 
 // Features that hold teardown state (observers, listeners) beyond their injected
@@ -59,6 +68,7 @@ const FEATURE_CLEANUPS: Partial<Record<FeatureKey, () => void>> = {
   "feature-pr-label-position": cleanupPRLabelPosition,
   "feature-watch-fork-star-popup": cleanupWatchForkStarPopup,
   "feature-release-downloads-count": cleanupReleaseAssetDownloads,
+  "feature-contributor-card": cleanupContributorCard,
 };
 
 function isExtensionValid(): boolean {
@@ -133,6 +143,9 @@ function injectFeature(key: FeatureKey): void {
       break;
     case "feature-pr-collapse-expand":
       injectPRCollapseExpand();
+      break;
+    case "feature-contributor-card":
+      injectContributorCard();
       break;
   }
 }

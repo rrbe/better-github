@@ -60,6 +60,31 @@
   "featPrLabelPositionDesc": {
     "message": "Move labels to the front of PR titles for better visibility and scanning."
   },
+  "featContributorCardName": { "message": "Contributor Background Card" },
+  "featContributorCardDesc": {
+    "message": "Add objective facts (account age, relation to this repo, historical merge rate, activity) to the hovercard shown when you hover a username. Facts only — no scoring. Activity needs a token."
+  },
+  "ccAge": { "message": "Account age" },
+  "ccRepo": { "message": "This repo" },
+  "ccHistory": { "message": "PR history" },
+  "ccActivity": { "message": "Activity" },
+  "ccUnitDay": { "message": "day" },
+  "ccUnitDays": { "message": "days" },
+  "ccUnitMonth": { "message": "month" },
+  "ccUnitMonths": { "message": "months" },
+  "ccUnitYear": { "message": "year" },
+  "ccUnitYears": { "message": "years" },
+  "ccFirstTime": { "message": "First-time contributor" },
+  "ccReturning": {
+    "message": "$count$ merged PRs",
+    "placeholders": { "count": { "content": "$1", "example": "4" } }
+  },
+  "ccMerged": { "message": "merged" },
+  "ccContribs": {
+    "message": "$count$ contributions in the past year",
+    "placeholders": { "count": { "content": "$1", "example": "1,240" } }
+  },
+  "ccNeedToken": { "message": "🔒 Connect a token to see" },
   "featPrApproveNowName": { "message": "PR Approve Now" },
   "featPrApproveNowDesc": {
     "message": "Add an \"approve now\" shortcut to the Reviewers sidebar on PR detail pages. Requires a token."
