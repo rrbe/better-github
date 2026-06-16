@@ -68,6 +68,30 @@
   "featPrCollapseExpandDesc": {
     "message": "在 PR、Commit 和比較頁面新增一個摺疊或展開所有檔案差異的按鈕。"
   },
+  "featLoadBearingName": { "message": "承重檔案高亮" },
+  "featLoadBearingDesc": {
+    "message": "在 PR 的變更檔案中標記承重檔案（相依清單、安裝指令稿、CI 與建置設定），避免大體量 diff 裡漏看影響很大的小改動。"
+  },
+  "lbLabelDeps": { "message": "相依清單" },
+  "lbLabelInstall": { "message": "安裝指令稿" },
+  "lbLabelCi": { "message": "CI 設定" },
+  "lbLabelBuild": { "message": "建置設定" },
+  "lbLabelSensitive": { "message": "敏感檔案" },
+  "lbTipDeps": {
+    "message": "相依清單或 lockfile —— 關注新增/變更的相依套件，警惕供應鏈風險。"
+  },
+  "lbTipInstall": {
+    "message": "會在安裝或 git 生命週期中執行程式碼 —— 留意是否有非預期的指令。"
+  },
+  "lbTipCi": {
+    "message": "CI / 自動化設定 —— 以儲存庫密鑰和較高權限執行。"
+  },
+  "lbTipBuild": {
+    "message": "建置或打包設定 —— 可能在建置時執行程式碼或改變產物。"
+  },
+  "lbTipSensitive": {
+    "message": "安全敏感檔案（擁有者、憑證或儲存庫來源設定）—— 請仔細審閱。"
+  },
   "featCommitTagsName": { "message": "Commit Tags" },
   "featCommitTagsDesc": {
     "message": "在 Commits 清單頁顯示 git tags，便於識別。"

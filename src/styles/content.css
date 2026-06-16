@@ -824,3 +824,34 @@ a.better-github-review-popover-item:hover {
   color: var(--fgColor-default, var(--color-fg-default, #24292f));
   background: var(--bgColor-muted, var(--color-canvas-subtle, #f6f8fa));
 }
+
+/* Load-bearing file highlight — a small amber pill next to the filename in a
+   PR's changed-files list. Sized to sit inline with GitHub's own file header. */
+.better-github-load-bearing {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 8px;
+  padding: 0 7px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  white-space: nowrap;
+  vertical-align: middle;
+  border: 1px solid transparent;
+  border-radius: 2em;
+  color: var(--fgColor-attention, var(--color-attention-fg, #9a6700));
+  background-color: var(--bgColor-attention-muted, var(--color-attention-subtle, #fff8c5));
+}
+
+.better-github-load-bearing-icon {
+  font-size: 11px;
+  line-height: 1;
+}
+
+/* Sensitive files (ownership, credentials, registry config) get the danger
+   palette so they stand out from the merely build/CI-related ones. */
+.better-github-load-bearing--sensitive {
+  color: var(--fgColor-danger, var(--color-danger-fg, #cf222e));
+  background-color: var(--bgColor-danger-muted, var(--color-danger-subtle, #ffebe9));
+}

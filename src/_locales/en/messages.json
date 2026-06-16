@@ -68,6 +68,30 @@
   "featPrCollapseExpandDesc": {
     "message": "Add a button to collapse or expand all file diffs on PR, commit, and compare pages."
   },
+  "featLoadBearingName": { "message": "Load-bearing File Highlight" },
+  "featLoadBearingDesc": {
+    "message": "Flag load-bearing files (dependency manifests, install scripts, CI and build config) in a PR's changed files, so a small high-impact change isn't missed in a large diff."
+  },
+  "lbLabelDeps": { "message": "Dependencies" },
+  "lbLabelInstall": { "message": "Install Script" },
+  "lbLabelCi": { "message": "CI Config" },
+  "lbLabelBuild": { "message": "Build Config" },
+  "lbLabelSensitive": { "message": "Sensitive File" },
+  "lbTipDeps": {
+    "message": "Dependency manifest or lockfile — review added or changed dependencies for supply-chain risk."
+  },
+  "lbTipInstall": {
+    "message": "Runs code during install or the git lifecycle — inspect for unexpected commands."
+  },
+  "lbTipCi": {
+    "message": "CI / automation config — runs with repository secrets and elevated permissions."
+  },
+  "lbTipBuild": {
+    "message": "Build or bundler config — can execute code at build time or alter the shipped output."
+  },
+  "lbTipSensitive": {
+    "message": "Security-sensitive file (ownership, credentials, or registry config) — review carefully."
+  },
   "featCommitTagsName": { "message": "Commit Tags" },
   "featCommitTagsDesc": {
     "message": "Show git tags on the commits list page for easy identification."

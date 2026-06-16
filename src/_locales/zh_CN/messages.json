@@ -68,6 +68,30 @@
   "featPrCollapseExpandDesc": {
     "message": "在 PR、Commit 和对比页面添加一个折叠或展开所有文件差异的按钮。"
   },
+  "featLoadBearingName": { "message": "承重文件高亮" },
+  "featLoadBearingDesc": {
+    "message": "在 PR 的变更文件中标记承重文件（依赖清单、安装脚本、CI 与构建配置），避免大体量 diff 里漏看影响很大的小改动。"
+  },
+  "lbLabelDeps": { "message": "依赖清单" },
+  "lbLabelInstall": { "message": "安装脚本" },
+  "lbLabelCi": { "message": "CI 配置" },
+  "lbLabelBuild": { "message": "构建配置" },
+  "lbLabelSensitive": { "message": "敏感文件" },
+  "lbTipDeps": {
+    "message": "依赖清单或 lockfile —— 关注新增/变更的依赖，警惕供应链风险。"
+  },
+  "lbTipInstall": {
+    "message": "会在安装或 git 生命周期中执行代码 —— 留意是否有意外命令。"
+  },
+  "lbTipCi": {
+    "message": "CI / 自动化配置 —— 以仓库密钥和较高权限运行。"
+  },
+  "lbTipBuild": {
+    "message": "构建或打包配置 —— 可能在构建时执行代码或改变产物。"
+  },
+  "lbTipSensitive": {
+    "message": "安全敏感文件（归属、凭据或仓库源配置）—— 请仔细审阅。"
+  },
   "featCommitTagsName": { "message": "Commit Tags" },
   "featCommitTagsDesc": {
     "message": "在 Commits 列表页显示 git tags，便于识别。"
