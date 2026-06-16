@@ -59,9 +59,18 @@ function row(labelKey: string, value: string): HTMLElement {
   return r;
 }
 
-/** Build the rows once the data has arrived. */
-function fillBlock(block: HTMLElement, info: ContributorInfo): void {
-  block.replaceChildren(header());
+function header(): HTMLElement {
+  const h = document.createElement("div");
+  h.className = `${BLOCK_CLASS}-header`;
+  h.textContent = "Better GitHub";
+  return h;
+}
+
+/** Build the fact block in full (the fetched data is already in hand). */
+function buildBlock(info: ContributorInfo): HTMLElement {
+  const block = document.createElement("div");
+  block.className = BLOCK_CLASS;
+  block.appendChild(header());
 
   const age = accountAge(Date.parse(info.createdAt), Date.now());
   const created = info.createdAt.slice(0, 7); // YYYY-MM
@@ -90,40 +99,26 @@ function fillBlock(block: HTMLElement, info: ContributorInfo): void {
       ? t("ccContribs", String(info.contributionsLastYear))
       : t("ccNeedToken");
   block.appendChild(row("ccActivity", activity));
-}
-
-function header(): HTMLElement {
-  const h = document.createElement("div");
-  h.className = `${BLOCK_CLASS}-header`;
-  h.textContent = "Better GitHub";
-  return h;
-}
-
-function loadingBlock(login: string): HTMLElement {
-  const block = document.createElement("div");
-  block.className = BLOCK_CLASS;
-  block.dataset.login = login;
-  const loading = document.createElement("div");
-  loading.className = `${BLOCK_CLASS}-row ${BLOCK_CLASS}-loading`;
-  loading.textContent = t("loading");
-  block.append(header(), loading);
   return block;
 }
 
+// Fetch first, then append the finished block exactly once. We deliberately do
+// NOT show a loading row and then swap it: tearing out a node under the cursor
+// (replaceChildren) mid-hover fires a spurious mouseout that GitHub reads as
+// "left the card", dismissing it. A single append never removes a hovered node.
+// `data-bg-card` on the content node is a synchronous re-entry guard so two
+// scans in the same populate don't both fetch.
 async function decorate(content: HTMLElement, login: string): Promise<void> {
-  const block = loadingBlock(login);
-  content.appendChild(block);
+  if (content.dataset.bgCard) return;
+  content.dataset.bgCard = login;
 
   const info = getRepoInfo();
   const data = await fetchContributorInfo(login, info?.owner, info?.repo);
 
   // The hovercard may have closed or switched users while we fetched.
-  if (!block.isConnected || block.dataset.login !== login) return;
-  if (!data) {
-    block.remove();
-    return;
-  }
-  fillBlock(block, data);
+  if (!content.isConnected || userLogin(content) !== login) return;
+  if (!data) return;
+  content.appendChild(buildBlock(data));
 }
 
 function scan(): void {
@@ -131,7 +126,7 @@ function scan(): void {
   if (!message) return;
   const content = message.querySelector<HTMLElement>("[data-hydro-view]");
   if (!content) return;
-  if (message.querySelector(`.${BLOCK_CLASS}`)) return; // already decorated this populate
+  if (content.dataset.bgCard) return; // pending or already decorated this populate
   const login = userLogin(content);
   if (!login) return;
   void decorate(content, login);

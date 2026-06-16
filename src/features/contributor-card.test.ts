@@ -122,13 +122,30 @@ describe("injectContributorCard", () => {
     expect(document.querySelector(BLOCK)).toBeNull();
   });
 
-  it("removes its block when no data comes back", async () => {
+  it("adds no block when no data comes back", async () => {
     fetchContributorInfo.mockResolvedValue(null);
     injectContributorCard();
     document.body.appendChild(hovercard("ghost"));
     await flush();
 
     expect(document.querySelector(BLOCK)).toBeNull();
+  });
+
+  it("appends the block once, only after data arrives (no loading swap)", async () => {
+    // A loading→fill swap (replaceChildren) tears out the node under the cursor
+    // and dismisses GitHub's hovercard, so the block must appear in one append.
+    let resolve!: (info: ContributorInfo) => void;
+    fetchContributorInfo.mockReturnValue(new Promise((r) => (resolve = r)));
+    injectContributorCard();
+    document.body.appendChild(hovercard("octocat"));
+    await flush();
+
+    expect(document.querySelector(BLOCK)).toBeNull(); // nothing rendered while pending
+
+    resolve(baseInfo());
+    await flush();
+
+    expect(document.querySelectorAll(BLOCK)).toHaveLength(1);
   });
 
   it("does not double-decorate the same populated card", async () => {

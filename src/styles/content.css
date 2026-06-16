@@ -858,7 +858,3 @@ a.better-github-review-popover-item:hover {
 .better-github-contributor-card-value {
   color: var(--fgColor-default, var(--color-fg-default, #24292f));
 }
-
-.better-github-contributor-card-loading {
-  color: var(--fgColor-muted, var(--color-fg-muted, #656d76));
-}
