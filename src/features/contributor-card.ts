@@ -1,16 +1,21 @@
 // Contributor background card.
 //
-// GitHub already shows a hovercard when you hover a username. We append a block
-// of *objective facts* to the bottom of it — account age, relation to this repo,
-// historical merge rate, activity — so the reader can judge whether an account
-// looks suspicious. Facts only: no score, no "suspicious" label, no red. See
-// docs/pr-signals-plan.md.
+// GitHub shows a hovercard when you hover a username. We attach a panel of
+// *objective facts* to it — account age, relation to this repo, historical merge
+// rate, activity — so the reader can judge whether an account looks suspicious.
+// Facts only: no score, no "suspicious" label, no red. See docs/pr-signals-plan.md.
 //
-// DOM verified against a live page (2026-06): the hovercard is a persistent,
-// reused container `.js-hovercard-content > .Popover-message`; GitHub drops the
-// fetched content in as a `<div data-hydro-view='{...}'>` whose JSON payload
-// carries `event_type: "user-hovercard-hover"` and `payload.card_user_login`.
-// We observe for that content, read the login from the payload, and append.
+// DOM verified against a live page (2026-06):
+//   .js-hovercard-content                ← the reused popover root; STABLE
+//     └ .Popover-message                 ← same node across hovers, but GitHub
+//         └ [data-hydro-view]            ←   replaces its innerHTML on every
+//                                            avatar↔username move, so anything we
+//                                            put *inside* it gets wiped (flicker).
+// The hydro-view payload carries `event_type: "user-hovercard-hover"` and
+// `payload.card_user_login`. We therefore anchor our panel as a child of the
+// STABLE `.js-hovercard-content` (a sibling after `.Popover-message`), and only
+// rebuild it when the login actually changes — so same-user content swaps never
+// touch it, and it never flickers.
 import { getRepoInfo } from "../lib/page-detect";
 import { fetchContributorInfo } from "../lib/github-api";
 import {
@@ -22,7 +27,7 @@ import {
 import type { ContributorInfo } from "../lib/messages";
 import { t } from "../lib/i18n";
 
-const BLOCK_CLASS = "better-github-contributor-card";
+const PANEL_CLASS = "better-github-contributor-card";
 
 /** Read the login from a hovercard content root's hydro-view payload, but only
  * when it's a *user* hovercard (repos/issues reuse the same container). */
@@ -48,12 +53,12 @@ function ageUnitWord(age: AccountAge): string {
 
 function row(labelKey: string, value: string): HTMLElement {
   const r = document.createElement("div");
-  r.className = `${BLOCK_CLASS}-row`;
+  r.className = `${PANEL_CLASS}-row`;
   const label = document.createElement("span");
-  label.className = `${BLOCK_CLASS}-label`;
+  label.className = `${PANEL_CLASS}-label`;
   label.textContent = t(labelKey);
   const val = document.createElement("span");
-  val.className = `${BLOCK_CLASS}-value`;
+  val.className = `${PANEL_CLASS}-value`;
   val.textContent = value;
   r.append(label, val);
   return r;
@@ -61,24 +66,25 @@ function row(labelKey: string, value: string): HTMLElement {
 
 function header(): HTMLElement {
   const h = document.createElement("div");
-  h.className = `${BLOCK_CLASS}-header`;
+  h.className = `${PANEL_CLASS}-header`;
   h.textContent = "Better GitHub";
   return h;
 }
 
-/** Build the fact block in full (the fetched data is already in hand). */
-function buildBlock(info: ContributorInfo): HTMLElement {
-  const block = document.createElement("div");
-  block.className = BLOCK_CLASS;
-  block.appendChild(header());
+/** Build the full panel for a login (data already in hand). */
+function buildPanel(login: string, info: ContributorInfo): HTMLElement {
+  const panel = document.createElement("div");
+  panel.className = PANEL_CLASS;
+  panel.dataset.login = login;
+  panel.appendChild(header());
 
   const age = accountAge(Date.parse(info.createdAt), Date.now());
   const created = info.createdAt.slice(0, 7); // YYYY-MM
-  block.appendChild(row("ccAge", `${age.value} ${ageUnitWord(age)} (${created})`));
+  panel.appendChild(row("ccAge", `${age.value} ${ageUnitWord(age)} (${created})`));
 
   const rel = repoRelation(info.repoMerged);
   if (rel) {
-    block.appendChild(
+    panel.appendChild(
       row(
         "ccRepo",
         rel.kind === "first-time" ? t("ccFirstTime") : t("ccReturning", String(rel.mergedCount)),
@@ -89,7 +95,7 @@ function buildBlock(info: ContributorInfo): HTMLElement {
   if (info.prTotal > 0) {
     const rate = mergeRatePct(info.prMerged, info.prTotal);
     const tail = rate == null ? "" : ` (${rate}%)`;
-    block.appendChild(
+    panel.appendChild(
       row("ccHistory", `${info.prTotal} PR · ${info.prMerged} ${t("ccMerged")}${tail}`),
     );
   }
@@ -98,43 +104,71 @@ function buildBlock(info: ContributorInfo): HTMLElement {
     info.hasToken && info.contributionsLastYear != null
       ? t("ccContribs", String(info.contributionsLastYear))
       : t("ccNeedToken");
-  block.appendChild(row("ccActivity", activity));
-  return block;
+  panel.appendChild(row("ccActivity", activity));
+  return panel;
 }
 
-// GitHub swaps in a fresh content node whenever you move between a user's avatar
-// and username (and may re-render again as the card settles), which destroys any
-// child we appended. So we must (re)inject whenever our block is missing — never
-// mark GitHub's node as "done", or one wipe leaves it gone for good. Data is
-// cached per login in-page so re-injection is synchronous and flicker-free; a
-// pending set stops duplicate fetches for the same login.
 const infoCache = new Map<string, ContributorInfo | null>();
 const fetching = new Set<string>();
 
-function currentContent(): HTMLElement | null {
-  const message = document.querySelector<HTMLElement>(".js-hovercard-content .Popover-message");
-  return message?.querySelector<HTMLElement>("[data-hydro-view]") ?? null;
+interface Card {
+  container: HTMLElement;
+  message: HTMLElement | null;
+  content: HTMLElement | null;
+  login: string | null;
 }
 
-function inject(content: HTMLElement | null, login: string): void {
-  // Bail if disabled, the card closed, switched users, or we're already in it.
-  if (!observer || !content || userLogin(content) !== login) return;
-  if (content.querySelector(`.${BLOCK_CLASS}`)) return;
-  const data = infoCache.get(login);
-  if (!data) return; // not fetched yet, or fetched with no data
-  content.appendChild(buildBlock(data));
+function currentCard(): Card | null {
+  const container = document.querySelector<HTMLElement>(".js-hovercard-content");
+  if (!container) return null;
+  const message = container.querySelector<HTMLElement>(".Popover-message");
+  const content = message?.querySelector<HTMLElement>("[data-hydro-view]") ?? null;
+  return { container, message, content, login: content ? userLogin(content) : null };
 }
 
-function scan(): void {
-  const content = currentContent();
-  if (!content) return;
-  const login = userLogin(content);
-  if (!login) return;
-  if (content.querySelector(`.${BLOCK_CLASS}`)) return; // already shown on this card
-  if (infoCache.has(login)) {
-    inject(content, login);
+/** Insert the panel into the stable container, right below the card body, and
+ * size it to match so the container doesn't widen. */
+function placePanel(card: Card, panel: HTMLElement): void {
+  const width = card.message?.getBoundingClientRect().width;
+  if (width) panel.style.width = `${Math.round(width)}px`;
+  if (card.message && card.message.nextSibling) {
+    card.container.insertBefore(panel, card.message.nextSibling);
+  } else {
+    card.container.appendChild(panel);
+  }
+}
+
+// Reconcile our panel with whatever the hovercard currently shows. Called on a
+// rAF-coalesced pass after any DOM mutation.
+function sync(): void {
+  if (!observer) return;
+  const card = currentCard();
+  if (!card) return;
+  const existing = card.container.querySelector<HTMLElement>(`.${PANEL_CLASS}`);
+
+  // Mid-swap (GitHub cleared the body, no content yet): leave our panel in place
+  // — removing it here is exactly what caused the flicker. Wait for the new content.
+  if (!card.content) return;
+
+  // Non-user hovercard (repo/issue): our panel doesn't belong here.
+  if (!card.login) {
+    existing?.remove();
     return;
   }
+
+  // Same user as what we're already showing → nothing to do (survives swaps).
+  if (existing && existing.dataset.login === card.login) return;
+
+  const login = card.login;
+  if (infoCache.has(login)) {
+    existing?.remove();
+    const info = infoCache.get(login);
+    if (info) placePanel(card, buildPanel(login, info));
+    return;
+  }
+
+  // Different/unknown user: drop the stale panel (don't show wrong data), fetch.
+  existing?.remove();
   if (fetching.has(login)) return;
   fetching.add(login);
   const repo = getRepoInfo();
@@ -142,7 +176,7 @@ function scan(): void {
     .then((data) => {
       fetching.delete(login);
       infoCache.set(login, data ?? null);
-      inject(currentContent(), login); // inject into whatever card is up now
+      sync();
     })
     .catch(() => fetching.delete(login));
 }
@@ -150,19 +184,19 @@ function scan(): void {
 let observer: MutationObserver | null = null;
 let rafId = 0;
 
-function scheduleScan(): void {
+function scheduleSync(): void {
   if (rafId) return;
   rafId = requestAnimationFrame(() => {
     rafId = 0;
-    scan();
+    sync();
   });
 }
 
 export function injectContributorCard(): void {
   cleanupContributorCard();
   // The hovercard is global, not page-specific. Watch for GitHub populating its
-  // (reused) container; coalesce mutation bursts into one scan per frame.
-  observer = new MutationObserver(() => scheduleScan());
+  // (reused) container; coalesce mutation bursts into one pass per frame.
+  observer = new MutationObserver(() => scheduleSync());
   observer.observe(document.body, { childList: true, subtree: true });
 }
 
@@ -175,5 +209,5 @@ export function cleanupContributorCard(): void {
   }
   fetching.clear();
   infoCache.clear();
-  document.querySelectorAll(`.${BLOCK_CLASS}`).forEach((el) => el.remove());
+  document.querySelectorAll(`.${PANEL_CLASS}`).forEach((el) => el.remove());
 }

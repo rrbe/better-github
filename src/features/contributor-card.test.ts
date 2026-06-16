@@ -112,19 +112,20 @@ describe("injectContributorCard", () => {
     expect(text).not.toContain("PR ·"); // history row omitted when prTotal is 0
   });
 
-  it("re-injects after GitHub swaps the content node (avatar→username for same user)", async () => {
+  it("survives a same-user content swap without flickering (avatar→username)", async () => {
     fetchContributorInfo.mockResolvedValue(baseInfo());
     injectContributorCard();
     const card = hovercard("octocat");
     document.body.appendChild(card);
     await flush();
-    expect(document.querySelectorAll(BLOCK)).toHaveLength(1); // appeared
+    expect(document.querySelectorAll(BLOCK)).toHaveLength(1); // appeared (in the container)
 
-    // GitHub destroys the old content node (+ our block) and swaps in a fresh
-    // one for the same user — the "flash then gone" the user reported.
+    // GitHub replaces the body's content node for the same user (avatar→username).
+    // Our panel lives in the stable popover root, NOT the body — so it stays put.
     const message = card.querySelector<HTMLElement>(".Popover-message")!;
     message.replaceChildren();
-    expect(document.querySelector(BLOCK)).toBeNull(); // momentarily gone
+    expect(document.querySelectorAll(BLOCK)).toHaveLength(1); // NOT removed — no flicker
+
     const fresh = document.createElement("div");
     fresh.setAttribute(
       "data-hydro-view",
@@ -137,8 +138,35 @@ describe("injectContributorCard", () => {
     message.appendChild(fresh);
     await flush();
 
-    // Re-injected into the new node (synchronously, from the per-login cache).
+    // Still exactly one — the same-user swap was a no-op for us.
     expect(document.querySelectorAll(BLOCK)).toHaveLength(1);
+  });
+
+  it("rebuilds the panel when the hovercard switches to a different user", async () => {
+    fetchContributorInfo.mockImplementation(async (login) => baseInfo({ login }));
+    injectContributorCard();
+    const card = hovercard("alice");
+    document.body.appendChild(card);
+    await flush();
+    expect(document.querySelector<HTMLElement>(BLOCK)?.dataset.login).toBe("alice");
+
+    // Same container, new user (GitHub reuses the popover for the next hover).
+    const message = card.querySelector<HTMLElement>(".Popover-message")!;
+    message.replaceChildren();
+    const fresh = document.createElement("div");
+    fresh.setAttribute(
+      "data-hydro-view",
+      JSON.stringify({
+        event_type: "user-hovercard-hover",
+        payload: { card_user_login: "bob" },
+      }),
+    );
+    message.appendChild(fresh);
+    await flush();
+
+    const panels = document.querySelectorAll<HTMLElement>(BLOCK);
+    expect(panels).toHaveLength(1);
+    expect(panels[0].dataset.login).toBe("bob");
   });
 
   it("ignores non-user hovercards (repo/issue cards reuse the same container)", async () => {

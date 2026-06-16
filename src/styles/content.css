@@ -825,14 +825,24 @@ a.better-github-review-popover-item:hover {
   background: var(--bgColor-muted, var(--color-canvas-subtle, #f6f8fa));
 }
 
-/* Contributor background card — a block of objective facts appended to the
-   bottom of GitHub's native user hovercard. Neutral, no scoring/red. */
+/* Contributor background card — a standalone panel of objective facts attached
+   below GitHub's native user hovercard. Anchored in the stable popover root (not
+   inside the body GitHub re-renders), so it never flickers. Neutral, no
+   scoring/red. Width is set inline to match the hovercard. */
 .better-github-contributor-card {
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid var(--borderColor-muted, var(--color-border-muted, #d8dee4));
+  box-sizing: border-box;
+  margin-top: 6px;
+  padding: 8px 16px;
   font-size: 12px;
-  line-height: 1.5;
+  line-height: 1.6;
+  background: var(--bgColor-default, var(--color-canvas-default, #fff));
+  border: 1px solid var(--borderColor-default, var(--color-border-default, #d0d7de));
+  border-radius: 6px;
+  box-shadow: var(
+    --shadow-floating-small,
+    0 1px 3px rgba(31, 35, 40, 0.12),
+    0 8px 24px rgba(66, 74, 83, 0.12)
+  );
 }
 
 .better-github-contributor-card-header {
