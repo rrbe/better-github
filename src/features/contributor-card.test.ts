@@ -208,21 +208,29 @@ describe("injectContributorCard", () => {
     expect(document.querySelector(BLOCK)).toBeNull();
   });
 
-  it("appends the block once, only after data arrives (no loading swap)", async () => {
-    // A loading→fill swap (replaceChildren) tears out the node under the cursor
-    // and dismisses GitHub's hovercard, so the block must appear in one append.
+  it("shows a loading skeleton, then fills it in when data arrives", async () => {
+    // The panel is anchored in the stable popover root (not inside the body
+    // GitHub re-renders), so a skeleton→data swap is safe — it lets the facts
+    // fill in rather than the whole panel popping in when the fetch lands.
     let resolve!: (info: ContributorInfo) => void;
     fetchContributorInfo.mockReturnValue(new Promise((r) => (resolve = r)));
     injectContributorCard();
     document.body.appendChild(hovercard("octocat"));
     await flush();
 
-    expect(document.querySelector(BLOCK)).toBeNull(); // nothing rendered while pending
+    const loading = document.querySelector<HTMLElement>(BLOCK);
+    expect(loading).not.toBeNull();
+    expect(loading!.dataset.skeleton).toBe("true"); // a skeleton while pending
+    expect(loading!.querySelector(`${BLOCK}-skeleton`)).not.toBeNull();
+    expect(loading!.textContent).not.toContain("days"); // no real data yet
 
     resolve(baseInfo());
     await flush();
 
-    expect(document.querySelectorAll(BLOCK)).toHaveLength(1);
+    const panels = document.querySelectorAll<HTMLElement>(BLOCK);
+    expect(panels).toHaveLength(1); // skeleton replaced in place, not duplicated
+    expect(panels[0].dataset.skeleton).toBeUndefined();
+    expect(panels[0].textContent).toContain("3 days · 2026-06"); // real data
   });
 
   it("does not double-decorate the same populated card", async () => {

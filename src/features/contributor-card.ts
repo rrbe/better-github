@@ -51,30 +51,6 @@ function ageUnitWord(age: AccountAge): string {
   return t(plural ? "ccUnitYears" : "ccUnitYear");
 }
 
-// Octicon 16×16 path data, harvested from GitHub's own UI so each row is
-// anchored by the same iconography as the native hovercard rows above it.
-const SVG_NS = "http://www.w3.org/2000/svg";
-const ICON = {
-  age: "M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Zm7-3.25v2.992l2.028.812a.75.75 0 0 1-.557 1.392l-2.5-1A.751.751 0 0 1 7 8.25v-3.5a.75.75 0 0 1 1.5 0Z",
-  repo: "M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8ZM5 12.25a.25.25 0 0 1 .25-.25h3.5a.25.25 0 0 1 .25.25v3.25a.25.25 0 0 1-.4.2l-1.45-1.087a.249.249 0 0 0-.3 0L5.4 15.7a.25.25 0 0 1-.4-.2Z",
-  pr: "M1.5 3.25a2.25 2.25 0 1 1 3 2.122v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.25 2.25 0 0 1 1.5 3.25Zm5.677-.177L9.573.677A.25.25 0 0 1 10 .854V2.5h1A2.5 2.5 0 0 1 13.5 5v5.628a2.251 2.251 0 1 1-1.5 0V5a1 1 0 0 0-1-1h-1v1.646a.25.25 0 0 1-.427.177L7.177 3.427a.25.25 0 0 1 0-.354ZM3.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm0 9.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm8.25.75a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0Z",
-  activity:
-    "M1.5 1.75V13.5h13.75a.75.75 0 0 1 0 1.5H.75a.75.75 0 0 1-.75-.75V1.75a.75.75 0 0 1 1.5 0Zm14.28 2.53-5.25 5.25a.75.75 0 0 1-1.06 0L7 7.06 4.28 9.78a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042l3.25-3.25a.75.75 0 0 1 1.06 0L10 7.94l4.72-4.72a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042Z",
-};
-
-function iconSvg(d: string): SVGSVGElement {
-  const svg = document.createElementNS(SVG_NS, "svg");
-  svg.setAttribute("class", `${PANEL_CLASS}-icon`);
-  svg.setAttribute("viewBox", "0 0 16 16");
-  svg.setAttribute("width", "16");
-  svg.setAttribute("height", "16");
-  svg.setAttribute("aria-hidden", "true");
-  const path = document.createElementNS(SVG_NS, "path");
-  path.setAttribute("d", d);
-  svg.appendChild(path);
-  return svg;
-}
-
 // A value is built from parts so the key datum (a count or status) can be made
 // bold while supporting detail is dimmed — that contrast is what makes the facts
 // scannable. A plain string is normal weight; {strong} bold; {dim} muted.
@@ -108,13 +84,13 @@ function emphasizeToken(full: string, token: string): ValuePart[] {
   return [full.slice(0, i), { strong: token }, full.slice(i + token.length)];
 }
 
-function row(iconPath: string, labelKey: string, value: HTMLElement): HTMLElement {
+function row(labelKey: string, value: HTMLElement): HTMLElement {
   const r = document.createElement("div");
   r.className = `${PANEL_CLASS}-row`;
   const label = document.createElement("span");
   label.className = `${PANEL_CLASS}-label`;
   label.textContent = t(labelKey);
-  r.append(iconSvg(iconPath), label, value);
+  r.append(label, value);
   return r;
 }
 
@@ -139,7 +115,7 @@ function buildPanel(login: string, info: ContributorInfo): HTMLElement {
   const age = accountAge(Date.parse(info.createdAt), Date.now());
   const created = info.createdAt.slice(0, 7); // YYYY-MM
   panel.appendChild(
-    row(ICON.age, "ccAge", valueEl([{ strong: `${age.value} ${ageUnitWord(age)}` }, { dim: ` · ${created}` }])),
+    row("ccAge", valueEl([{ strong: `${age.value} ${ageUnitWord(age)}` }, { dim: ` · ${created}` }])),
   );
 
   const rel = repoRelation(info.repoMerged);
@@ -148,7 +124,7 @@ function buildPanel(login: string, info: ContributorInfo): HTMLElement {
       rel.kind === "first-time"
         ? valueEl([{ strong: t("ccFirstTime") }])
         : valueEl(emphasizeToken(t("ccReturning", String(rel.mergedCount)), String(rel.mergedCount)));
-    panel.appendChild(row(ICON.repo, "ccRepo", value));
+    panel.appendChild(row("ccRepo", value));
   }
 
   if (info.prTotal > 0) {
@@ -160,7 +136,7 @@ function buildPanel(login: string, info: ContributorInfo): HTMLElement {
       ` ${t("ccMerged")}`,
     ];
     if (rate != null) parts.push({ dim: ` · ${rate}%` });
-    panel.appendChild(row(ICON.pr, "ccHistory", valueEl(parts)));
+    panel.appendChild(row("ccHistory", valueEl(parts)));
   }
 
   const activity =
@@ -172,7 +148,45 @@ function buildPanel(login: string, info: ContributorInfo): HTMLElement {
           ),
         )
       : valueEl([{ dim: t("ccNeedToken") }]);
-  panel.appendChild(row(ICON.activity, "ccActivity", activity));
+  panel.appendChild(row("ccActivity", activity));
+  return panel;
+}
+
+function skeletonBar(width: number): HTMLElement {
+  const bar = document.createElement("span");
+  bar.className = `${PANEL_CLASS}-skeleton`;
+  bar.style.width = `${width}px`;
+  return bar;
+}
+
+/** A placeholder shown the instant the card opens, while the fetch is in flight,
+ * so real data fills in rather than popping the whole panel into existence. Same
+ * row structure (label slot + value slot) as the real panel, so swapping in the
+ * data causes no layout shift. Widths are varied so it reads as content. */
+function buildSkeleton(login: string): HTMLElement {
+  const panel = document.createElement("div");
+  panel.className = `${PANEL_CLASS} ${PANEL_CLASS}--loading`;
+  panel.dataset.login = login;
+  panel.dataset.skeleton = "true";
+  panel.appendChild(header());
+  // [label-bar width, value-bar width] per row — mirrors age/repo/history/activity.
+  for (const [lw, vw] of [
+    [58, 92],
+    [52, 132],
+    [60, 108],
+    [44, 150],
+  ]) {
+    const r = document.createElement("div");
+    r.className = `${PANEL_CLASS}-row`;
+    const label = document.createElement("span");
+    label.className = `${PANEL_CLASS}-label`;
+    label.appendChild(skeletonBar(lw));
+    const value = document.createElement("span");
+    value.className = `${PANEL_CLASS}-value`;
+    value.appendChild(skeletonBar(vw));
+    r.append(label, value);
+    panel.appendChild(r);
+  }
   return panel;
 }
 
@@ -231,14 +245,15 @@ function sync(): void {
     return;
   }
 
-  // Same user as what we're already showing → nothing to do (survives swaps).
-  if (existing && existing.dataset.login === card.login) return;
-
+  // Already showing the *real* panel for this user → nothing to do (survives
+  // content swaps). A skeleton for this user is NOT done — it still needs filling.
   const login = card.login;
-  // Key the cache by repo *and* login. The cache now persists across
-  // navigations (injectContributorCard no longer clears it), and the
-  // repo-relation row (`repoMerged`) is repo-specific — a bare login key would
-  // show repo A's relation while viewing repo B.
+  if (existing && !existing.dataset.skeleton && existing.dataset.login === login) return;
+
+  // Key the cache by repo *and* login. The cache persists across navigations
+  // (injectContributorCard no longer clears it), and the repo-relation row
+  // (`repoMerged`) is repo-specific — a bare login key would show repo A's
+  // relation while viewing repo B.
   const repo = getRepoInfo();
   const cacheKey = `${repo?.owner ?? ""}/${repo?.repo ?? ""}#${login}`;
   if (infoCache.has(cacheKey)) {
@@ -248,8 +263,13 @@ function sync(): void {
     return;
   }
 
-  // Different/unknown user: drop the stale panel (don't show wrong data), fetch.
-  existing?.remove();
+  // Not cached yet. Show a skeleton immediately so the card doesn't pop in when
+  // the data lands; keep it while the fetch is in flight, and fetch once.
+  const skeletonShown = existing?.dataset.skeleton === "true" && existing.dataset.login === login;
+  if (!skeletonShown) {
+    existing?.remove();
+    placePanel(card, buildSkeleton(login));
+  }
   if (fetching.has(cacheKey)) return;
   fetching.add(cacheKey);
   fetchContributorInfo(login, repo?.owner, repo?.repo)
@@ -258,7 +278,11 @@ function sync(): void {
       infoCache.set(cacheKey, data ?? null);
       sync();
     })
-    .catch(() => fetching.delete(cacheKey));
+    .catch(() => {
+      fetching.delete(cacheKey);
+      // Don't leave a skeleton shimmering forever on a failed fetch.
+      card.container.querySelector(`.${PANEL_CLASS}[data-skeleton]`)?.remove();
+    });
 }
 
 let observer: MutationObserver | null = null;
