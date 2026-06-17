@@ -21,22 +21,34 @@ export function accountAge(createdAtMs: number, nowMs: number): AccountAge {
   return { days, value: Math.floor(days / 365), unit: "year" };
 }
 
-/** Merge rate as a whole-number percentage (merged ÷ authored). Null when the
- * author has no PRs at all (nothing to rate). */
-export function mergeRatePct(merged: number, total: number): number | null {
-  if (total <= 0) return null;
-  return Math.round((merged / total) * 100);
-}
-
-/** Relationship to the current repo, derived from how many of the author's PRs
- * to it have merged. Null means "no repo context" (hovercard fired off a repo
- * page) — the card omits the row. */
+/** Standing in the current repo, derived from the author's `author_association`
+ * (as GitHub reports it on their issues/PRs here). `owner`/`member`/`collaborator`
+ * are trust signals; `contributor` has merged here before; `first-time` has not.
+ * Null means no usable association (no repo context / nothing authored / unknown)
+ * — the card omits the row. */
 export type RepoRelation =
+  | { kind: "owner" }
+  | { kind: "member" }
+  | { kind: "collaborator" }
+  | { kind: "contributor" }
   | { kind: "first-time" }
-  | { kind: "returning"; mergedCount: number }
   | null;
 
-export function repoRelation(repoMerged: number | null): RepoRelation {
-  if (repoMerged == null) return null;
-  return repoMerged === 0 ? { kind: "first-time" } : { kind: "returning", mergedCount: repoMerged };
+export function repoRelation(association: string | null): RepoRelation {
+  switch (association) {
+    case "OWNER":
+      return { kind: "owner" };
+    case "MEMBER":
+      return { kind: "member" };
+    case "COLLABORATOR":
+      return { kind: "collaborator" };
+    case "CONTRIBUTOR":
+      return { kind: "contributor" };
+    case "FIRST_TIME_CONTRIBUTOR":
+    case "FIRST_TIMER":
+    case "NONE":
+      return { kind: "first-time" };
+    default:
+      return null;
+  }
 }

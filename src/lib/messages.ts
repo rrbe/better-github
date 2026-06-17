@@ -88,11 +88,16 @@ export interface ContributorInfo {
   publicRepos: number;
   /** Total PRs authored across GitHub (Search `type:pr author:X`). */
   prTotal: number;
-  /** ...of which merged (Search `is:merged`). Merge rate = merged ÷ total. */
+  /** ...of which merged (Search `is:merged`). */
   prMerged: number;
-  /** Merged PRs the author has to the *current* repo; null when the card fired
-   * off a repo page (no owner/repo context). 0 ⇒ first-time contributor. */
-  repoMerged: number | null;
+  /** ...and closed without merging (Search `is:closed is:unmerged`) — the
+   * rejection signal. (total = merged + closed + still-open.) */
+  prClosed: number;
+  /** The author's `author_association` to the *current* repo — `OWNER`,
+   * `MEMBER`, `COLLABORATOR`, `CONTRIBUTOR`, `FIRST_TIME_CONTRIBUTOR`, … — or
+   * null when the card fired off a repo page, or the user has authored nothing
+   * here, or the lookup failed. */
+  repoAssociation: string | null;
   /** Contribution-calendar total for the last year (GraphQL); null without a token. */
   contributionsLastYear: number | null;
   /** Whether a token was configured — lets the card show the right degraded state. */

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { accountAge, mergeRatePct, repoRelation } from "./contributor-signals";
+import { accountAge, repoRelation } from "./contributor-signals";
 
 const NOW = Date.parse("2026-06-16T00:00:00Z");
 const daysAgo = (n: number) => NOW - n * 24 * 60 * 60 * 1000;
@@ -24,32 +24,21 @@ describe("accountAge", () => {
   });
 });
 
-describe("mergeRatePct", () => {
-  it("rounds merged ÷ total to a whole percent", () => {
-    expect(mergeRatePct(2, 8)).toBe(25);
-    expect(mergeRatePct(1, 3)).toBe(33);
-    expect(mergeRatePct(5, 5)).toBe(100);
-  });
-
-  it("returns null when the author has no PRs", () => {
-    expect(mergeRatePct(0, 0)).toBeNull();
-  });
-
-  it("is 0 when nothing merged", () => {
-    expect(mergeRatePct(0, 7)).toBe(0);
-  });
-});
-
 describe("repoRelation", () => {
-  it("is null without repo context", () => {
+  it("is null without a usable association", () => {
     expect(repoRelation(null)).toBeNull();
+    expect(repoRelation("MANNEQUIN")).toBeNull();
   });
 
-  it("is first-time when no merged PR to this repo", () => {
-    expect(repoRelation(0)).toEqual({ kind: "first-time" });
+  it("maps elevated associations to a trust identity", () => {
+    expect(repoRelation("OWNER")).toEqual({ kind: "owner" });
+    expect(repoRelation("MEMBER")).toEqual({ kind: "member" });
+    expect(repoRelation("COLLABORATOR")).toEqual({ kind: "collaborator" });
   });
 
-  it("is returning with the merged count otherwise", () => {
-    expect(repoRelation(4)).toEqual({ kind: "returning", mergedCount: 4 });
+  it("distinguishes returning vs first-time contributors", () => {
+    expect(repoRelation("CONTRIBUTOR")).toEqual({ kind: "contributor" });
+    expect(repoRelation("FIRST_TIME_CONTRIBUTOR")).toEqual({ kind: "first-time" });
+    expect(repoRelation("NONE")).toEqual({ kind: "first-time" });
   });
 });

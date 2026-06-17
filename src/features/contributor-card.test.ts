@@ -24,7 +24,8 @@ function baseInfo(over: Partial<ContributorInfo> = {}): ContributorInfo {
     publicRepos: 5,
     prTotal: 8,
     prMerged: 2,
-    repoMerged: 0,
+    prClosed: 5,
+    repoAssociation: "FIRST_TIME_CONTRIBUTOR",
     contributionsLastYear: 1240,
     hasToken: true,
     ...over,
@@ -74,8 +75,8 @@ describe("injectContributorCard", () => {
     expect(block).not.toBeNull();
     const text = block!.textContent ?? "";
     expect(text).toContain("3 days · 2026-06"); // account age + created month
-    expect(text).toContain("First-time contributor"); // repoMerged 0
-    expect(text).toContain("8 PR · 2 merged · 25%"); // history + merge rate
+    expect(text).toContain("First-time contributor"); // FIRST_TIME_CONTRIBUTOR
+    expect(text).toContain("8 PR · 2 merged · 5 closed"); // history: total/merged/rejected
     expect(text).toContain("1240 contributions in the past year"); // token activity
   });
 
@@ -101,15 +102,28 @@ describe("injectContributorCard", () => {
     expect(text).not.toContain("contributions in the past year");
   });
 
-  it("shows merged-PR count for a returning contributor and omits an empty history", async () => {
-    fetchContributorInfo.mockResolvedValue(baseInfo({ repoMerged: 4, prTotal: 0, prMerged: 0 }));
+  it("shows a returning contributor's association and omits an empty history", async () => {
+    fetchContributorInfo.mockResolvedValue(
+      baseInfo({ repoAssociation: "CONTRIBUTOR", prTotal: 0, prMerged: 0, prClosed: 0 }),
+    );
     injectContributorCard();
     document.body.appendChild(hovercard("octocat"));
     await flush();
 
     const text = document.querySelector<HTMLElement>(BLOCK)?.textContent ?? "";
-    expect(text).toContain("4 merged PRs");
+    expect(text).toContain("Contributor");
     expect(text).not.toContain("PR ·"); // history row omitted when prTotal is 0
+  });
+
+  it("shows an elevated repo identity instead of a contributor label", async () => {
+    fetchContributorInfo.mockResolvedValue(baseInfo({ repoAssociation: "MEMBER" }));
+    injectContributorCard();
+    document.body.appendChild(hovercard("octocat"));
+    await flush();
+
+    const text = document.querySelector<HTMLElement>(BLOCK)?.textContent ?? "";
+    expect(text).toContain("Member");
+    expect(text).not.toContain("First-time"); // identity replaces the first-time label
   });
 
   it("survives a same-user content swap without flickering (avatar→username)", async () => {

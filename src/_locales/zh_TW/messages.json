@@ -75,10 +75,11 @@
   "ccUnitYear": { "message": "年" },
   "ccUnitYears": { "message": "年" },
   "ccFirstTime": { "message": "首次貢獻者" },
-  "ccReturning": {
-    "message": "已有 $count$ 個合併 PR",
-    "placeholders": { "count": { "content": "$1", "example": "4" } }
-  },
+  "ccOwner": { "message": "擁有者" },
+  "ccMember": { "message": "成員" },
+  "ccCollaborator": { "message": "協作者" },
+  "ccContributor": { "message": "貢獻者" },
+  "ccClosed": { "message": "關閉" },
   "ccMerged": { "message": "合併" },
   "ccContribs": {
     "message": "近一年 $count$ 次貢獻",

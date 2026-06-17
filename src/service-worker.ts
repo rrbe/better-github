@@ -681,6 +681,31 @@ async function fetchContributionsLastYear(login: string, token: string): Promise
   });
 }
 
+// The author's `author_association` to the current repo, read off their latest
+// issue/PR here (GitHub computes it live, so any one reflects current standing).
+// REST core limit, not the tighter Search limit. null on no-access/none/failure.
+async function fetchRepoAssociation(
+  login: string,
+  owner: string,
+  repo: string,
+  token: string,
+): Promise<string | null> {
+  return cachedFetch<string | null>(`cache:contrib:assoc:${login}:${owner}/${repo}`, async () => {
+    const url =
+      `https://api.github.com/repos/${owner}/${repo}/issues` +
+      `?creator=${encodeURIComponent(login)}&state=all&per_page=1`;
+    try {
+      const response = await fetch(url, { headers: restHeaders(token) });
+      if (!response.ok) return null;
+      const data: Array<{ author_association?: string }> = await response.json();
+      const assoc = Array.isArray(data) ? data[0]?.author_association : undefined;
+      return typeof assoc === "string" ? assoc : null;
+    } catch {
+      return null;
+    }
+  });
+}
+
 async function fetchContributorInfo(
   login: string,
   owner?: string,
@@ -691,19 +716,19 @@ async function fetchContributorInfo(
   const profile = await fetchUserProfile(login, token);
   if (!profile) return null; // unknown user / rate-limited — no card
 
-  const hasRepo = Boolean(owner && repo);
-  const [prTotal, prMerged, repoMerged, contributionsLastYear] = await Promise.all([
+  const [prTotal, prMerged, prClosed, repoAssociation, contributionsLastYear] = await Promise.all([
     cachedFetch<number>(`cache:contrib:prtotal:${login}`, () =>
       searchCount(`type:pr author:${login}`, token),
     ),
     cachedFetch<number>(`cache:contrib:prmerged:${login}`, () =>
       searchCount(`type:pr author:${login} is:merged`, token),
     ),
-    hasRepo
-      ? cachedFetch<number>(`cache:contrib:repomerged:${login}:${owner}/${repo}`, () =>
-          searchCount(`type:pr author:${login} repo:${owner}/${repo} is:merged`, token),
-        )
-      : Promise.resolve<number | null>(null),
+    cachedFetch<number>(`cache:contrib:prclosed:${login}`, () =>
+      searchCount(`type:pr author:${login} is:closed is:unmerged`, token),
+    ),
+    owner && repo
+      ? fetchRepoAssociation(login, owner, repo, token)
+      : Promise.resolve<string | null>(null),
     fetchContributionsLastYear(login, token),
   ]);
 
@@ -714,7 +739,8 @@ async function fetchContributorInfo(
     publicRepos: profile.publicRepos,
     prTotal,
     prMerged,
-    repoMerged,
+    prClosed,
+    repoAssociation,
     contributionsLastYear,
     hasToken: Boolean(token),
   };

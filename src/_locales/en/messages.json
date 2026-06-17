@@ -75,10 +75,11 @@
   "ccUnitYear": { "message": "year" },
   "ccUnitYears": { "message": "years" },
   "ccFirstTime": { "message": "First-time contributor" },
-  "ccReturning": {
-    "message": "$count$ merged PRs",
-    "placeholders": { "count": { "content": "$1", "example": "4" } }
-  },
+  "ccOwner": { "message": "Owner" },
+  "ccMember": { "message": "Member" },
+  "ccCollaborator": { "message": "Collaborator" },
+  "ccContributor": { "message": "Contributor" },
+  "ccClosed": { "message": "closed" },
   "ccMerged": { "message": "merged" },
   "ccContribs": {
     "message": "$count$ contributions in the past year",

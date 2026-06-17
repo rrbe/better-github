@@ -20,9 +20,9 @@ import { getRepoInfo } from "../lib/page-detect";
 import { fetchContributorInfo } from "../lib/github-api";
 import {
   accountAge,
-  mergeRatePct,
   repoRelation,
   type AccountAge,
+  type RepoRelation,
 } from "../lib/contributor-signals";
 import type { ContributorInfo } from "../lib/messages";
 import { t } from "../lib/i18n";
@@ -84,6 +84,22 @@ function emphasizeToken(full: string, token: string): ValuePart[] {
   return [full.slice(0, i), { strong: token }, full.slice(i + token.length)];
 }
 
+/** i18n key for a repo-relation identity label. */
+function relationLabelKey(rel: NonNullable<RepoRelation>): string {
+  switch (rel.kind) {
+    case "owner":
+      return "ccOwner";
+    case "member":
+      return "ccMember";
+    case "collaborator":
+      return "ccCollaborator";
+    case "contributor":
+      return "ccContributor";
+    case "first-time":
+      return "ccFirstTime";
+  }
+}
+
 function row(labelKey: string, value: HTMLElement): HTMLElement {
   const r = document.createElement("div");
   r.className = `${PANEL_CLASS}-row`;
@@ -118,25 +134,27 @@ function buildPanel(login: string, info: ContributorInfo): HTMLElement {
     row("ccAge", valueEl([{ strong: `${age.value} ${ageUnitWord(age)}` }, { dim: ` · ${created}` }])),
   );
 
-  const rel = repoRelation(info.repoMerged);
+  const rel = repoRelation(info.repoAssociation);
   if (rel) {
-    const value =
-      rel.kind === "first-time"
-        ? valueEl([{ strong: t("ccFirstTime") }])
-        : valueEl(emphasizeToken(t("ccReturning", String(rel.mergedCount)), String(rel.mergedCount)));
-    panel.appendChild(row("ccRepo", value));
+    panel.appendChild(row("ccRepo", valueEl([{ strong: t(relationLabelKey(rel)) }])));
   }
 
   if (info.prTotal > 0) {
-    const rate = mergeRatePct(info.prMerged, info.prTotal);
-    const parts: ValuePart[] = [
-      { strong: String(info.prTotal) },
-      " PR · ",
-      { strong: String(info.prMerged) },
-      ` ${t("ccMerged")}`,
-    ];
-    if (rate != null) parts.push({ dim: ` · ${rate}%` });
-    panel.appendChild(row("ccHistory", valueEl(parts)));
+    // total · merged · closed (closed = closed without merging — the rejection
+    // signal). Counts bold; the words muted-default. No rate (counts read clearer).
+    panel.appendChild(
+      row(
+        "ccHistory",
+        valueEl([
+          { strong: String(info.prTotal) },
+          " PR · ",
+          { strong: String(info.prMerged) },
+          ` ${t("ccMerged")} · `,
+          { strong: String(info.prClosed) },
+          ` ${t("ccClosed")}`,
+        ]),
+      ),
+    );
   }
 
   const activity =
@@ -252,7 +270,7 @@ function sync(): void {
 
   // Key the cache by repo *and* login. The cache persists across navigations
   // (injectContributorCard no longer clears it), and the repo-relation row
-  // (`repoMerged`) is repo-specific — a bare login key would show repo A's
+  // (`repoAssociation`) is repo-specific — a bare login key would show repo A's
   // relation while viewing repo B.
   const repo = getRepoInfo();
   const cacheKey = `${repo?.owner ?? ""}/${repo?.repo ?? ""}#${login}`;
