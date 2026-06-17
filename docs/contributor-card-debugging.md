@@ -1,10 +1,19 @@
 # Contributor Card — debugging state & open problems
 
 > Handoff doc so a future session can resume. Branch `feat/contributor-card`,
-> PR #34. The data layer + card render work; **two things are unresolved**:
-> (1) the panel still flashes then disappears (~0.5–1s) in real use, and
-> (2) a design decision — the user wants it as a **seamless continuation of
-> GitHub's native card**, not the separate floating panel currently shipped.
+> PR #34. The data layer + card render work.
+>
+> (1) **FLICKER — RESOLVED 2026-06-17.** Root cause was *not* in `sync()` (all of
+>     §5's H1–H4 were wrong). `navigation.ts` re-runs every `onPageReady` handler
+>     on a **2-second poll** (`setInterval(runHandlers, 2000)`) and on every
+>     `turbo:render`; each run re-called `injectContributorCard()`, whose first
+>     act was `cleanupContributorCard()` — which **removed the live panel and
+>     cleared the cache mid-hover** (this is the H5 family). Fixed by making
+>     `injectContributorCard()` idempotent and non-destructive. **Verified
+>     zero-flicker across 18+ poll cycles** with the real-CDP-hover timeline. See §9.
+> (2) **Still open** — a design decision: the user wants the facts as a **seamless
+>     continuation of GitHub's native card**, not the separate floating panel
+>     currently shipped (§7). Resolve next.
 >
 > Last updated 2026-06-17.
 
@@ -17,12 +26,19 @@ facts (account age, relation to this repo, historical merge rate, activity).
 Code: `src/features/contributor-card.ts` (+ `src/lib/contributor-signals.ts`,
 service-worker `fetchContributorInfo`). Toggle: `feature-contributor-card`.
 
-## 2. The bug (still open)
+## 2. The bug (RESOLVED — see §9 for the fix)
 
 **Symptom (user, real mouse, logged-in):** hovering the avatar or username area,
 our panel **appears for ~0.5–1s then disappears on its own**, while GitHub's
 native card stays. Confirmed the current build IS loaded (panel is a direct child
 of `.js-hovercard-content`, showing real data).
+
+**Root cause (confirmed 2026-06-17):** an *external* teardown, not a `sync()`
+decision. The real-CDP-hover timeline caught the panel being removed while the
+hydro node was unchanged and `card.login` still valid and the container still
+`display:block` — which `sync()` would never do. The remover was
+`cleanupContributorCard()`, re-triggered by `navigation.ts`'s 2s poll /
+`turbo:render` re-running `injectContributorCard()`. See §9.
 
 **Why my "fixes" kept missing:** I validated with **synthetic events** and a
 **mimic**, which showed 0 flicker — but the real mouse does something synthetic
@@ -163,3 +179,37 @@ Resolve the flicker (§5/§6) FIRST; don't polish styling on something that vani
 - All unit tests pass (225). Tests use happy-dom + synthetic DOM — they DON'T
   catch the real-mouse flicker; treat them as logic guards, not proof it works.
 - Design rationale & signal taxonomy: `docs/pr-signals-plan.md`.
+
+## 9. Flicker resolution (2026-06-17)
+
+**Method that finally worked:** real CDP `hover` (not synthetic events) on the
+PR author's username + a `MutationObserver`/sampler timeline (§6). The clean
+warm-cache run showed: `+PANEL` at T, `-PANEL` at T+~375ms, *with the hydro node
+unchanged, `login` still valid, container still `display:block`*. That combination
+is impossible from `sync()` (it only removes on `!card.login` or a login change),
+so the remover had to be external → `cleanupContributorCard()`.
+
+**Why it fired:** `src/lib/navigation.ts` runs `runHandlers()` on a **2s
+`setInterval`** and on every `turbo:render`. That re-runs the `onPageReady`
+handler → `injectFeature("feature-contributor-card")` → `injectContributorCard()`,
+which used to start with `cleanupContributorCard()` (remove panel + clear cache +
+disconnect observer). So roughly every 2 seconds, any in-flight hover got wiped.
+The native card survived because it's GitHub's, untouched by our cleanup. Synthetic
+tests missed it because no real 2s poll runs across a single synthetic hover.
+
+**The fix** (`src/features/contributor-card.ts`):
+- `injectContributorCard()` is now **idempotent + non-destructive**: it returns
+  early when the observer is already attached to the current `document.body`, and
+  only re-attaches (without clearing cache or removing panels) when Turbo swaps
+  the `<body>`. One long-lived observer; no per-poll churn.
+- The `infoCache` now persists across navigations, so it's **keyed by
+  `repo#login`** (the repo-relation row `repoMerged` is repo-specific).
+- Regression test: "survives a navigation re-inject without wiping a live panel"
+  — re-calls `injectContributorCard()` mid-hover and asserts the panel survives
+  and no refetch happens. The old code would have failed it.
+
+**Verification (real CDP hover, new build, 2026-06-17):** held a hover and
+alternated avatar↔username over a ~36s window spanning **18+ poll ticks**; the
+sampler showed `panel=YES` in **every** sample — never removed. When GitHub closes
+its own card the panel is hidden *with* the container (correct) but not destroyed,
+and re-shows instantly on the next hover with no refetch. 226 tests pass.

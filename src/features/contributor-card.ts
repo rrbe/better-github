@@ -160,28 +160,34 @@ function sync(): void {
   if (existing && existing.dataset.login === card.login) return;
 
   const login = card.login;
-  if (infoCache.has(login)) {
+  // Key the cache by repo *and* login. The cache now persists across
+  // navigations (injectContributorCard no longer clears it), and the
+  // repo-relation row (`repoMerged`) is repo-specific — a bare login key would
+  // show repo A's relation while viewing repo B.
+  const repo = getRepoInfo();
+  const cacheKey = `${repo?.owner ?? ""}/${repo?.repo ?? ""}#${login}`;
+  if (infoCache.has(cacheKey)) {
     existing?.remove();
-    const info = infoCache.get(login);
+    const info = infoCache.get(cacheKey);
     if (info) placePanel(card, buildPanel(login, info));
     return;
   }
 
   // Different/unknown user: drop the stale panel (don't show wrong data), fetch.
   existing?.remove();
-  if (fetching.has(login)) return;
-  fetching.add(login);
-  const repo = getRepoInfo();
+  if (fetching.has(cacheKey)) return;
+  fetching.add(cacheKey);
   fetchContributorInfo(login, repo?.owner, repo?.repo)
     .then((data) => {
-      fetching.delete(login);
-      infoCache.set(login, data ?? null);
+      fetching.delete(cacheKey);
+      infoCache.set(cacheKey, data ?? null);
       sync();
     })
-    .catch(() => fetching.delete(login));
+    .catch(() => fetching.delete(cacheKey));
 }
 
 let observer: MutationObserver | null = null;
+let observedBody: HTMLElement | null = null;
 let rafId = 0;
 
 function scheduleSync(): void {
@@ -193,16 +199,26 @@ function scheduleSync(): void {
 }
 
 export function injectContributorCard(): void {
-  cleanupContributorCard();
-  // The hovercard is global, not page-specific. Watch for GitHub populating its
-  // (reused) container; coalesce mutation bursts into one pass per frame.
+  // MUST be idempotent and non-destructive. navigation.ts re-fires every
+  // onPageReady handler on a 2s poll and on every turbo:render — so this runs
+  // repeatedly while the user is mid-hover. The old code called
+  // cleanupContributorCard() here first, which removed the live panel and
+  // cleared the cache: that is what made the card flash then vanish on its own
+  // (~0.5–1s in), while GitHub's native card stayed. The hovercard and its
+  // container are global, so one long-lived observer is enough; we only
+  // re-attach when Turbo has swapped out the <body> we were watching.
+  if (observer && observedBody === document.body) return;
+  observer?.disconnect();
   observer = new MutationObserver(() => scheduleSync());
-  observer.observe(document.body, { childList: true, subtree: true });
+  observedBody = document.body;
+  observer.observe(observedBody, { childList: true, subtree: true });
+  scheduleSync(); // a hovercard may already be open when we (re)attach
 }
 
 export function cleanupContributorCard(): void {
   observer?.disconnect();
   observer = null;
+  observedBody = null;
   if (rafId) {
     cancelAnimationFrame(rafId);
     rafId = 0;

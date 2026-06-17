@@ -142,6 +142,26 @@ describe("injectContributorCard", () => {
     expect(document.querySelectorAll(BLOCK)).toHaveLength(1);
   });
 
+  it("survives a navigation re-inject without wiping a live panel", async () => {
+    // navigation.ts re-fires every onPageReady handler on a 2s poll and on
+    // turbo:render, which re-calls injectContributorCard *while hovering*. That
+    // must be a no-op — the old code ran cleanupContributorCard() here, removing
+    // the live panel and clearing the cache, which made the card flash then
+    // vanish on its own (~0.5–1s in) with GitHub's native card still showing.
+    fetchContributorInfo.mockResolvedValue(baseInfo());
+    injectContributorCard();
+    document.body.appendChild(hovercard("octocat"));
+    await flush();
+    expect(document.querySelectorAll(BLOCK)).toHaveLength(1);
+    expect(fetchContributorInfo).toHaveBeenCalledTimes(1);
+
+    injectContributorCard(); // simulates the 2s poll / turbo:render re-run
+    await flush();
+
+    expect(document.querySelectorAll(BLOCK)).toHaveLength(1); // not wiped
+    expect(fetchContributorInfo).toHaveBeenCalledTimes(1); // cache reused, no refetch
+  });
+
   it("rebuilds the panel when the hovercard switches to a different user", async () => {
     fetchContributorInfo.mockImplementation(async (login) => baseInfo({ login }));
     injectContributorCard();
