@@ -73,9 +73,9 @@ describe("injectContributorCard", () => {
     const block = document.querySelector<HTMLElement>(BLOCK);
     expect(block).not.toBeNull();
     const text = block!.textContent ?? "";
-    expect(text).toContain("3 days (2026-06)"); // account age + created month
+    expect(text).toContain("3 days · 2026-06"); // account age + created month
     expect(text).toContain("First-time contributor"); // repoMerged 0
-    expect(text).toContain("8 PR · 2 merged (25%)"); // history + merge rate
+    expect(text).toContain("8 PR · 2 merged · 25%"); // history + merge rate
     expect(text).toContain("1240 contributions in the past year"); // token activity
   });
 
