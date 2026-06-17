@@ -4,15 +4,23 @@
 
 [![Chrome Web Store](https://img.shields.io/chrome-web-store/v/annimelofpkbcphbdikipjlconehbnpb)](https://chromewebstore.google.com/detail/better-github/annimelofpkbcphbdikipjlconehbnpb)
 
-A Chrome extension that enhances GitHub's UI with practical features.
+Better GitHub is a Chrome extension that enhances the GitHub experience. Inspired by [Refined GitHub](https://github.com/refined-github/refined-github), but with hundreds of fiddly toggles trimmed away. It stays lightweight and focuses on the experience improvements that matter, so it's maintainable for the long haul.
 
-Inspired by [Refined GitHub](https://github.com/refined-github/refined-github) — a great extension, but some bugs linger unfixed (e.g. the Releases tab) and certain feature requests go unaddressed due to scope control. Better GitHub fills those gaps.
+**Open source and zero-tracking** — no analytics, no telemetry; all your data stays in your browser. (Some features require a GitHub token with the `repo` scope.)
 
-Another motivation: Refined GitHub has too many features tightly coupled to GitHub's DOM, which breaks frequently as GitHub updates its UI. By keeping the feature set small and preferring the GitHub API over DOM manipulation, Better GitHub stays maintainable long-term.
+<img src="docs/screenshots/main_screenshot.png" width=600/>
 
-> **Note:** GitHub frequently A/B tests UI changes and offers additional toggles in Feature Preview. Features that depend on unstable or frequently changing DOM structures are unlikely to be added, to keep this project at a manageable complexity.
+### Features Overview
 
-## Features
+- **Contributor profile insights** — quickly tell whether a contributor is just an "AI-coding account that spams low-quality commits."
+- **Better PR and issue lists** — sort by most recently updated, with branch names, review status, and diff stats all at a glance.
+- **Repository extras** — a dedicated Releases tab, hover previews for watcher/fork/star counts, plus commit tags and diff stats.
+
+Every feature can be individually toggled on or off in the settings.
+
+> **Note:** Because GitHub frequently A/B tests features and offers extra toggles under Feature Preview, features that are hard to maintain or change often may not be added — the goal is to keep the project at a manageable complexity.
+
+## Feature Details
 
 ### Home
 
@@ -25,7 +33,7 @@ Another motivation: Refined GitHub has too many features tightly coupled to GitH
 
 ### PRs and issues
 
-- **Default Sort by Updated** — Sort PR and issue lists by recently updated instead of GitHub's default creation time order. No more missing active PRs buried on page 2.
+- **Default Sort by Updated** — Sort PR and issue lists by recently updated instead of GitHub's default creation time order. No more missing active PRs.
 
    <details>
       <summary>Screenshot</summary>
@@ -77,7 +85,7 @@ Another motivation: Refined GitHub has too many features tightly coupled to GitH
       <img src="docs/screenshots/pr-collapse-expand-2.png" alt="Collapse/Expand All Files" width="300" />
    </details>
 
-### Profiles
+### Profile
 
 - **Contributor Card** — Hover a username to append a panel of objective facts to GitHub's native hovercard: account age, relation to the current repo (first-time vs. returning contributor), historical PR merge rate, and last-year activity. Helps you size up an unfamiliar contributor at a glance — for instance, spotting mass-generated low-effort PRs. Facts only: no scoring, no labels. The activity row requires a token.
 
