@@ -178,32 +178,28 @@ function skeletonBar(width: number): HTMLElement {
 }
 
 /** A placeholder shown the instant the card opens, while the fetch is in flight,
- * so real data fills in rather than popping the whole panel into existence. Same
- * row structure (label slot + value slot) as the real panel, so swapping in the
- * data causes no layout shift. Widths are varied so it reads as content. */
+ * so real data fills in rather than popping the whole panel into existence. The
+ * keys (labels) are static and known up front, so they render as real text —
+ * only the value slot, which depends on the fetch, gets a shimmer bar. Same row
+ * structure as the real panel, so swapping in the data causes no layout shift.
+ * Value-bar widths are varied so they read as content. */
 function buildSkeleton(login: string): HTMLElement {
   const panel = document.createElement("div");
   panel.className = `${PANEL_CLASS} ${PANEL_CLASS}--loading`;
   panel.dataset.login = login;
   panel.dataset.skeleton = "true";
   panel.appendChild(header());
-  // [label-bar width, value-bar width] per row — mirrors age/repo/history/activity.
-  for (const [lw, vw] of [
-    [58, 92],
-    [52, 132],
-    [60, 108],
-    [44, 150],
-  ]) {
-    const r = document.createElement("div");
-    r.className = `${PANEL_CLASS}-row`;
-    const label = document.createElement("span");
-    label.className = `${PANEL_CLASS}-label`;
-    label.appendChild(skeletonBar(lw));
+  // [label key, value-bar width] per row — mirrors age/repo/history/activity.
+  for (const [labelKey, vw] of [
+    ["ccAge", 92],
+    ["ccRepo", 132],
+    ["ccHistory", 108],
+    ["ccActivity", 150],
+  ] as const) {
     const value = document.createElement("span");
     value.className = `${PANEL_CLASS}-value`;
     value.appendChild(skeletonBar(vw));
-    r.append(label, value);
-    panel.appendChild(r);
+    panel.appendChild(row(labelKey, value));
   }
   return panel;
 }
