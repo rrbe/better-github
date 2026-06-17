@@ -3,13 +3,14 @@
 > 状态:**MVP 已实现并上线**(分支 `feat/contributor-card` / PR #34)。本文是
 > 共识记录 + 信号知识库,后续相关 feature 都回到这里对照,不重新发散。
 >
-> **与本设计的已知差异 / 待补(2026-06-17):**
-> - 历史信号目前只显示 **merge 率**(merged/total);计划里点名"单信号最强之一"的
->   **拒绝率(closed-unmerged/total)尚未单独显示**(§3.2 / §4.2)。
-> - "与本仓库关系"用 Search 计数 `repoMerged`(首次 / 回访 N 次)实现,**未采用
->   计划里的 `author_association`**——因而少了"维护者 / 组织成员"身份信号,且多一次
->   API 请求(§3.2)。
-> - 开关**默认开**、无 token 首次提示(§3.5 的"默认行为待定"按"默认开"落地)。
+> **实现说明 / 与初版设计的演进(2026-06-17):**
+> - **拒绝率已实现**:历史 PR 行现为 `总数 PR · N merged · M closed`(closed = 关闭
+>   未合并,Search `is:closed is:unmerged`)——即计划点名的"单信号最强之一"(§3.2 / §4.2)。
+> - **改用 `author_association`**:"与本仓库关系"现显示 Owner / Member / Collaborator /
+>   Contributor / First-time(从该用户在本仓库的 issue/PR 读取,REST、非 DOM),替代了
+>   原先的 merged 计数,补上了"维护者 / 组织成员"身份信号(§3.2 的本意)。
+> - **默认开**(经确认):4 个信号中 3 个免 token,活跃度行已内置"🔒 连接 token"提示,
+>   故保持默认开(§3.5 的"默认行为待定"定为默认开)。
 > - 实现期间另做了:合并进原生 hovercard 成一张卡、行内去图标重排、加载骨架屏,
 >   并修复了 nav-poll 重注入导致的 flicker(详见 `docs/contributor-card-debugging.md`)。
 
