@@ -4,14 +4,23 @@
 
 [![Chrome Web Store](https://img.shields.io/chrome-web-store/v/annimelofpkbcphbdikipjlconehbnpb)](https://chromewebstore.google.com/detail/better-github/annimelofpkbcphbdikipjlconehbnpb)
 
-一个增强 GitHub 界面的 Chrome 扩展。
+Better GitHub 是一个增强 GitHub 使用体验的 Chrome 插件，灵感源自 [Refined GitHub](https://github.com/refined-github/refined-github)，但精简掉了上百个繁杂的开关。保持轻量，专注重要的体验优化，以便长期维护。
 
-灵感来自 [Refined GitHub](https://github.com/refined-github/refined-github)——功能强大，但部分 bug 长期未修复（如 Releases Tab），一些实用的 feature request 也未被采纳（因为 refined-github 功能已经太多了，要控制复杂度）。Better GitHub 补上了这些缺口。
-还有一个点是 refined-github 有太多的功能是和 github 界面强绑定的，github 又经常改界面，所以很多功能都经常失效。只有保持功能足够少，并且尽量用 github api，少和 DOM 元素绑定，才能长期维护下去。
+**开源且零追踪**——无数据分析，无遥测，所有数据均保留在您的浏览器中。（部分功能需要具有 `repo` 权限的 GitHub Token。）
+
+<img src="docs/screenshots/main_screenshot.png" width=600/>
+
+### 功能概览
+
+- **Contributor Profile 增强** -- 帮你快速识别一个贡献者是不是“只会乱提交代码的纯 AI Coding 用户”
+- **更好的 PR（拉取请求）与 Issue（问题）列表** —— 支持按最近更新排序，分支名称、评审状态及代码差异统计（diff stats）一目了然。
+- **仓库额外扩展** —— 提供专门的 Releases 标签页、对关注者/分叉/点赞数（watchers/forks/stars）悬停预览，以及提交标签（commit tags）和代码差异统计。
+
+所有功能均可在设置中单独开启或关闭。
 
 > **注意：** 由于 GitHub 经常灰度测试功能，并且在 Feature Preview 中还有一些额外的功能开关，一些难以维护或经常变动的功能可能就不会加了，尽量控制项目在一个可维护的复杂度。
 
-## 功能
+## 功能详情
 
 ### 首页
 
