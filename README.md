@@ -77,6 +77,15 @@ Another motivation: Refined GitHub has too many features tightly coupled to GitH
       <img src="docs/screenshots/pr-collapse-expand-2.png" alt="Collapse/Expand All Files" width="300" />
    </details>
 
+### Profiles
+
+- **Contributor Card** — Hover a username to append a panel of objective facts to GitHub's native hovercard: account age, relation to the current repo (first-time vs. returning contributor), historical PR merge rate, and last-year activity. Helps you size up an unfamiliar contributor at a glance — for instance, spotting mass-generated low-effort PRs. Facts only: no scoring, no labels. The activity row requires a token.
+
+   <details>
+      <summary>Screenshot</summary>
+      <img src="docs/screenshots/contributor-card.png" alt="Contributor Card" width="430" />
+   </details>
+
 ### Commits
 
 - **Commit Tags** — Show git tags as badges on the commits list page, so you can instantly see which commits are tagged releases.

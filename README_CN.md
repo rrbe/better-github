@@ -76,6 +76,15 @@
       <img src="docs/screenshots/pr-collapse-expand-2.png" alt="一键折叠/展开所有文件" width="300" />
    </details>
 
+### 用户
+
+- **贡献者背景卡** — 悬停用户名时，在 GitHub 原生 hovercard 底部追加一块客观事实：账号年龄、与当前仓库的关系（首次贡献 / 回访贡献者）、历史 PR 合并率、近一年活跃度。帮你一眼判断一个陌生的贡献者——例如识别批量生成的低质量 PR。只摆事实，不打分、不贴标签。活跃度一行需要 token。
+
+   <details>
+      <summary>示例截图</summary>
+      <img src="docs/screenshots/contributor-card.png" alt="贡献者背景卡" width="430" />
+   </details>
+
 ### Commits
 
 - **Commit 标签显示** — 在 commits 列表页展示 git tag 标记，一眼看出哪些 commit 对应了 release 版本。
