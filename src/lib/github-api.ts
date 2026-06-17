@@ -1,4 +1,18 @@
-import type { ServiceWorkerRequest, PRBranchInfo, PRReviewStatus, ReviewThreadDetail, PRDiffStats, CommitDiffStats, PRApproveResult, TagInfo, StargazerInfo, WatcherInfo, ForkInfo, ReleaseAssetDownload } from "./messages";
+import type {
+  ServiceWorkerRequest,
+  PRBranchInfo,
+  PRReviewStatus,
+  ReviewThreadDetail,
+  PRDiffStats,
+  CommitDiffStats,
+  PRApproveResult,
+  TagInfo,
+  StargazerInfo,
+  WatcherInfo,
+  ForkInfo,
+  ReleaseAssetDownload,
+  ContributorInfo,
+} from "./messages";
 
 function sendMessage<T>(request: ServiceWorkerRequest): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -25,7 +39,40 @@ function sendMessage<T>(request: ServiceWorkerRequest): Promise<T> {
   });
 }
 
-export type { PRReviewStatus, ReviewThreadDetail, PRDiffStats, CommitDiffStats, PRApproveResult, TagInfo, StargazerInfo, WatcherInfo, ForkInfo, ReleaseAssetDownload };
+export type {
+  PRReviewStatus,
+  ReviewThreadDetail,
+  PRDiffStats,
+  CommitDiffStats,
+  PRApproveResult,
+  TagInfo,
+  StargazerInfo,
+  WatcherInfo,
+  ForkInfo,
+  ReleaseAssetDownload,
+  ContributorInfo,
+};
+
+/** Fetch objective facts about an account for the contributor card. Returns null
+ * for an unknown user, a rate-limited request, or any failure (the caller then
+ * renders nothing). owner/repo add the repo-relation row when on a repo page. */
+export async function fetchContributorInfo(
+  login: string,
+  owner?: string,
+  repo?: string,
+): Promise<ContributorInfo | null> {
+  try {
+    return await sendMessage<ContributorInfo | null>({
+      type: "FETCH_CONTRIBUTOR_INFO",
+      login,
+      owner,
+      repo,
+    });
+  } catch (err) {
+    console.error("[Better GitHub] Failed to fetch contributor info:", err);
+    return null;
+  }
+}
 
 export async function fetchPRBranches(
   owner: string,
@@ -118,10 +165,7 @@ export async function fetchCommitDiffStats(
   }
 }
 
-export async function fetchRepoTags(
-  owner: string,
-  repo: string,
-): Promise<TagInfo[]> {
+export async function fetchRepoTags(owner: string, repo: string): Promise<TagInfo[]> {
   try {
     return await sendMessage<TagInfo[]>({
       type: "FETCH_REPO_TAGS",
@@ -155,10 +199,7 @@ export async function approvePR(
   }
 }
 
-export async function fetchStargazers(
-  owner: string,
-  repo: string,
-): Promise<StargazerInfo[]> {
+export async function fetchStargazers(owner: string, repo: string): Promise<StargazerInfo[]> {
   try {
     return await sendMessage<StargazerInfo[]>({
       type: "FETCH_STARGAZERS",
@@ -171,10 +212,7 @@ export async function fetchStargazers(
   }
 }
 
-export async function fetchWatchers(
-  owner: string,
-  repo: string,
-): Promise<WatcherInfo[]> {
+export async function fetchWatchers(owner: string, repo: string): Promise<WatcherInfo[]> {
   try {
     return await sendMessage<WatcherInfo[]>({
       type: "FETCH_WATCHERS",
@@ -187,10 +225,7 @@ export async function fetchWatchers(
   }
 }
 
-export async function fetchForks(
-  owner: string,
-  repo: string,
-): Promise<ForkInfo[]> {
+export async function fetchForks(owner: string, repo: string): Promise<ForkInfo[]> {
   try {
     return await sendMessage<ForkInfo[]>({
       type: "FETCH_FORKS",

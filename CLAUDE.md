@@ -63,3 +63,4 @@ it competes with GitHub's rendering for the same main thread and network.
 ## Guidelines
 
 - Avoid modifying GitHub's original DOM structure. Prefer appending new elements or using CSS overrides.
+- Use English as first class language in pull request title & description

@@ -824,3 +824,104 @@ a.better-github-review-popover-item:hover {
   color: var(--fgColor-default, var(--color-fg-default, #24292f));
   background: var(--bgColor-muted, var(--color-canvas-subtle, #f6f8fa));
 }
+
+/* Contributor background card — a section of objective facts that continues
+   GitHub's native user hovercard so the two read as ONE card. Anchored in the
+   stable popover root (a sibling after .Popover-message, not inside the body
+   GitHub re-renders), so it never flickers. The merged look: no gap, the panel's
+   top border is the section divider, top corners squared (continuing the bubble)
+   and bottom corners rounded (closing the card). Width + horizontal offset are
+   set inline (placePanel) to match the bubble's box. Neutral, no scoring/red. */
+.better-github-contributor-card {
+  box-sizing: border-box;
+  /* margin-left set inline to match the bubble's offset; no top gap — flush. */
+  padding: 10px 16px 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  background: var(--bgColor-default, var(--color-canvas-default, #fff));
+  border: 1px solid var(--borderColor-default, var(--color-border-default, #d0d7de));
+  border-radius: 0 0 6px 6px;
+  box-shadow: var(
+    --shadow-floating-small,
+    0 1px 3px rgba(31, 35, 40, 0.12),
+    0 8px 24px rgba(66, 74, 83, 0.12)
+  );
+}
+
+/* Merge the seam: when our card is attached, drop GitHub's bubble bottom border +
+   rounding so it flows straight into our section, and give the bubble the same
+   soft shadow so the whole stack casts one shadow. Scoped to when our card is
+   present, so GitHub's hovercard is untouched otherwise. */
+.js-hovercard-content:has(.better-github-contributor-card) .Popover-message {
+  border-bottom: 0;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  box-shadow: var(
+    --shadow-floating-small,
+    0 1px 3px rgba(31, 35, 40, 0.12),
+    0 8px 24px rgba(66, 74, 83, 0.12)
+  );
+}
+
+/* Eyebrow: a small accent mark + wordmark that flags the section as ours
+   without shouting — keeps the merge seamless while giving it an identity. */
+.better-github-contributor-card-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 9px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--fgColor-muted, var(--color-fg-muted, #59636e));
+}
+
+.better-github-contributor-card-mark {
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 2px;
+  background: var(--fgColor-accent, var(--color-accent-fg, #0969da));
+}
+
+.better-github-contributor-card-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-height: 21px;
+}
+
+.better-github-contributor-card-label {
+  flex-shrink: 0;
+  width: 80px;
+  font-size: 12px;
+  color: var(--fgColor-muted, var(--color-fg-muted, #59636e));
+}
+
+/* Value carries the fact: default-color, tabular figures for clean number
+   alignment, with the key datum bold and supporting detail dimmed. */
+.better-github-contributor-card-value {
+  color: var(--fgColor-default, var(--color-fg-default, #1f2328));
+  font-variant-numeric: tabular-nums;
+}
+
+.better-github-contributor-card-value strong {
+  font-weight: 600;
+}
+
+.better-github-contributor-card-dim {
+  color: var(--fgColor-muted, var(--color-fg-muted, #59636e));
+}
+
+/* Loading skeleton — shown the instant the card opens so real data fills in
+   rather than the panel popping into existence. Bars sit in the same row slots
+   as the real label/value, so swapping in the data causes no layout shift.
+   Reuses the extension's shared skeleton pulse. */
+.better-github-contributor-card-skeleton {
+  display: inline-block;
+  height: 8px;
+  border-radius: 3px;
+  vertical-align: middle;
+  background: var(--bgColor-muted, var(--color-canvas-subtle, #f6f8fa));
+  animation: bg-wfs-skeleton-pulse 1.5s ease-in-out infinite;
+}

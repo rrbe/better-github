@@ -35,6 +35,7 @@
   "groupPRDetails": { "message": "PR 詳情" },
   "groupCommits": { "message": "Commits" },
   "groupRepository": { "message": "儲存庫" },
+  "groupProfile": { "message": "使用者" },
 
   "featBetterTopReposName": { "message": "增強的熱門儲存庫" },
   "featBetterTopReposDesc": {
@@ -60,6 +61,32 @@
   "featPrLabelPositionDesc": {
     "message": "將標籤移到 PR 標題前面，便於查看和掃讀。"
   },
+  "featContributorCardName": { "message": "貢獻者背景卡" },
+  "featContributorCardDesc": {
+    "message": "在 hover 使用者名稱彈出的卡片裡追加客觀事實（帳號年齡、與本儲存庫關係、歷史 merge 率、活躍度），幫你判斷帳號。只擺事實、不打分。活躍度需要權杖。"
+  },
+  "ccAge": { "message": "帳號年齡" },
+  "ccRepo": { "message": "本儲存庫" },
+  "ccHistory": { "message": "歷史 PR" },
+  "ccActivity": { "message": "活躍度" },
+  "ccUnitDay": { "message": "天" },
+  "ccUnitDays": { "message": "天" },
+  "ccUnitMonth": { "message": "個月" },
+  "ccUnitMonths": { "message": "個月" },
+  "ccUnitYear": { "message": "年" },
+  "ccUnitYears": { "message": "年" },
+  "ccFirstTime": { "message": "首次貢獻者" },
+  "ccOwner": { "message": "擁有者" },
+  "ccMember": { "message": "成員" },
+  "ccCollaborator": { "message": "協作者" },
+  "ccContributor": { "message": "貢獻者" },
+  "ccClosed": { "message": "關閉" },
+  "ccMerged": { "message": "合併" },
+  "ccContribs": {
+    "message": "近一年 $count$ 次貢獻",
+    "placeholders": { "count": { "content": "$1", "example": "1,240" } }
+  },
+  "ccNeedToken": { "message": "🔒 連接權杖後可見" },
   "featPrApproveNowName": { "message": "PR 快速核准" },
   "featPrApproveNowDesc": {
     "message": "在 PR 詳情頁的 Reviewers 側邊欄新增「立即核准」快速入口。需要權杖。"

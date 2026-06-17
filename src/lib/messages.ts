@@ -78,6 +78,32 @@ export interface ReleaseAssetDownload {
   downloadCount: number;
 }
 
+/** Objective facts about a GitHub account, for the contributor background card.
+ * Pure-fact only — no scoring. See docs/pr-signals-plan.md. */
+export interface ContributorInfo {
+  login: string;
+  /** ISO timestamp of account creation (REST `created_at`). */
+  createdAt: string;
+  followers: number;
+  publicRepos: number;
+  /** Total PRs authored across GitHub (Search `type:pr author:X`). */
+  prTotal: number;
+  /** ...of which merged (Search `is:merged`). */
+  prMerged: number;
+  /** ...and closed without merging (Search `is:closed is:unmerged`) — the
+   * rejection signal. (total = merged + closed + still-open.) */
+  prClosed: number;
+  /** The author's `author_association` to the *current* repo — `OWNER`,
+   * `MEMBER`, `COLLABORATOR`, `CONTRIBUTOR`, `FIRST_TIME_CONTRIBUTOR`, … — or
+   * null when the card fired off a repo page, or the user has authored nothing
+   * here, or the lookup failed. */
+  repoAssociation: string | null;
+  /** Contribution-calendar total for the last year (GraphQL); null without a token. */
+  contributionsLastYear: number | null;
+  /** Whether a token was configured — lets the card show the right degraded state. */
+  hasToken: boolean;
+}
+
 export type ServiceWorkerRequest =
   | { type: "FETCH_PR_BRANCHES"; owner: string; repo: string; state: string; page: number }
   | { type: "FETCH_PR_REVIEW_STATUSES"; owner: string; repo: string; prNumbers: number[] }
@@ -89,8 +115,7 @@ export type ServiceWorkerRequest =
   | { type: "FETCH_STARGAZERS"; owner: string; repo: string }
   | { type: "FETCH_WATCHERS"; owner: string; repo: string }
   | { type: "FETCH_FORKS"; owner: string; repo: string }
-  | { type: "FETCH_RELEASE_DOWNLOADS"; owner: string; repo: string; tag: string };
+  | { type: "FETCH_RELEASE_DOWNLOADS"; owner: string; repo: string; tag: string }
+  | { type: "FETCH_CONTRIBUTOR_INFO"; login: string; owner?: string; repo?: string };
 
-export type ServiceWorkerResponse<T> =
-  | { ok: true; data: T }
-  | { ok: false; error: string };
+export type ServiceWorkerResponse<T> = { ok: true; data: T } | { ok: false; error: string };

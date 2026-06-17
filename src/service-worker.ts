@@ -1,4 +1,19 @@
-import type { ServiceWorkerRequest, ServiceWorkerResponse, PRBranchInfo, PRReviewStatus, ReviewThreadDetail, PRDiffStats, CommitDiffStats, PRApproveResult, TagInfo, StargazerInfo, WatcherInfo, ForkInfo, ReleaseAssetDownload } from "./lib/messages";
+import type {
+  ServiceWorkerRequest,
+  ServiceWorkerResponse,
+  PRBranchInfo,
+  PRReviewStatus,
+  ReviewThreadDetail,
+  PRDiffStats,
+  CommitDiffStats,
+  PRApproveResult,
+  TagInfo,
+  StargazerInfo,
+  WatcherInfo,
+  ForkInfo,
+  ReleaseAssetDownload,
+  ContributorInfo,
+} from "./lib/messages";
 
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
@@ -32,12 +47,14 @@ async function cachedFetch<T>(key: string, fetcher: () => Promise<T>): Promise<T
   const existing = inflight.get(key);
   if (existing) return existing as Promise<T>;
 
-  const promise = fetcher().then(async (data) => {
-    await setCache(key, data);
-    return data;
-  }).finally(() => {
-    inflight.delete(key);
-  });
+  const promise = fetcher()
+    .then(async (data) => {
+      await setCache(key, data);
+      return data;
+    })
+    .finally(() => {
+      inflight.delete(key);
+    });
 
   inflight.set(key, promise);
   return promise;
@@ -54,7 +71,10 @@ function getToken(): Promise<string> {
 // Headers for an anonymous-capable GitHub REST call: the given Accept media
 // type, plus a Bearer token when one is set (raises the rate limit on public
 // repos; required for private ones).
-function restHeaders(token: string, accept = "application/vnd.github.v3+json"): Record<string, string> {
+function restHeaders(
+  token: string,
+  accept = "application/vnd.github.v3+json",
+): Record<string, string> {
   const headers: Record<string, string> = { Accept: accept };
   if (token) headers["Authorization"] = `Bearer ${token}`;
   return headers;
@@ -140,7 +160,9 @@ ${entries}
       return [];
     }
 
-    const repoData = json.data?.repository as Record<string, Record<string, unknown> | null> | undefined;
+    const repoData = json.data?.repository as
+      | Record<string, Record<string, unknown> | null>
+      | undefined;
     if (!repoData) return [];
 
     const results: V[] = [];
@@ -232,7 +254,9 @@ async function fetchPRReviewThreadDetails(
           path: string | null;
           line: number | null;
           originalLine: number | null;
-          comments: { nodes: Array<{ author: { login: string } | null; bodyText: string; url: string }> };
+          comments: {
+            nodes: Array<{ author: { login: string } | null; bodyText: string; url: string }>;
+          };
         }>;
       };
       return threads.nodes
@@ -318,7 +342,11 @@ async function approvePR(
   body?: string,
 ): Promise<PRApproveResult> {
   const token = await getToken();
-  if (!token) return { success: false, error: "No token configured. Please set a GitHub token in the extension settings." };
+  if (!token)
+    return {
+      success: false,
+      error: "No token configured. Please set a GitHub token in the extension settings.",
+    };
 
   const url = `https://api.github.com/repos/${owner}/${repo}/pulls/${prNumber}/reviews`;
   try {
@@ -336,19 +364,23 @@ async function approvePR(
 
     if (!response.ok) {
       const data = await response.json().catch(() => ({}));
-      const msg = (data as { message?: string }).message || `${response.status} ${response.statusText}`;
+      const msg =
+        (data as { message?: string }).message || `${response.status} ${response.statusText}`;
       return { success: false, error: msg };
     }
 
     // Fire-and-forget: invalidate both review caches (counts + detail) for this repo
-    chrome.storage.session.get(null).then((all) => {
-      const keys = Object.keys(all).filter(
-        (k) =>
-          k.startsWith(`cache:reviews:${owner}/${repo}:`) ||
-          k.startsWith(`cache:reviewdetails:${owner}/${repo}:`),
-      );
-      if (keys.length > 0) chrome.storage.session.remove(keys);
-    }).catch(() => {});
+    chrome.storage.session
+      .get(null)
+      .then((all) => {
+        const keys = Object.keys(all).filter(
+          (k) =>
+            k.startsWith(`cache:reviews:${owner}/${repo}:`) ||
+            k.startsWith(`cache:reviewdetails:${owner}/${repo}:`),
+        );
+        if (keys.length > 0) chrome.storage.session.remove(keys);
+      })
+      .catch(() => {});
 
     return { success: true };
   } catch (err) {
@@ -389,10 +421,7 @@ async function fetchRepoTagsViaRest(
   return allTags;
 }
 
-async function fetchRepoTags(
-  owner: string,
-  repo: string,
-): Promise<TagInfo[]> {
+async function fetchRepoTags(owner: string, repo: string): Promise<TagInfo[]> {
   const cacheKey = `cache:tags:${owner}/${repo}`;
   return cachedFetch<TagInfo[]>(cacheKey, async () => {
     const token = await getToken();
@@ -431,7 +460,9 @@ async function fetchRepoTags(
     });
 
     if (!response.ok) {
-      console.error(`[Better GitHub] Tags GraphQL error: ${response.status} ${response.statusText}`);
+      console.error(
+        `[Better GitHub] Tags GraphQL error: ${response.status} ${response.statusText}`,
+      );
       return fetchRepoTagsViaRest(owner, repo, token);
     }
 
@@ -455,10 +486,7 @@ async function fetchRepoTags(
   });
 }
 
-async function fetchStargazers(
-  owner: string,
-  repo: string,
-): Promise<StargazerInfo[]> {
+async function fetchStargazers(owner: string, repo: string): Promise<StargazerInfo[]> {
   const cacheKey = `cache:stargazers:${owner}/${repo}`;
   return cachedFetch<StargazerInfo[]>(cacheKey, async () => {
     const headers = restHeaders(await getToken(), "application/vnd.github.star+json");
@@ -466,11 +494,16 @@ async function fetchStargazers(
     const response = await fetch(url, { headers });
 
     if (!response.ok) {
-      console.error(`[Better GitHub] Stargazers API error: ${response.status} ${response.statusText}`);
+      console.error(
+        `[Better GitHub] Stargazers API error: ${response.status} ${response.statusText}`,
+      );
       return [];
     }
 
-    const data: Array<{ user: { login: string; avatar_url: string; name?: string | null }; starred_at: string }> = await response.json();
+    const data: Array<{
+      user: { login: string; avatar_url: string; name?: string | null };
+      starred_at: string;
+    }> = await response.json();
     return data.map((item) => ({
       login: item.user.login,
       avatarUrl: item.user.avatar_url,
@@ -480,10 +513,7 @@ async function fetchStargazers(
   });
 }
 
-async function fetchWatchers(
-  owner: string,
-  repo: string,
-): Promise<WatcherInfo[]> {
+async function fetchWatchers(owner: string, repo: string): Promise<WatcherInfo[]> {
   const cacheKey = `cache:watchers:${owner}/${repo}`;
   return cachedFetch<WatcherInfo[]>(cacheKey, async () => {
     const headers = restHeaders(await getToken());
@@ -491,11 +521,14 @@ async function fetchWatchers(
     const response = await fetch(url, { headers });
 
     if (!response.ok) {
-      console.error(`[Better GitHub] Watchers API error: ${response.status} ${response.statusText}`);
+      console.error(
+        `[Better GitHub] Watchers API error: ${response.status} ${response.statusText}`,
+      );
       return [];
     }
 
-    const data: Array<{ login: string; avatar_url: string; name?: string | null }> = await response.json();
+    const data: Array<{ login: string; avatar_url: string; name?: string | null }> =
+      await response.json();
     return data.map((user) => ({
       login: user.login,
       avatarUrl: user.avatar_url,
@@ -504,10 +537,7 @@ async function fetchWatchers(
   });
 }
 
-async function fetchForks(
-  owner: string,
-  repo: string,
-): Promise<ForkInfo[]> {
+async function fetchForks(owner: string, repo: string): Promise<ForkInfo[]> {
   const cacheKey = `cache:forks:${owner}/${repo}`;
   return cachedFetch<ForkInfo[]>(cacheKey, async () => {
     const headers = restHeaders(await getToken());
@@ -519,7 +549,12 @@ async function fetchForks(
       return [];
     }
 
-    const data: Array<{ owner: { login: string; avatar_url: string }; full_name: string; description: string | null; stargazers_count: number }> = await response.json();
+    const data: Array<{
+      owner: { login: string; avatar_url: string };
+      full_name: string;
+      description: string | null;
+      stargazers_count: number;
+    }> = await response.json();
     return data.map((fork) => ({
       owner: fork.owner.login,
       ownerAvatarUrl: fork.owner.avatar_url,
@@ -565,7 +600,9 @@ async function fetchReleaseDownloads(
     const response = await fetch(url, { headers });
 
     if (!response.ok) {
-      console.error(`[Better GitHub] Release downloads API error: ${response.status} ${response.statusText}`);
+      console.error(
+        `[Better GitHub] Release downloads API error: ${response.status} ${response.statusText}`,
+      );
       return [];
     }
 
@@ -574,20 +611,175 @@ async function fetchReleaseDownloads(
   });
 }
 
-async function handleMessage(request: ServiceWorkerRequest): Promise<ServiceWorkerResponse<unknown>> {
+// --- Contributor background card ---
+//
+// Objective facts about an account, fetched lazily on hover (one user at a
+// time). Each piece is cached independently so hovering the same user again —
+// or on a different repo — reuses what it can. Search/GraphQL failures degrade
+// to 0/null, which makes the card simply omit that row rather than show a wrong
+// number. See docs/pr-signals-plan.md.
+
+// Run a Search-issues query and return its total_count; 0 on any failure so the
+// card omits the affected row instead of rendering a misleading value.
+async function searchCount(query: string, token: string): Promise<number> {
+  const url = `https://api.github.com/search/issues?q=${encodeURIComponent(query)}&per_page=1`;
+  try {
+    const response = await fetch(url, { headers: restHeaders(token) });
+    if (!response.ok) return 0;
+    const data: { total_count?: number } = await response.json();
+    return typeof data.total_count === "number" ? data.total_count : 0;
+  } catch {
+    return 0;
+  }
+}
+
+interface UserProfile {
+  createdAt: string;
+  followers: number;
+  publicRepos: number;
+}
+
+async function fetchUserProfile(login: string, token: string): Promise<UserProfile | null> {
+  return cachedFetch<UserProfile | null>(`cache:contrib:user:${login}`, async () => {
+    const response = await fetch(`https://api.github.com/users/${encodeURIComponent(login)}`, {
+      headers: restHeaders(token),
+    });
+    if (!response.ok) return null;
+    const data: { created_at?: string; followers?: number; public_repos?: number } =
+      await response.json();
+    if (!data.created_at) return null;
+    return {
+      createdAt: data.created_at,
+      followers: data.followers ?? 0,
+      publicRepos: data.public_repos ?? 0,
+    };
+  });
+}
+
+async function fetchContributionsLastYear(login: string, token: string): Promise<number | null> {
+  if (!token) return null;
+  return cachedFetch<number | null>(`cache:contrib:cal:${login}`, async () => {
+    const query = `query($login: String!) {
+  user(login: $login) {
+    contributionsCollection { contributionCalendar { totalContributions } }
+  }
+}`;
+    try {
+      const response = await fetch("https://api.github.com/graphql", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ query, variables: { login } }),
+      });
+      if (!response.ok) return null;
+      const json = await response.json();
+      const total =
+        json?.data?.user?.contributionsCollection?.contributionCalendar?.totalContributions;
+      return typeof total === "number" ? total : null;
+    } catch {
+      return null;
+    }
+  });
+}
+
+// The author's `author_association` to the current repo, read off their latest
+// issue/PR here (GitHub computes it live, so any one reflects current standing).
+// REST core limit, not the tighter Search limit. null on no-access/none/failure.
+async function fetchRepoAssociation(
+  login: string,
+  owner: string,
+  repo: string,
+  token: string,
+): Promise<string | null> {
+  return cachedFetch<string | null>(`cache:contrib:assoc:${login}:${owner}/${repo}`, async () => {
+    const url =
+      `https://api.github.com/repos/${owner}/${repo}/issues` +
+      `?creator=${encodeURIComponent(login)}&state=all&per_page=1`;
+    try {
+      const response = await fetch(url, { headers: restHeaders(token) });
+      if (!response.ok) return null;
+      const data: Array<{ author_association?: string }> = await response.json();
+      const assoc = Array.isArray(data) ? data[0]?.author_association : undefined;
+      return typeof assoc === "string" ? assoc : null;
+    } catch {
+      return null;
+    }
+  });
+}
+
+async function fetchContributorInfo(
+  login: string,
+  owner?: string,
+  repo?: string,
+): Promise<ContributorInfo | null> {
+  const token = await getToken();
+
+  const profile = await fetchUserProfile(login, token);
+  if (!profile) return null; // unknown user / rate-limited — no card
+
+  const [prTotal, prMerged, prClosed, repoAssociation, contributionsLastYear] = await Promise.all([
+    cachedFetch<number>(`cache:contrib:prtotal:${login}`, () =>
+      searchCount(`type:pr author:${login}`, token),
+    ),
+    cachedFetch<number>(`cache:contrib:prmerged:${login}`, () =>
+      searchCount(`type:pr author:${login} is:merged`, token),
+    ),
+    cachedFetch<number>(`cache:contrib:prclosed:${login}`, () =>
+      searchCount(`type:pr author:${login} is:closed is:unmerged`, token),
+    ),
+    owner && repo
+      ? fetchRepoAssociation(login, owner, repo, token)
+      : Promise.resolve<string | null>(null),
+    fetchContributionsLastYear(login, token),
+  ]);
+
+  return {
+    login,
+    createdAt: profile.createdAt,
+    followers: profile.followers,
+    publicRepos: profile.publicRepos,
+    prTotal,
+    prMerged,
+    prClosed,
+    repoAssociation,
+    contributionsLastYear,
+    hasToken: Boolean(token),
+  };
+}
+
+async function handleMessage(
+  request: ServiceWorkerRequest,
+): Promise<ServiceWorkerResponse<unknown>> {
   switch (request.type) {
     case "FETCH_PR_BRANCHES":
-      return { ok: true, data: await fetchPRBranches(request.owner, request.repo, request.state, request.page) };
+      return {
+        ok: true,
+        data: await fetchPRBranches(request.owner, request.repo, request.state, request.page),
+      };
     case "FETCH_PR_REVIEW_STATUSES":
-      return { ok: true, data: await fetchPRReviewStatuses(request.owner, request.repo, request.prNumbers) };
+      return {
+        ok: true,
+        data: await fetchPRReviewStatuses(request.owner, request.repo, request.prNumbers),
+      };
     case "FETCH_PR_REVIEW_THREAD_DETAILS":
-      return { ok: true, data: await fetchPRReviewThreadDetails(request.owner, request.repo, request.prNumber) };
+      return {
+        ok: true,
+        data: await fetchPRReviewThreadDetails(request.owner, request.repo, request.prNumber),
+      };
     case "FETCH_PR_DIFF_STATS":
-      return { ok: true, data: await fetchPRDiffStats(request.owner, request.repo, request.prNumbers) };
+      return {
+        ok: true,
+        data: await fetchPRDiffStats(request.owner, request.repo, request.prNumbers),
+      };
     case "FETCH_COMMIT_DIFF_STATS":
-      return { ok: true, data: await fetchCommitDiffStats(request.owner, request.repo, request.shas) };
+      return {
+        ok: true,
+        data: await fetchCommitDiffStats(request.owner, request.repo, request.shas),
+      };
     case "APPROVE_PR":
-      return { ok: true, data: await approvePR(request.owner, request.repo, request.prNumber, request.body) };
+      return {
+        ok: true,
+        data: await approvePR(request.owner, request.repo, request.prNumber, request.body),
+      };
     case "FETCH_REPO_TAGS":
       return { ok: true, data: await fetchRepoTags(request.owner, request.repo) };
     case "FETCH_STARGAZERS":
@@ -597,7 +789,15 @@ async function handleMessage(request: ServiceWorkerRequest): Promise<ServiceWork
     case "FETCH_FORKS":
       return { ok: true, data: await fetchForks(request.owner, request.repo) };
     case "FETCH_RELEASE_DOWNLOADS":
-      return { ok: true, data: await fetchReleaseDownloads(request.owner, request.repo, request.tag) };
+      return {
+        ok: true,
+        data: await fetchReleaseDownloads(request.owner, request.repo, request.tag),
+      };
+    case "FETCH_CONTRIBUTOR_INFO":
+      return {
+        ok: true,
+        data: await fetchContributorInfo(request.login, request.owner, request.repo),
+      };
     default:
       return { ok: false, error: "Unknown message type" };
   }
