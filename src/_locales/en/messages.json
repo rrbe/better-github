@@ -35,6 +35,7 @@
   "groupPRDetails": { "message": "PR details" },
   "groupCommits": { "message": "Commits" },
   "groupRepository": { "message": "Repository" },
+  "groupProfile": { "message": "Profile" },
 
   "featBetterTopReposName": { "message": "Better Top Repositories" },
   "featBetterTopReposDesc": {

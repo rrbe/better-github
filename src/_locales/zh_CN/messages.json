@@ -35,6 +35,7 @@
   "groupPRDetails": { "message": "PR 详情" },
   "groupCommits": { "message": "Commits" },
   "groupRepository": { "message": "仓库" },
+  "groupProfile": { "message": "用户" },
 
   "featBetterTopReposName": { "message": "增强的热门仓库" },
   "featBetterTopReposDesc": {

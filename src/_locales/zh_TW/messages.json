@@ -35,6 +35,7 @@
   "groupPRDetails": { "message": "PR 詳情" },
   "groupCommits": { "message": "Commits" },
   "groupRepository": { "message": "儲存庫" },
+  "groupProfile": { "message": "使用者" },
 
   "featBetterTopReposName": { "message": "增強的熱門儲存庫" },
   "featBetterTopReposDesc": {
