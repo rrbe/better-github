@@ -204,8 +204,16 @@ function buildSkeleton(login: string): HTMLElement {
   return panel;
 }
 
-const infoCache = new Map<string, ContributorInfo | null>();
+// Successful fetches only — keyed by repo#login, persists across navigations.
+const infoCache = new Map<string, ContributorInfo>();
 const fetching = new Set<string>();
+// Logins whose last fetch FAILED, with when it failed. A failure must NOT be
+// cached as a permanent "no data": fetchContributorInfo returns null on any
+// error (rate limit, network blip), and caching that forever hid the card for
+// the rest of the session after a single transient failure. Instead we retry
+// after a short cooldown (and on any fresh page load, since this is in-memory).
+const failedFetchAt = new Map<string, number>();
+const FAILED_FETCH_RETRY_MS = 60_000;
 
 interface Card {
   container: HTMLElement;
@@ -272,8 +280,16 @@ function sync(): void {
   const cacheKey = `${repo?.owner ?? ""}/${repo?.repo ?? ""}#${login}`;
   if (infoCache.has(cacheKey)) {
     existing?.remove();
-    const info = infoCache.get(cacheKey);
-    if (info) placePanel(card, buildPanel(login, info));
+    placePanel(card, buildPanel(login, infoCache.get(cacheKey)!));
+    return;
+  }
+
+  // Fetch failed recently → don't re-shimmer or refetch on every hovercard
+  // re-render (which would storm the network); just show nothing for now. The
+  // cooldown lets a later hover retry instead of the card being stuck off.
+  const failedAt = failedFetchAt.get(cacheKey);
+  if (failedAt !== undefined && Date.now() - failedAt < FAILED_FETCH_RETRY_MS) {
+    existing?.remove();
     return;
   }
 
@@ -289,11 +305,21 @@ function sync(): void {
   fetchContributorInfo(login, repo?.owner, repo?.repo)
     .then((data) => {
       fetching.delete(cacheKey);
-      infoCache.set(cacheKey, data ?? null);
-      sync();
+      if (data) {
+        // Success → cache and render. Clear any prior failure mark.
+        failedFetchAt.delete(cacheKey);
+        infoCache.set(cacheKey, data);
+        sync();
+      } else {
+        // null = transient failure (see failedFetchAt note). Mark for retry and
+        // drop the skeleton — never cache it as permanent "no data".
+        failedFetchAt.set(cacheKey, Date.now());
+        card.container.querySelector(`.${PANEL_CLASS}[data-skeleton]`)?.remove();
+      }
     })
     .catch(() => {
       fetching.delete(cacheKey);
+      failedFetchAt.set(cacheKey, Date.now());
       // Don't leave a skeleton shimmering forever on a failed fetch.
       card.container.querySelector(`.${PANEL_CLASS}[data-skeleton]`)?.remove();
     });
@@ -338,5 +364,6 @@ export function cleanupContributorCard(): void {
   }
   fetching.clear();
   infoCache.clear();
+  failedFetchAt.clear();
   document.querySelectorAll(`.${PANEL_CLASS}`).forEach((el) => el.remove());
 }

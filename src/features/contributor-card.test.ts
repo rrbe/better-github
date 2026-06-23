@@ -222,6 +222,36 @@ describe("injectContributorCard", () => {
     expect(document.querySelector(BLOCK)).toBeNull();
   });
 
+  it("retries a failed fetch on a later hover instead of suppressing the card forever", async () => {
+    // fetchContributorInfo returns null on ANY error (rate limit, network blip).
+    // Caching that as permanent "no data" hid the card for the rest of the
+    // session after a single transient failure. It must retry — but not storm
+    // the network on every hovercard re-render, so a short cooldown gates it.
+    fetchContributorInfo.mockResolvedValueOnce(null); // first attempt fails
+    injectContributorCard();
+    const card = hovercard("octocat");
+    document.body.appendChild(card);
+    await flush();
+
+    expect(document.querySelector(BLOCK)).toBeNull(); // failed → nothing shown
+    expect(fetchContributorInfo).toHaveBeenCalledTimes(1);
+
+    // Re-hover within the cooldown: no refetch (no storm), still nothing.
+    card.querySelector(".content")!.appendChild(document.createElement("span"));
+    await flush();
+    expect(fetchContributorInfo).toHaveBeenCalledTimes(1);
+    expect(document.querySelector(BLOCK)).toBeNull();
+
+    // Past the cooldown, a hover retries — and this time the fetch succeeds.
+    fetchContributorInfo.mockResolvedValue(baseInfo());
+    vi.setSystemTime(new Date(NOW.getTime() + 61_000));
+    card.querySelector(".content")!.appendChild(document.createElement("span"));
+    await flush();
+
+    expect(fetchContributorInfo).toHaveBeenCalledTimes(2); // retried, not stuck
+    expect(document.querySelector<HTMLElement>(BLOCK)?.textContent).toContain("3 days");
+  });
+
   it("shows a loading skeleton, then fills it in when data arrives", async () => {
     // The panel is anchored in the stable popover root (not inside the body
     // GitHub re-renders), so a skeleton→data swap is safe — it lets the facts
