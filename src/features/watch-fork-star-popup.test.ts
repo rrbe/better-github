@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { setUrl } from "../test-utils/url";
 import { cleanupWatchForkStarPopup, injectWatchForkStarPopup } from "./watch-fork-star-popup";
-import { fetchWatchers } from "../lib/github-api";
+import { fetchWatchers, fetchStargazers } from "../lib/github-api";
 
 vi.mock("../lib/github-api");
 
@@ -61,6 +61,61 @@ describe("watch/fork/star popup", () => {
     expect(items[0].querySelector("img")?.getAttribute("alt")).toBe("alice");
 
     vi.useRealTimers();
+  });
+
+  it("keeps a clicked stargazer's link pointing at their profile and out of the stargazers anchor", async () => {
+    vi.useFakeTimers();
+    // GitHub nests the star counter inside an `<a href=".../stargazers">`.
+    // Reproduce that so the popup's user links live inside the outer anchor.
+    const star = document.getElementById("star-counter")!;
+    const outer = document.createElement("a");
+    outer.href = `${GH}/owner/repo/stargazers`;
+    star.replaceWith(outer);
+    outer.appendChild(star);
+
+    vi.mocked(fetchStargazers).mockResolvedValue([
+      { login: "CodyTseng", avatarUrl: "https://a/cody.png", name: "Cody", starredAt: "2024-01-01T00:00:00Z" },
+    ]);
+
+    injectWatchForkStarPopup();
+    star.dispatchEvent(new Event("mouseenter"));
+    await vi.advanceTimersByTimeAsync(300);
+
+    const item = star.querySelector<HTMLAnchorElement>(".bg-wfs-popup-item")!;
+    // The link is a real anchor to the profile — the browser navigates it
+    // natively (so new-tab modifiers keep working); we only stop the click
+    // from reaching the outer stargazers anchor / GitHub's handlers.
+    expect(item.getAttribute("href")).toBe(`${GH}/CodyTseng`);
+
+    const click = new MouseEvent("click", { bubbles: true, cancelable: true });
+    const onOuter = vi.fn();
+    outer.addEventListener("click", onOuter);
+    item.dispatchEvent(click);
+
+    expect(onOuter).not.toHaveBeenCalled();
+    // We don't preventDefault — native anchor navigation is left intact.
+    expect(click.defaultPrevented).toBe(false);
+
+    vi.useRealTimers();
+  });
+
+  it("swallows blank-area clicks so they don't fall through to the stargazers anchor", () => {
+    const star = document.getElementById("star-counter")!;
+    const outer = document.createElement("a");
+    outer.href = `${GH}/owner/repo/stargazers`;
+    star.replaceWith(outer);
+    outer.appendChild(star);
+
+    injectWatchForkStarPopup();
+    const onOuter = vi.fn();
+    outer.addEventListener("click", onOuter);
+
+    // Click the popup header (no link) — must not bubble to the outer anchor.
+    const header = star.querySelector(".bg-wfs-popup-header")!;
+    const click = new MouseEvent("click", { bubbles: true, cancelable: true });
+    header.dispatchEvent(click);
+
+    expect(onOuter).not.toHaveBeenCalled();
   });
 
   it("hides the counter's native title on hover and restores it on leave", () => {
