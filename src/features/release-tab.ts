@@ -3,9 +3,13 @@ import { t } from "../lib/i18n";
 
 const TAB_CLASS = "better-github-releases-tab";
 
-// GitHub's rocket SVG icon (Octicon rocket-16) — used for releases
-const TAG_ICON_SVG = `<svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" fill="currentColor" class="octicon UnderlineNav-octicon">
-  <path d="M14.064 0h.186C15.216 0 16 .784 16 1.75v.186a8.752 8.752 0 0 1-2.564 6.186l-.458.459c-.314.314-.641.616-.979.904v3.207c0 .608-.315 1.172-.833 1.49l-2.774 1.707a.749.749 0 0 1-1.11-.418l-.954-3.102a1.214 1.214 0 0 1-.145-.125L3.754 9.816a1.218 1.218 0 0 1-.124-.145L.528 8.716a.749.749 0 0 1-.418-1.11l1.71-2.774A1.748 1.748 0 0 1 3.31 4h3.204c.288-.338.59-.665.904-.979l.459-.458A8.749 8.749 0 0 1 14.064 0ZM8.938 3.623h-.002l-.458.458c-.76.76-1.437 1.598-2.02 2.5l-1.188 1.862 3.854 3.855 1.862-1.19c.901-.583 1.74-1.26 2.499-2.02l.459-.457a7.25 7.25 0 0 0 2.123-5.127V1.75a.25.25 0 0 0-.25-.25h-.186a7.249 7.249 0 0 0-5.127 2.123ZM3.56 14.56c-.732.732-2.334 1.045-3.005 1.148a.234.234 0 0 1-.201-.064.234.234 0 0 1-.064-.201c.103-.671.416-2.273 1.15-3.003a1.502 1.502 0 1 1 2.12 2.12Zm6.94-9.935a1.25 1.25 0 1 1-1.768 1.768 1.25 1.25 0 0 1 1.768-1.768Z"></path>
+// GitHub's native tag icon (Octicon tag-16) — the same thin line-art octicon
+// GitHub uses for Releases, so it matches the rest of the UnderlineNav icons.
+// Use the `octicon octicon-tag` class pattern like the native nav icons, NOT
+// `UnderlineNav-octicon`: that class adds its own `margin-right: 8px`, which
+// would stack on top of the link's flex `gap` and double the icon→text spacing.
+const TAG_ICON_SVG = `<svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" fill="currentColor" class="octicon octicon-tag">
+  <path d="M1 7.775V2.75C1 1.784 1.784 1 2.75 1h5.025c.464 0 .91.184 1.238.513l6.25 6.25a1.75 1.75 0 0 1 0 2.474l-5.026 5.026a1.75 1.75 0 0 1-2.474 0l-6.25-6.25A1.752 1.752 0 0 1 1 7.775Zm1.5 0c0 .066.026.13.073.177l6.25 6.25a.25.25 0 0 0 .354 0l5.025-5.025a.25.25 0 0 0 0-.354l-6.25-6.25a.25.25 0 0 0-.177-.073H2.75a.25.25 0 0 0-.25.25ZM6 5a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z"></path>
 </svg>`;
 
 export function injectReleasesTab(): void {
@@ -58,7 +62,7 @@ export function injectReleasesTab(): void {
     .querySelectorAll(".Counter, [data-view-component].Counter")
     .forEach((el) => el.remove());
 
-  // Replace SVG icon with tag icon
+  // Replace SVG icon with the tag icon
   const svg = releasesTab.querySelector("svg");
   if (svg) {
     svg.outerHTML = TAG_ICON_SVG;
