@@ -866,6 +866,18 @@ a.better-github-review-popover-item:hover {
   border-bottom-right-radius: 0;
 }
 
+/* GitHub points the hovercard at its trigger with a caret on the bubble's edge.
+   When it opens ABOVE the trigger, the caret is on the bubble's BOTTOM edge
+   (.Popover-message--bottom*) — and with our card attached below, it lands in the
+   seam as a stray chevron pointing into the card (its fill is a fixed light color,
+   so in dark mode it's a bright notch). Our card is the popover's real bottom now,
+   so that pointer is meaningless here — hide it. The top-edge caret (bubble opens
+   below the trigger) is left alone: it points up at the trigger, clear of the card. */
+.js-hovercard-content:has(.better-github-contributor-card) [class*="Popover-message--bottom"]::before,
+.js-hovercard-content:has(.better-github-contributor-card) [class*="Popover-message--bottom"]::after {
+  display: none;
+}
+
 /* Eyebrow: a small accent mark + wordmark that flags the section as ours
    without shouting — keeps the merge seamless while giving it an identity. */
 .better-github-contributor-card-header {
