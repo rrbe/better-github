@@ -165,6 +165,23 @@ function setupHover(
   });
 }
 
+/**
+ * The star counter is nested inside GitHub's own `<a href=".../stargazers">`,
+ * so the popup lives inside that anchor. Without help, clicks bubble up to it
+ * (and to GitHub's delegated document-level click handlers) and navigate to
+ * the stargazers list — whether the click landed on a user link or on blank
+ * space. Swallow the bubble at the popup; the user links are real `<a>`
+ * elements, so the browser still navigates them natively — which also keeps
+ * Cmd/Ctrl/middle-click "open in new tab" working for free.
+ */
+function interceptPopupNavigation(popup: HTMLElement): void {
+  const stop = (e: Event) => e.stopPropagation();
+  // `auxclick` covers the middle-click new-tab gesture, which doesn't fire
+  // `click` but would still bubble to GitHub's handlers otherwise.
+  popup.addEventListener("click", stop);
+  popup.addEventListener("auxclick", stop);
+}
+
 function attachPopup(
   counter: HTMLElement,
   config: PopupConfig,
@@ -175,6 +192,7 @@ function attachPopup(
   counter.classList.add(WRAP_CLASS);
 
   const popup = createPopupElement(config);
+  interceptPopupNavigation(popup);
   counter.appendChild(popup);
 
   // GitHub's own JS rewrites the stargazer counter's children after
