@@ -838,29 +838,44 @@ a.better-github-review-popover-item:hover {
   padding: 10px 16px 12px;
   font-size: 12px;
   line-height: 1.5;
-  background: var(--bgColor-default, var(--color-canvas-default, #fff));
+  /* Match the popover SURFACE, not the page canvas. GitHub's hovercard bubble is
+     an overlay (--overlay-bgColor, #010409 in dark) — darker than the canvas
+     (--bgColor-default, #0d1117). Using the canvas made the card a lighter shade
+     than the bubble in dark mode; the two read as one card only on a shared
+     surface color. (Both are #fff in light, which is why the gap was invisible
+     there.) */
+  background: var(--overlay-bgColor, var(--color-canvas-overlay, #fff));
+  /* The 1px border is the card's ONLY edge, so it lines up with the bubble's 1px
+     border. No box-shadow: GitHub's hovercard casts none in dark mode, and the
+     --shadow-floating-small token bundles an OPAQUE `0 0 0 1px` border-colored
+     ring — stacked on this border it rendered the card's edges as a doubled ~2px
+     border (visible only in dark, where the ring is opaque #3d444d; in light it's
+     a translucent halo). Border-only keeps our edge identical to the bubble's. */
   border: 1px solid var(--borderColor-default, var(--color-border-default, #d0d7de));
   border-radius: 0 0 6px 6px;
-  box-shadow: var(
-    --shadow-floating-small,
-    0 1px 3px rgba(31, 35, 40, 0.12),
-    0 8px 24px rgba(66, 74, 83, 0.12)
-  );
 }
 
 /* Merge the seam: when our card is attached, drop GitHub's bubble bottom border +
-   rounding so it flows straight into our section, and give the bubble the same
-   soft shadow so the whole stack casts one shadow. Scoped to when our card is
-   present, so GitHub's hovercard is untouched otherwise. */
+   rounding so the bubble flows straight into our section — the card's top border
+   becomes the single divider. Scoped to when our card is present, so GitHub's
+   hovercard is untouched otherwise. (No box-shadow here: GitHub's hovercard has
+   none in dark mode, and the card matches with a plain border — see above.) */
 .js-hovercard-content:has(.better-github-contributor-card) .Popover-message {
   border-bottom: 0;
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
-  box-shadow: var(
-    --shadow-floating-small,
-    0 1px 3px rgba(31, 35, 40, 0.12),
-    0 8px 24px rgba(66, 74, 83, 0.12)
-  );
+}
+
+/* GitHub points the hovercard at its trigger with a caret on the bubble's edge.
+   When it opens ABOVE the trigger, the caret is on the bubble's BOTTOM edge
+   (.Popover-message--bottom*) — and with our card attached below, it lands in the
+   seam as a stray chevron pointing into the card (its fill is a fixed light color,
+   so in dark mode it's a bright notch). Our card is the popover's real bottom now,
+   so that pointer is meaningless here — hide it. The top-edge caret (bubble opens
+   below the trigger) is left alone: it points up at the trigger, clear of the card. */
+.js-hovercard-content:has(.better-github-contributor-card) [class*="Popover-message--bottom"]::before,
+.js-hovercard-content:has(.better-github-contributor-card) [class*="Popover-message--bottom"]::after {
+  display: none;
 }
 
 /* Eyebrow: a small accent mark + wordmark that flags the section as ours
