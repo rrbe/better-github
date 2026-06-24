@@ -222,6 +222,74 @@ describe("injectContributorCard", () => {
     expect(document.querySelector(BLOCK)).toBeNull();
   });
 
+  it("retries a failed fetch on a later hover instead of suppressing the card forever", async () => {
+    // fetchContributorInfo returns null on ANY error (rate limit, network blip).
+    // Caching that as permanent "no data" hid the card for the rest of the
+    // session after a single transient failure. It must retry — but not storm
+    // the network on every hovercard re-render, so a short cooldown gates it.
+    fetchContributorInfo.mockResolvedValueOnce(null); // first attempt fails
+    injectContributorCard();
+    const card = hovercard("octocat");
+    document.body.appendChild(card);
+    await flush();
+
+    expect(document.querySelector(BLOCK)).toBeNull(); // failed → nothing shown
+    expect(fetchContributorInfo).toHaveBeenCalledTimes(1);
+
+    // Re-hover within the cooldown: no refetch (no storm), still nothing.
+    card.querySelector(".content")!.appendChild(document.createElement("span"));
+    await flush();
+    expect(fetchContributorInfo).toHaveBeenCalledTimes(1);
+    expect(document.querySelector(BLOCK)).toBeNull();
+
+    // Past the cooldown, a hover retries — and this time the fetch succeeds.
+    fetchContributorInfo.mockResolvedValue(baseInfo());
+    vi.setSystemTime(new Date(NOW.getTime() + 61_000));
+    card.querySelector(".content")!.appendChild(document.createElement("span"));
+    await flush();
+
+    expect(fetchContributorInfo).toHaveBeenCalledTimes(2); // retried, not stuck
+    expect(document.querySelector<HTMLElement>(BLOCK)?.textContent).toContain("3 days");
+  });
+
+  it("a stale failed fetch doesn't blank the card now showing a different user", async () => {
+    // Hovercards are reused: hovering A then B swaps the same container's payload.
+    // When A's slow fetch finally fails, it must drop only A's skeleton — the
+    // removal is scoped by login, so a since-passed fetch can't blank the card
+    // that is now loading B.
+    const resolvers: Record<string, (v: ContributorInfo | null) => void> = {};
+    fetchContributorInfo.mockImplementation(
+      (login) => new Promise((r) => (resolvers[login] = r)),
+    );
+    injectContributorCard();
+
+    const card = hovercard("alice");
+    document.body.appendChild(card);
+    await flush();
+    expect(document.querySelector<HTMLElement>(BLOCK)?.dataset.login).toBe("alice");
+
+    // Move to bob on the same reused hovercard (GitHub swaps the payload in place,
+    // which our observer sees as a childList mutation under the content node).
+    const view = card.querySelector<HTMLElement>("[data-hydro-view]")!;
+    view.setAttribute(
+      "data-hydro-view",
+      JSON.stringify({ event_type: "user-hovercard-hover", payload: { card_user_login: "bob" } }),
+    );
+    card.querySelector(".content")!.appendChild(document.createElement("span"));
+    await flush();
+    const bobSkeleton = document.querySelector<HTMLElement>(`${BLOCK}[data-login="bob"]`);
+    expect(bobSkeleton?.dataset.skeleton).toBe("true");
+
+    // alice's fetch resolves null last — must NOT touch bob's in-flight skeleton.
+    // Assert on node identity, not presence: an unscoped removal would yank this
+    // exact node out (a later sync() re-adds a *different* one, masking the bug),
+    // so `isConnected` is what proves bob's skeleton was left alone.
+    resolvers["alice"](null);
+    await flush();
+
+    expect(bobSkeleton!.isConnected).toBe(true); // bob's own skeleton untouched
+  });
+
   it("shows a loading skeleton, then fills it in when data arrives", async () => {
     // The panel is anchored in the stable popover root (not inside the body
     // GitHub re-renders), so a skeleton→data swap is safe — it lets the facts
