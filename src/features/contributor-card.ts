@@ -302,27 +302,35 @@ function sync(): void {
   }
   if (fetching.has(cacheKey)) return;
   fetching.add(cacheKey);
+
+  // A null return and a thrown error are the same outcome — fetchContributorInfo
+  // returns null on any error (rate limit, network blip). Treat both as a
+  // transient failure: clear the in-flight mark, schedule a retry after the
+  // cooldown, and drop *this login's* skeleton. Scope the removal by login so a
+  // slow fetch for a user we've since hovered past doesn't blank the card that
+  // now shows a different user.
+  const onFailure = (): void => {
+    fetching.delete(cacheKey);
+    failedFetchAt.set(cacheKey, Date.now());
+    card.container
+      .querySelector(`.${PANEL_CLASS}[data-skeleton][data-login="${login}"]`)
+      ?.remove();
+  };
   fetchContributorInfo(login, repo?.owner, repo?.repo)
     .then((data) => {
-      fetching.delete(cacheKey);
-      if (data) {
-        // Success → cache and render. Clear any prior failure mark.
-        failedFetchAt.delete(cacheKey);
-        infoCache.set(cacheKey, data);
-        sync();
-      } else {
-        // null = transient failure (see failedFetchAt note). Mark for retry and
-        // drop the skeleton — never cache it as permanent "no data".
-        failedFetchAt.set(cacheKey, Date.now());
-        card.container.querySelector(`.${PANEL_CLASS}[data-skeleton]`)?.remove();
+      if (!data) {
+        // null = transient failure (see failedFetchAt note) — never cache it as
+        // permanent "no data".
+        onFailure();
+        return;
       }
-    })
-    .catch(() => {
+      // Success → cache and render. Clear any prior failure mark.
       fetching.delete(cacheKey);
-      failedFetchAt.set(cacheKey, Date.now());
-      // Don't leave a skeleton shimmering forever on a failed fetch.
-      card.container.querySelector(`.${PANEL_CLASS}[data-skeleton]`)?.remove();
-    });
+      failedFetchAt.delete(cacheKey);
+      infoCache.set(cacheKey, data);
+      sync();
+    })
+    .catch(onFailure);
 }
 
 let observer: MutationObserver | null = null;
