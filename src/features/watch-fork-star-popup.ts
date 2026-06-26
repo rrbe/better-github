@@ -7,6 +7,18 @@ import type { ForkInfo } from "../lib/github-api";
 const WRAP_CLASS = "bg-wfs-counter-wrap";
 const POPUP_CLASS = "bg-wfs-popup";
 
+// Must match `.bg-wfs-popup { width }` in content.css — the popup is portaled to
+// <body> and positioned with fixed coordinates, so JS needs the width to right-
+// align it under the counter.
+const POPUP_WIDTH = 280;
+// Gap between the counter's bottom edge and the popup (matches the hover bridge).
+const POPUP_GAP = 8;
+
+// The popup lives in <body>, detached from its counter (see `attachPopup`), so we
+// can't rely on DOM ancestry to tie the two together. Track ownership here to
+// reap orphaned popups when their counter leaves the page on SPA navigation.
+const popupOwner = new WeakMap<HTMLElement, HTMLElement>();
+
 // GitHub puts the exact count in a native `title` on the counter span (e.g.
 // title="1,234" behind a visible "1.2k"). Our popup attaches to that same span,
 // so the browser tooltip would otherwise overlap it. We stash the title here
@@ -113,11 +125,20 @@ function setupHover(
   let closeTimer: ReturnType<typeof setTimeout> | null = null;
   let loaded = false;
 
+  function positionPopup() {
+    // The popup is `position: fixed` in <body>, so place it in viewport coords
+    // right-aligned under the counter — matching the old in-anchor `right: 0`.
+    const rect = wrap.getBoundingClientRect();
+    popup.style.top = `${rect.bottom + POPUP_GAP}px`;
+    popup.style.left = `${Math.max(POPUP_GAP, rect.right - POPUP_WIDTH)}px`;
+  }
+
   function show() {
     if (closeTimer) {
       clearTimeout(closeTimer);
       closeTimer = null;
     }
+    positionPopup();
     popup.style.display = "block";
     if (!loaded) {
       loaded = true;
@@ -142,12 +163,20 @@ function setupHover(
     // Drop the native tooltip up front — our popup opens at HOVER_OPEN_DELAY,
     // which beats the browser's title delay, so it never gets a chance to show.
     suppressNativeTitle(wrap);
+    // Re-entering the counter (e.g. moving back up from the popup) cancels a
+    // pending close so the open popup doesn't flicker shut.
+    if (closeTimer) {
+      clearTimeout(closeTimer);
+      closeTimer = null;
+    }
     openTimer = setTimeout(show, HOVER_OPEN_DELAY);
   });
 
   wrap.addEventListener("mouseleave", () => {
-    // mouseleave only fires once the pointer leaves the counter *and* the popup
-    // (a descendant), so by here the popup is dismissed and the title is safe.
+    // The popup is portaled to <body>, so leaving the counter fires this even
+    // while heading into the popup. Restoring the title here is safe — the
+    // tooltip only shows over the counter, which the pointer has left; moving
+    // onto the popup cancels the close below, and re-entering re-suppresses.
     restoreNativeTitle(wrap);
     hide();
   });
@@ -165,21 +194,12 @@ function setupHover(
   });
 }
 
-/**
- * The star counter is nested inside GitHub's own `<a href=".../stargazers">`,
- * so the popup lives inside that anchor. Without help, clicks bubble up to it
- * (and to GitHub's delegated document-level click handlers) and navigate to
- * the stargazers list — whether the click landed on a user link or on blank
- * space. Swallow the bubble at the popup; the user links are real `<a>`
- * elements, so the browser still navigates them natively — which also keeps
- * Cmd/Ctrl/middle-click "open in new tab" working for free.
- */
-function interceptPopupNavigation(popup: HTMLElement): void {
-  const stop = (e: Event) => e.stopPropagation();
-  // `auxclick` covers the middle-click new-tab gesture, which doesn't fire
-  // `click` but would still bubble to GitHub's handlers otherwise.
-  popup.addEventListener("click", stop);
-  popup.addEventListener("auxclick", stop);
+/** Remove popups whose owning counter has left the page (e.g. SPA navigation). */
+function reapOrphanedPopups(): void {
+  for (const popup of document.querySelectorAll<HTMLElement>(`.${POPUP_CLASS}`)) {
+    const owner = popupOwner.get(popup);
+    if (!owner || !owner.isConnected) popup.remove();
+  }
 }
 
 function attachPopup(
@@ -191,21 +211,18 @@ function attachPopup(
 
   counter.classList.add(WRAP_CLASS);
 
+  // GitHub nests the star/fork counters inside their own `<a>`/`<button>`
+  // (e.g. `<a href=".../stargazers">`). Appending the popup there traps its
+  // user links inside that anchor, so clicking a stargazer resolves to the
+  // wrapping anchor and navigates to the stargazers list instead of the user.
+  // `stopPropagation` can't fix this reliably (GitHub binds clicks in the
+  // capture phase, and nested anchors are invalid HTML with no spec'd target).
+  // Portal the popup to <body> and position it with `position: fixed` so it
+  // lives outside any anchor — user links then navigate natively, keeping
+  // Cmd/Ctrl/middle-click "open in new tab" for free.
   const popup = createPopupElement(config);
-  interceptPopupNavigation(popup);
-  counter.appendChild(popup);
-
-  // GitHub's own JS rewrites the stargazer counter's children after
-  // hydration (e.g. setting textContent on `.js-social-count`), which
-  // wipes our popup. Re-attach if that happens.
-  const observer = new MutationObserver(() => {
-    if (!counter.classList.contains(WRAP_CLASS)) {
-      observer.disconnect();
-      return;
-    }
-    if (popup.parentElement !== counter) counter.appendChild(popup);
-  });
-  observer.observe(counter, { childList: true });
+  popupOwner.set(popup, counter);
+  document.body.appendChild(popup);
 
   setupHover(counter, popup, async () => {
     const list = popup.querySelector(".bg-wfs-popup-list") as HTMLElement;
@@ -214,6 +231,10 @@ function attachPopup(
 }
 
 export function injectWatchForkStarPopup(): void {
+  // Popups are portaled to <body>, so a prior page's popups don't get removed
+  // with their counter on SPA navigation — sweep them before re-injecting.
+  reapOrphanedPopups();
+
   const repoInfo = getRepoInfo();
   if (!repoInfo) return;
 
@@ -274,6 +295,7 @@ export function cleanupWatchForkStarPopup(): void {
     counter.classList.remove(WRAP_CLASS);
     // If we tear down mid-hover, give the counter its native title back.
     restoreNativeTitle(counter);
-    counter.querySelectorAll(`.${POPUP_CLASS}`).forEach((popup) => popup.remove());
   }
+  // Popups live in <body> (portaled out of the counter), so remove them by class.
+  document.querySelectorAll<HTMLElement>(`.${POPUP_CLASS}`).forEach((popup) => popup.remove());
 }

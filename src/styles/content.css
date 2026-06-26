@@ -595,9 +595,9 @@ a.better-github-review-popover-item:hover {
 
 .bg-wfs-popup {
   display: none;
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
+  /* Portaled to <body> and positioned in viewport coords by JS (see
+     watch-fork-star-popup.ts) so it lives outside GitHub's stargazers anchor. */
+  position: fixed;
   width: 280px;
   background: var(--bgColor-default, var(--color-canvas-default, #fff));
   border: 1px solid var(--borderColor-default, var(--color-border-default, #d0d7de));
