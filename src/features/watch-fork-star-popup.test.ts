@@ -55,7 +55,8 @@ describe("watch/fork/star popup", () => {
     await vi.advanceTimersByTimeAsync(300);
 
     expect(fetchWatchers).toHaveBeenCalledWith("owner", "repo");
-    const items = watchCounter.querySelectorAll(".bg-wfs-popup-item");
+    // The popup is portaled to <body>, so query the document, not the counter.
+    const items = document.querySelectorAll(".bg-wfs-popup-item");
     expect(items).toHaveLength(2);
     expect(items[0].querySelector(".bg-wfs-popup-username")?.textContent).toBe("alice");
     expect(items[0].querySelector("img")?.getAttribute("alt")).toBe("alice");
@@ -63,10 +64,10 @@ describe("watch/fork/star popup", () => {
     vi.useRealTimers();
   });
 
-  it("keeps a clicked stargazer's link pointing at their profile and out of the stargazers anchor", async () => {
+  it("portals the popup to <body>, out of the stargazers anchor, so clicks can't leak to it", async () => {
     vi.useFakeTimers();
     // GitHub nests the star counter inside an `<a href=".../stargazers">`.
-    // Reproduce that so the popup's user links live inside the outer anchor.
+    // Reproduce that to prove the popup is NOT placed inside the outer anchor.
     const star = document.getElementById("star-counter")!;
     const outer = document.createElement("a");
     outer.href = `${GH}/owner/repo/stargazers`;
@@ -81,41 +82,39 @@ describe("watch/fork/star popup", () => {
     star.dispatchEvent(new Event("mouseenter"));
     await vi.advanceTimersByTimeAsync(300);
 
-    const item = star.querySelector<HTMLAnchorElement>(".bg-wfs-popup-item")!;
+    // Only the hovered star popup has a rendered item — find it by that.
+    const item = document.querySelector<HTMLAnchorElement>(".bg-wfs-popup-item")!;
+    const popup = item.closest<HTMLElement>(".bg-wfs-popup")!;
+
+    // The popup lives in <body>, never inside the stargazers anchor — so a click
+    // anywhere in it (user link or blank space) can't resolve to that anchor.
+    expect(popup.parentElement).toBe(document.body);
+    expect(outer.contains(popup)).toBe(false);
+
     // The link is a real anchor to the profile — the browser navigates it
-    // natively (so new-tab modifiers keep working); we only stop the click
-    // from reaching the outer stargazers anchor / GitHub's handlers.
+    // natively, so Cmd/Ctrl/middle-click "open in new tab" keeps working.
     expect(item.getAttribute("href")).toBe(`${GH}/CodyTseng`);
-
-    const click = new MouseEvent("click", { bubbles: true, cancelable: true });
-    const onOuter = vi.fn();
-    outer.addEventListener("click", onOuter);
-    item.dispatchEvent(click);
-
-    expect(onOuter).not.toHaveBeenCalled();
-    // We don't preventDefault — native anchor navigation is left intact.
-    expect(click.defaultPrevented).toBe(false);
 
     vi.useRealTimers();
   });
 
-  it("swallows blank-area clicks so they don't fall through to the stargazers anchor", () => {
-    const star = document.getElementById("star-counter")!;
-    const outer = document.createElement("a");
-    outer.href = `${GH}/owner/repo/stargazers`;
-    star.replaceWith(outer);
-    outer.appendChild(star);
+  it("reaps a popup whose counter left the page before re-injecting", () => {
+    injectWatchForkStarPopup();
+    expect(document.querySelectorAll(".bg-wfs-popup")).toHaveLength(3);
+
+    // Simulate an SPA navigation: GitHub swaps in a fresh pagehead, dropping the
+    // old counters. The portaled popups stay in <body> as orphans until reaped.
+    document.querySelector("ul.pagehead-actions")!.remove();
+    const fresh = document.createElement("ul");
+    fresh.className = "pagehead-actions";
+    fresh.innerHTML = `<li><span class="Counter js-social-count" id="star-counter">42</span></li>`;
+    document.body.appendChild(fresh);
 
     injectWatchForkStarPopup();
-    const onOuter = vi.fn();
-    outer.addEventListener("click", onOuter);
 
-    // Click the popup header (no link) — must not bubble to the outer anchor.
-    const header = star.querySelector(".bg-wfs-popup-header")!;
-    const click = new MouseEvent("click", { bubbles: true, cancelable: true });
-    header.dispatchEvent(click);
-
-    expect(onOuter).not.toHaveBeenCalled();
+    // The three orphaned popups from the old counters are gone; only the new
+    // page's single popup remains.
+    expect(document.querySelectorAll(".bg-wfs-popup")).toHaveLength(1);
   });
 
   it("hides the counter's native title on hover and restores it on leave", () => {
