@@ -135,6 +135,10 @@ Every feature can be individually toggled on or off in the settings.
 
 All features except Recent Commit Message Color can be individually toggled on/off in the extension options.
 
+## Removed Features
+
+- **Release Asset Downloads** — Removed after GitHub updated the Releases page to show release asset download counts natively. Discovered on 2026-07-01.
+
 ## Build from Source
 
 1. Clone the repo and build:

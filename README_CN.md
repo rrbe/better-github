@@ -135,6 +135,10 @@ Better GitHub 是一个增强 GitHub 使用体验的 Chrome 插件，灵感源�
 
 除"最近提交 Commit Message 颜色"外，所有功能均可在扩展选项中单独开关。
 
+## 已删除功能
+
+- **Release 资源下载量** — 已删除。2026 年 7 月 1 日发现 GitHub 官方更新了 Release 页面，已原生支持显示 release asset 下载量。
+
 ## 自行打包安装
 
 1. 克隆仓库并构建：
