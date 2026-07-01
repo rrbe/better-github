@@ -10,7 +10,6 @@ import type {
   StargazerInfo,
   WatcherInfo,
   ForkInfo,
-  ReleaseAssetDownload,
   ContributorInfo,
 } from "./messages";
 
@@ -49,7 +48,6 @@ export type {
   StargazerInfo,
   WatcherInfo,
   ForkInfo,
-  ReleaseAssetDownload,
   ContributorInfo,
 };
 
@@ -234,24 +232,6 @@ export async function fetchForks(owner: string, repo: string): Promise<ForkInfo[
     });
   } catch (err) {
     console.error("[Better GitHub] Failed to fetch forks:", err);
-    return [];
-  }
-}
-
-export async function fetchReleaseDownloads(
-  owner: string,
-  repo: string,
-  tag: string,
-): Promise<ReleaseAssetDownload[]> {
-  try {
-    return await sendMessage<ReleaseAssetDownload[]>({
-      type: "FETCH_RELEASE_DOWNLOADS",
-      owner,
-      repo,
-      tag,
-    });
-  } catch (err) {
-    console.error("[Better GitHub] Failed to fetch release downloads:", err);
     return [];
   }
 }

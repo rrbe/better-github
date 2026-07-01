@@ -107,10 +107,6 @@
   "featReleaseTabDesc": {
     "message": "在儲存庫導覽列新增一個 Releases 分頁，方便快速存取。"
   },
-  "featReleaseDownloadsName": { "message": "Release 資源下載次數" },
-  "featReleaseDownloadsDesc": {
-    "message": "在 Releases 頁面顯示每個資源檔案被下載的次數。"
-  },
   "featWatchForkStarName": { "message": "Watch/Fork/Star 彈出視窗" },
   "featWatchForkStarDesc": {
     "message": "將游標停在 Watch、Fork 或 Star 數字上，即可在彈出視窗中預覽清單。"
@@ -145,10 +141,6 @@
   "commitTagTitle": {
     "message": "Tag: $name$",
     "placeholders": { "name": { "content": "$1", "example": "v1.0.0" } }
-  },
-  "assetDownloadsTitle": {
-    "message": "已下載 $count$ 次",
-    "placeholders": { "count": { "content": "$1", "example": "1,234" } }
   },
   "copied": { "message": "已複製！" },
   "branchCopyTitle": { "message": "點擊複製分支名稱" },

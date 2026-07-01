@@ -5,7 +5,6 @@ const FEATURE_KEYS = [
   "feature-pr-review-status",
   "feature-pr-diff-stats",
   "feature-release-tab",
-  "feature-release-downloads-count",
   "feature-pr-label-position",
   "feature-pr-approve-now",
   "feature-default-sort",

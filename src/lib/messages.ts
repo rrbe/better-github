@@ -69,15 +69,6 @@ export interface ForkInfo {
   stargazersCount: number;
 }
 
-export interface ReleaseAssetDownload {
-  /** The release tag the asset belongs to (raw `tag_name`, matches the download URL). */
-  tag: string;
-  /** Asset file name (matches the last segment of the download URL). */
-  name: string;
-  /** Number of times this asset file has been downloaded. */
-  downloadCount: number;
-}
-
 /** Objective facts about a GitHub account, for the contributor background card.
  * Pure-fact only — no scoring. See docs/pr-signals-plan.md. */
 export interface ContributorInfo {
@@ -115,7 +106,6 @@ export type ServiceWorkerRequest =
   | { type: "FETCH_STARGAZERS"; owner: string; repo: string }
   | { type: "FETCH_WATCHERS"; owner: string; repo: string }
   | { type: "FETCH_FORKS"; owner: string; repo: string }
-  | { type: "FETCH_RELEASE_DOWNLOADS"; owner: string; repo: string; tag: string }
   | { type: "FETCH_CONTRIBUTOR_INFO"; login: string; owner?: string; repo?: string };
 
 export type ServiceWorkerResponse<T> = { ok: true; data: T } | { ok: false; error: string };
