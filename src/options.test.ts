@@ -29,8 +29,6 @@ function buildDom(): void {
   document.body.innerHTML = `
     <input type="password" id="token" />
     <div id="tokenStatus" class="token-status"></div>
-    <button id="save">Save</button>
-    <div class="status" id="status"></div>
     <button id="searchBtn"></button>
     <div id="searchBar" class="search-bar"></div>
     <input type="text" id="searchInput" />
@@ -84,6 +82,7 @@ const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as 
 
 describe("options page", () => {
   afterEach(() => {
+    vi.useRealTimers();
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
     document.body.innerHTML = "";
@@ -114,31 +113,6 @@ describe("options page", () => {
     );
   });
 
-  it("persists the token and every flag when Save is clicked", async () => {
-    const chrome = await loadOptions({});
-    $<HTMLInputElement>("token").value = "  ghp_new  ";
-    $<HTMLInputElement>("feature-commit-tags").checked = false;
-
-    $("save").click();
-
-    expect(chrome.set).toHaveBeenCalledTimes(1);
-    const saved = chrome.set.mock.calls[0][0] as Record<string, unknown>;
-    expect(saved.githubToken).toBe("ghp_new"); // trimmed
-    expect(saved["feature-commit-tags"]).toBe(false);
-    expect(saved["feature-pr-branch-names"]).toBe(true);
-    expect($("status").textContent).toBe("Saved!");
-  });
-
-  it("surfaces a storage error from Save", async () => {
-    const chrome = await loadOptions({});
-    chrome.lastError = { message: "quota exceeded" };
-
-    $("save").click();
-
-    expect($("status").textContent).toBe("quota exceeded");
-    expect($("status").className).toContain("error");
-  });
-
   it("auto-saves a single flag when its checkbox is toggled", async () => {
     const chrome = await loadOptions({});
     const box = $<HTMLInputElement>("feature-release-tab");
@@ -147,6 +121,32 @@ describe("options page", () => {
     box.dispatchEvent(new Event("change"));
 
     expect(chrome.set).toHaveBeenCalledWith({ "feature-release-tab": false });
+  });
+
+  it("auto-saves a valid token after input validation", async () => {
+    vi.useFakeTimers();
+    const chrome = await loadOptions({});
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ login: "octocat" }), {
+          status: 200,
+          headers: { "GitHub-Authentication-Token-Expiration": "2026-07-08 12:00:00 UTC" },
+        }),
+      ),
+    );
+
+    const token = $<HTMLInputElement>("token");
+    token.value = "  ghp_valid  ";
+    token.dispatchEvent(new Event("input"));
+    await vi.advanceTimersByTimeAsync(600);
+
+    await vi.waitFor(() =>
+      expect(chrome.set).toHaveBeenCalledWith({ githubToken: "ghp_valid" }, expect.any(Function)),
+    );
+    expect($("tokenStatus").textContent).toBe(
+      "Valid — authenticated as octocat · expires 2026-07-08 12:00:00 UTC",
+    );
   });
 
   it("filters feature items and hides groups with no match while searching", async () => {
@@ -165,7 +165,7 @@ describe("options page", () => {
   });
 
   it("validates the token against the GitHub API on blur", async () => {
-    await loadOptions({});
+    const chrome = await loadOptions({});
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -185,5 +185,6 @@ describe("options page", () => {
       ),
     );
     expect($("tokenStatus").className).toContain("valid");
+    expect(chrome.set).toHaveBeenCalledWith({ githubToken: "ghp_valid" }, expect.any(Function));
   });
 });
