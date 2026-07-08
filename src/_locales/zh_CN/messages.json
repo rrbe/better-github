@@ -126,6 +126,9 @@
   },
   "tokenExpirationNone": { "message": "无过期时间" },
   "tokenInvalid": { "message": "无效令牌 — 未保存" },
+  "tokenStoredInvalid": {
+    "message": "已保存的令牌无效 — 请更新令牌，否则需要令牌的功能无法使用"
+  },
   "tokenValidationFailed": {
     "message": "验证失败（HTTP $status$）",
     "placeholders": { "status": { "content": "$1", "example": "500" } }

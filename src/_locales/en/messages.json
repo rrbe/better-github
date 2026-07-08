@@ -126,6 +126,9 @@
   },
   "tokenExpirationNone": { "message": "no expiration date" },
   "tokenInvalid": { "message": "Invalid token — not saved" },
+  "tokenStoredInvalid": {
+    "message": "Saved token is invalid — update it to keep token-only features working"
+  },
   "tokenValidationFailed": {
     "message": "Validation failed (HTTP $status$)",
     "placeholders": { "status": { "content": "$1", "example": "500" } }

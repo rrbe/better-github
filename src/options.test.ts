@@ -23,9 +23,7 @@ interface ChromeStub {
 }
 
 function buildDom(): void {
-  const checkboxes = FEATURE_KEYS.map(
-    (k) => `<input type="checkbox" id="${k}" />`,
-  ).join("");
+  const checkboxes = FEATURE_KEYS.map((k) => `<input type="checkbox" id="${k}" />`).join("");
   document.body.innerHTML = `
     <input type="password" id="token" />
     <div id="tokenStatus" class="token-status"></div>
@@ -107,10 +105,22 @@ describe("options page", () => {
     expect($<HTMLInputElement>("feature-default-sort").checked).toBe(false);
     expect($("footer").innerHTML).toContain("9.9.9");
     await vi.waitFor(() =>
+      expect($("tokenStatus").textContent).toBe("Saved — octocat · expires 2026-07-08"),
+    );
+  });
+
+  it("shows stored invalid token copy without clearing the saved token", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(null, { status: 401 })));
+    const chrome = await loadOptions({ githubToken: "ghp_revoked" });
+
+    await vi.waitFor(() =>
       expect($("tokenStatus").textContent).toBe(
-        "Saved — octocat · expires 2026-07-08",
+        "Saved token is invalid — update it to keep token-only features working",
       ),
     );
+    expect($<HTMLInputElement>("token").value).toBe("ghp_revoked");
+    expect(chrome.store.githubToken).toBe("ghp_revoked");
+    expect(chrome.set).not.toHaveBeenCalled();
   });
 
   it("auto-saves a single flag when its checkbox is toggled", async () => {
@@ -144,9 +154,7 @@ describe("options page", () => {
     await vi.waitFor(() =>
       expect(chrome.set).toHaveBeenCalledWith({ githubToken: "ghp_valid" }, expect.any(Function)),
     );
-    expect($("tokenStatus").textContent).toBe(
-      "Saved — octocat · expires 2026-07-08",
-    );
+    expect($("tokenStatus").textContent).toBe("Saved — octocat · expires 2026-07-08");
   });
 
   it("filters feature items and hides groups with no match while searching", async () => {
@@ -180,9 +188,7 @@ describe("options page", () => {
     token.value = "ghp_valid";
     token.dispatchEvent(new Event("blur"));
     await vi.waitFor(() =>
-      expect($("tokenStatus").textContent).toBe(
-        "Saved — octocat · expires 2026-07-08",
-      ),
+      expect($("tokenStatus").textContent).toBe("Saved — octocat · expires 2026-07-08"),
     );
     expect($("tokenStatus").className).toContain("valid");
     expect(chrome.set).toHaveBeenCalledWith({ githubToken: "ghp_valid" }, expect.any(Function));

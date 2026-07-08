@@ -47,7 +47,7 @@ chrome.storage.local.get<StoredSettings>(["githubToken", ...FEATURE_KEYS], (resu
   if (result.githubToken) {
     storedToken = result.githubToken.trim();
     tokenInput.value = storedToken;
-    localeReady.then(() => validateToken(storedToken));
+    localeReady.then(() => validateToken(storedToken, { invalidMessageKey: "tokenStoredInvalid" }));
   }
   for (const key of FEATURE_KEYS) {
     const checkbox = document.getElementById(key) as HTMLInputElement;
@@ -59,6 +59,11 @@ chrome.storage.local.get<StoredSettings>(["githubToken", ...FEATURE_KEYS], (resu
 let lastValidatedToken = "";
 let validationRun = 0;
 let tokenValidationTimer: number | undefined;
+
+interface TokenValidationOptions {
+  shouldPersist?: boolean;
+  invalidMessageKey?: "tokenInvalid" | "tokenStoredInvalid";
+}
 
 function renderValidTokenStatus(user: string, expiration: string | null) {
   const expirationDate = expiration?.match(/^\d{4}-\d{2}-\d{2}/)?.[0] ?? null;
@@ -84,7 +89,10 @@ function persistToken(token: string, run: number) {
   });
 }
 
-async function validateToken(token: string, shouldPersist = false) {
+async function validateToken(
+  token: string,
+  { shouldPersist = false, invalidMessageKey = "tokenInvalid" }: TokenValidationOptions = {},
+) {
   const run = ++validationRun;
   if (!token) {
     tokenStatus.className = "token-status";
@@ -119,7 +127,7 @@ async function validateToken(token: string, shouldPersist = false) {
       if (shouldPersist) persistToken(token, run);
     } else if (response.status === 401) {
       tokenStatus.className = "token-status invalid";
-      tokenStatus.textContent = t("tokenInvalid");
+      tokenStatus.textContent = t(invalidMessageKey);
       lastValidatedToken = "";
     } else {
       tokenStatus.className = "token-status invalid";
@@ -137,7 +145,7 @@ async function validateToken(token: string, shouldPersist = false) {
 function scheduleTokenValidation() {
   if (tokenValidationTimer) clearTimeout(tokenValidationTimer);
   tokenValidationTimer = window.setTimeout(() => {
-    validateToken(tokenInput.value.trim(), true);
+    validateToken(tokenInput.value.trim(), { shouldPersist: true });
   }, 600);
 }
 
@@ -147,7 +155,7 @@ tokenInput.addEventListener("blur", () => {
     clearTimeout(tokenValidationTimer);
     tokenValidationTimer = undefined;
   }
-  validateToken(tokenInput.value.trim(), true);
+  validateToken(tokenInput.value.trim(), { shouldPersist: true });
 });
 
 // --- Auto-save feature toggles on change ---
