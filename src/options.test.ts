@@ -108,7 +108,7 @@ describe("options page", () => {
     expect($("footer").innerHTML).toContain("9.9.9");
     await vi.waitFor(() =>
       expect($("tokenStatus").textContent).toBe(
-        "Valid — authenticated as octocat · expires 2026-07-08 12:00:00 UTC",
+        "Saved — octocat · expires 2026-07-08",
       ),
     );
   });
@@ -145,7 +145,7 @@ describe("options page", () => {
       expect(chrome.set).toHaveBeenCalledWith({ githubToken: "ghp_valid" }, expect.any(Function)),
     );
     expect($("tokenStatus").textContent).toBe(
-      "Valid — authenticated as octocat · expires 2026-07-08 12:00:00 UTC",
+      "Saved — octocat · expires 2026-07-08",
     );
   });
 
@@ -181,7 +181,7 @@ describe("options page", () => {
     token.dispatchEvent(new Event("blur"));
     await vi.waitFor(() =>
       expect($("tokenStatus").textContent).toBe(
-        "Valid — authenticated as octocat · expires 2026-07-08 12:00:00 UTC",
+        "Saved — octocat · expires 2026-07-08",
       ),
     );
     expect($("tokenStatus").className).toContain("valid");

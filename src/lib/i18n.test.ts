@@ -26,8 +26,8 @@ describe("i18n", () => {
 
   it("substitutes positional placeholders in both locales", () => {
     setLocale("en");
-    expect(t("tokenValid", ["octocat", "expires 2026-07-08 12:00:00 UTC"])).toBe(
-      "Valid — authenticated as octocat · expires 2026-07-08 12:00:00 UTC",
+    expect(t("tokenValid", ["octocat", "expires 2026-07-08"])).toBe(
+      "Saved — octocat · expires 2026-07-08",
     );
     expect(t("diffStatsTitleWithFiles", ["1,234", "56", "3 files"])).toBe(
       "1,234 additions, 56 deletions across 3 files",
