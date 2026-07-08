@@ -3,7 +3,7 @@ import { t, localizePage, initLocale, setLocale, LOCALE_KEY, type LocalePref } f
 const langSelect = document.getElementById("langSelect") as HTMLSelectElement | null;
 
 // Resolve the stored locale preference, reflect it in the picker, then localize.
-initLocale().then((pref) => {
+const localeReady = initLocale().then((pref) => {
   if (langSelect) langSelect.value = pref;
   localizePage();
 });
@@ -18,10 +18,6 @@ langSelect?.addEventListener("change", () => {
 
 const tokenInput = document.getElementById("token") as HTMLInputElement;
 const tokenStatus = document.getElementById("tokenStatus") as HTMLDivElement;
-const saveBtn = document.getElementById("save") as HTMLButtonElement;
-// Not named `status`: as a top-level script var that would shadow the DOM
-// global `window.status` (a string), breaking `.className`/`.textContent`.
-const statusEl = document.getElementById("status") as HTMLDivElement;
 
 interface StoredSettings {
   githubToken?: string;
@@ -44,10 +40,14 @@ const FEATURE_KEYS = [
   "feature-contributor-card",
 ] as const;
 
+let storedToken = "";
+
 // --- Load saved settings ---
 chrome.storage.local.get<StoredSettings>(["githubToken", ...FEATURE_KEYS], (result) => {
   if (result.githubToken) {
-    tokenInput.value = result.githubToken;
+    storedToken = result.githubToken.trim();
+    tokenInput.value = storedToken;
+    localeReady.then(() => validateToken(storedToken, { invalidMessageKey: "tokenStoredInvalid" }));
   }
   for (const key of FEATURE_KEYS) {
     const checkbox = document.getElementById(key) as HTMLInputElement;
@@ -55,16 +55,56 @@ chrome.storage.local.get<StoredSettings>(["githubToken", ...FEATURE_KEYS], (resu
   }
 });
 
-// --- Token validation on blur ---
+// --- Token validation and auto-save ---
 let lastValidatedToken = "";
+let validationRun = 0;
+let tokenValidationTimer: number | undefined;
 
-async function validateToken(token: string) {
+interface TokenValidationOptions {
+  shouldPersist?: boolean;
+  invalidMessageKey?: "tokenInvalid" | "tokenStoredInvalid";
+}
+
+function renderValidTokenStatus(user: string, expiration: string | null) {
+  const expirationDate = expiration?.match(/^\d{4}-\d{2}-\d{2}/)?.[0] ?? null;
+  const expirationText = expirationDate
+    ? t("tokenExpirationDate", expirationDate)
+    : t("tokenExpirationNone");
+  tokenStatus.className = "token-status valid";
+  tokenStatus.textContent = t("tokenValid", [user, expirationText]);
+}
+
+function persistToken(token: string, run: number) {
+  if (token === storedToken) return;
+
+  chrome.storage.local.set({ githubToken: token }, () => {
+    if (run !== validationRun) return;
+    if (chrome.runtime.lastError) {
+      tokenStatus.className = "token-status invalid";
+      tokenStatus.textContent = chrome.runtime.lastError.message ?? t("saveFailed");
+      lastValidatedToken = "";
+      return;
+    }
+    storedToken = token;
+  });
+}
+
+async function validateToken(
+  token: string,
+  { shouldPersist = false, invalidMessageKey = "tokenInvalid" }: TokenValidationOptions = {},
+) {
+  const run = ++validationRun;
   if (!token) {
     tokenStatus.className = "token-status";
     tokenStatus.textContent = "";
+    lastValidatedToken = "";
+    if (shouldPersist) persistToken("", run);
     return;
   }
-  if (token === lastValidatedToken) return;
+  if (token === lastValidatedToken) {
+    if (shouldPersist) persistToken(token, run);
+    return;
+  }
 
   tokenStatus.className = "token-status checking";
   tokenStatus.textContent = t("validatingToken");
@@ -74,14 +114,20 @@ async function validateToken(token: string) {
       headers: { Authorization: `Bearer ${token}` },
     });
 
+    if (run !== validationRun) return;
+
     if (response.ok) {
       const user = await response.json();
-      tokenStatus.className = "token-status valid";
-      tokenStatus.textContent = t("tokenValid", user.login);
+      if (run !== validationRun) return;
+      renderValidTokenStatus(
+        user.login,
+        response.headers.get("GitHub-Authentication-Token-Expiration")?.trim() || null,
+      );
       lastValidatedToken = token;
+      if (shouldPersist) persistToken(token, run);
     } else if (response.status === 401) {
       tokenStatus.className = "token-status invalid";
-      tokenStatus.textContent = t("tokenInvalid");
+      tokenStatus.textContent = t(invalidMessageKey);
       lastValidatedToken = "";
     } else {
       tokenStatus.className = "token-status invalid";
@@ -89,45 +135,27 @@ async function validateToken(token: string) {
       lastValidatedToken = "";
     }
   } catch {
+    if (run !== validationRun) return;
     tokenStatus.className = "token-status invalid";
     tokenStatus.textContent = t("tokenNetworkError");
     lastValidatedToken = "";
   }
 }
 
-tokenInput.addEventListener("blur", () => {
-  validateToken(tokenInput.value.trim());
-});
-
-// --- Save button ---
-let statusTimer: number | undefined;
-
-function showStatus(kind: "success" | "error", message: string) {
-  statusEl.className = `status ${kind}`;
-  statusEl.textContent = message;
-  if (statusTimer) clearTimeout(statusTimer);
-  statusTimer = window.setTimeout(() => {
-    statusEl.className = "status";
-    statusEl.textContent = "";
-  }, 2000);
+function scheduleTokenValidation() {
+  if (tokenValidationTimer) clearTimeout(tokenValidationTimer);
+  tokenValidationTimer = window.setTimeout(() => {
+    validateToken(tokenInput.value.trim(), { shouldPersist: true });
+  }, 600);
 }
 
-saveBtn.addEventListener("click", () => {
-  const token = tokenInput.value.trim();
-  const settings: Record<string, string | boolean> = { githubToken: token };
-
-  for (const key of FEATURE_KEYS) {
-    const checkbox = document.getElementById(key) as HTMLInputElement;
-    settings[key] = checkbox.checked;
+tokenInput.addEventListener("input", scheduleTokenValidation);
+tokenInput.addEventListener("blur", () => {
+  if (tokenValidationTimer) {
+    clearTimeout(tokenValidationTimer);
+    tokenValidationTimer = undefined;
   }
-
-  chrome.storage.local.set(settings, () => {
-    if (chrome.runtime.lastError) {
-      showStatus("error", chrome.runtime.lastError.message ?? t("saveFailed"));
-    } else {
-      showStatus("success", t("saved"));
-    }
-  });
+  validateToken(tokenInput.value.trim(), { shouldPersist: true });
 });
 
 // --- Auto-save feature toggles on change ---

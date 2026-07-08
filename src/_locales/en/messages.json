@@ -114,10 +114,21 @@
 
   "validatingToken": { "message": "Validating token…" },
   "tokenValid": {
-    "message": "Valid — authenticated as $user$",
-    "placeholders": { "user": { "content": "$1", "example": "octocat" } }
+    "message": "Saved — $user$ · $expiration$",
+    "placeholders": {
+      "user": { "content": "$1", "example": "octocat" },
+      "expiration": { "content": "$2", "example": "expires 2026-07-08" }
+    }
   },
-  "tokenInvalid": { "message": "Invalid token — authentication failed" },
+  "tokenExpirationDate": {
+    "message": "expires $date$",
+    "placeholders": { "date": { "content": "$1", "example": "2026-07-08" } }
+  },
+  "tokenExpirationNone": { "message": "no expiration date" },
+  "tokenInvalid": { "message": "Invalid token — not saved" },
+  "tokenStoredInvalid": {
+    "message": "Saved token is invalid — update it to keep token-only features working"
+  },
   "tokenValidationFailed": {
     "message": "Validation failed (HTTP $status$)",
     "placeholders": { "status": { "content": "$1", "example": "500" } }

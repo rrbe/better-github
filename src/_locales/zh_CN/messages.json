@@ -114,10 +114,21 @@
 
   "validatingToken": { "message": "正在验证令牌…" },
   "tokenValid": {
-    "message": "有效 — 已认证为 $user$",
-    "placeholders": { "user": { "content": "$1", "example": "octocat" } }
+    "message": "已保存 — $user$ · $expiration$",
+    "placeholders": {
+      "user": { "content": "$1", "example": "octocat" },
+      "expiration": { "content": "$2", "example": "有效期至 2026-07-08" }
+    }
   },
-  "tokenInvalid": { "message": "无效令牌 — 认证失败" },
+  "tokenExpirationDate": {
+    "message": "有效期至 $date$",
+    "placeholders": { "date": { "content": "$1", "example": "2026-07-08" } }
+  },
+  "tokenExpirationNone": { "message": "无过期时间" },
+  "tokenInvalid": { "message": "无效令牌 — 未保存" },
+  "tokenStoredInvalid": {
+    "message": "已保存的令牌无效 — 请更新令牌，否则需要令牌的功能无法使用"
+  },
   "tokenValidationFailed": {
     "message": "验证失败（HTTP $status$）",
     "placeholders": { "status": { "content": "$1", "example": "500" } }

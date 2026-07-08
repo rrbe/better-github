@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 const FEATURE_KEYS = [
   "feature-pr-branch-names",
@@ -23,14 +23,10 @@ interface ChromeStub {
 }
 
 function buildDom(): void {
-  const checkboxes = FEATURE_KEYS.map(
-    (k) => `<input type="checkbox" id="${k}" />`,
-  ).join("");
+  const checkboxes = FEATURE_KEYS.map((k) => `<input type="checkbox" id="${k}" />`).join("");
   document.body.innerHTML = `
     <input type="password" id="token" />
     <div id="tokenStatus" class="token-status"></div>
-    <button id="save">Save</button>
-    <div class="status" id="status"></div>
     <button id="searchBtn"></button>
     <div id="searchBar" class="search-bar"></div>
     <input type="text" id="searchInput" />
@@ -84,12 +80,23 @@ const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as 
 
 describe("options page", () => {
   afterEach(() => {
+    vi.useRealTimers();
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
     document.body.innerHTML = "";
   });
 
-  it("reflects stored settings into the form on load", async () => {
+  it("reflects stored settings and validates a stored token on load", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ login: "octocat" }), {
+          status: 200,
+          headers: { "GitHub-Authentication-Token-Expiration": "2026-07-08 12:00:00 UTC" },
+        }),
+      ),
+    );
+
     await loadOptions({ githubToken: "ghp_abc", "feature-default-sort": false });
 
     expect($<HTMLInputElement>("token").value).toBe("ghp_abc");
@@ -97,31 +104,23 @@ describe("options page", () => {
     expect($<HTMLInputElement>("feature-pr-branch-names").checked).toBe(true);
     expect($<HTMLInputElement>("feature-default-sort").checked).toBe(false);
     expect($("footer").innerHTML).toContain("9.9.9");
+    await vi.waitFor(() =>
+      expect($("tokenStatus").textContent).toBe("Saved — octocat · expires 2026-07-08"),
+    );
   });
 
-  it("persists the token and every flag when Save is clicked", async () => {
-    const chrome = await loadOptions({});
-    $<HTMLInputElement>("token").value = "  ghp_new  ";
-    $<HTMLInputElement>("feature-commit-tags").checked = false;
+  it("shows stored invalid token copy without clearing the saved token", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(null, { status: 401 })));
+    const chrome = await loadOptions({ githubToken: "ghp_revoked" });
 
-    $("save").click();
-
-    expect(chrome.set).toHaveBeenCalledTimes(1);
-    const saved = chrome.set.mock.calls[0][0] as Record<string, unknown>;
-    expect(saved.githubToken).toBe("ghp_new"); // trimmed
-    expect(saved["feature-commit-tags"]).toBe(false);
-    expect(saved["feature-pr-branch-names"]).toBe(true);
-    expect($("status").textContent).toBe("Saved!");
-  });
-
-  it("surfaces a storage error from Save", async () => {
-    const chrome = await loadOptions({});
-    chrome.lastError = { message: "quota exceeded" };
-
-    $("save").click();
-
-    expect($("status").textContent).toBe("quota exceeded");
-    expect($("status").className).toContain("error");
+    await vi.waitFor(() =>
+      expect($("tokenStatus").textContent).toBe(
+        "Saved token is invalid — update it to keep token-only features working",
+      ),
+    );
+    expect($<HTMLInputElement>("token").value).toBe("ghp_revoked");
+    expect(chrome.store.githubToken).toBe("ghp_revoked");
+    expect(chrome.set).not.toHaveBeenCalled();
   });
 
   it("auto-saves a single flag when its checkbox is toggled", async () => {
@@ -132,6 +131,30 @@ describe("options page", () => {
     box.dispatchEvent(new Event("change"));
 
     expect(chrome.set).toHaveBeenCalledWith({ "feature-release-tab": false });
+  });
+
+  it("auto-saves a valid token after input validation", async () => {
+    vi.useFakeTimers();
+    const chrome = await loadOptions({});
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ login: "octocat" }), {
+          status: 200,
+          headers: { "GitHub-Authentication-Token-Expiration": "2026-07-08 12:00:00 UTC" },
+        }),
+      ),
+    );
+
+    const token = $<HTMLInputElement>("token");
+    token.value = "  ghp_valid  ";
+    token.dispatchEvent(new Event("input"));
+    await vi.advanceTimersByTimeAsync(600);
+
+    await vi.waitFor(() =>
+      expect(chrome.set).toHaveBeenCalledWith({ githubToken: "ghp_valid" }, expect.any(Function)),
+    );
+    expect($("tokenStatus").textContent).toBe("Saved — octocat · expires 2026-07-08");
   });
 
   it("filters feature items and hides groups with no match while searching", async () => {
@@ -150,11 +173,14 @@ describe("options page", () => {
   });
 
   it("validates the token against the GitHub API on blur", async () => {
-    await loadOptions({});
+    const chrome = await loadOptions({});
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
-        new Response(JSON.stringify({ login: "octocat" }), { status: 200 }),
+        new Response(JSON.stringify({ login: "octocat" }), {
+          status: 200,
+          headers: { "GitHub-Authentication-Token-Expiration": "2026-07-08 12:00:00 UTC" },
+        }),
       ),
     );
 
@@ -162,8 +188,9 @@ describe("options page", () => {
     token.value = "ghp_valid";
     token.dispatchEvent(new Event("blur"));
     await vi.waitFor(() =>
-      expect($("tokenStatus").textContent).toBe("Valid — authenticated as octocat"),
+      expect($("tokenStatus").textContent).toBe("Saved — octocat · expires 2026-07-08"),
     );
     expect($("tokenStatus").className).toContain("valid");
+    expect(chrome.set).toHaveBeenCalledWith({ githubToken: "ghp_valid" }, expect.any(Function));
   });
 });

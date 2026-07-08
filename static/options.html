@@ -214,24 +214,6 @@
         display: block;
         color: #656d76;
       }
-      .save-row {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-top: 12px;
-      }
-      .status {
-        font-size: 13px;
-        display: none;
-      }
-      .status.success {
-        display: block;
-        color: #1a7f37;
-      }
-      .status.error {
-        display: block;
-        color: #cf222e;
-      }
       button {
         padding: 6px 16px;
         background: #2da44e;
@@ -469,10 +451,6 @@
     <label for="token" data-i18n="tokenLabel">GitHub Personal Access Token</label>
     <input type="password" id="token" placeholder="ghp_xxxxxxxxxxxx" />
     <div id="tokenStatus" class="token-status"></div>
-    <div class="save-row">
-      <button id="save" data-i18n="save">Save</button>
-      <div class="status" id="status"></div>
-    </div>
     <div class="hint">
       <p class="hint-intro" data-i18n="tokenHintIntro">
         ⬆️ A token is required for accessing private repositories. The plugin itself will never
