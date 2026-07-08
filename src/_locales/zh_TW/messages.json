@@ -125,7 +125,7 @@
     "placeholders": { "date": { "content": "$1", "example": "2026-07-08" } }
   },
   "tokenExpirationNone": { "message": "無過期時間" },
-  "tokenInvalid": { "message": "無效權杖 — 驗證失敗" },
+  "tokenInvalid": { "message": "無效權杖 — 未儲存" },
   "tokenValidationFailed": {
     "message": "驗證失敗（HTTP $status$）",
     "placeholders": { "status": { "content": "$1", "example": "500" } }

@@ -125,7 +125,7 @@
     "placeholders": { "date": { "content": "$1", "example": "2026-07-08" } }
   },
   "tokenExpirationNone": { "message": "no expiration date" },
-  "tokenInvalid": { "message": "Invalid token — authentication failed" },
+  "tokenInvalid": { "message": "Invalid token — not saved" },
   "tokenValidationFailed": {
     "message": "Validation failed (HTTP $status$)",
     "placeholders": { "status": { "content": "$1", "example": "500" } }

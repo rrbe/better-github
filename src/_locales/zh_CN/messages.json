@@ -125,7 +125,7 @@
     "placeholders": { "date": { "content": "$1", "example": "2026-07-08" } }
   },
   "tokenExpirationNone": { "message": "无过期时间" },
-  "tokenInvalid": { "message": "无效令牌 — 认证失败" },
+  "tokenInvalid": { "message": "无效令牌 — 未保存" },
   "tokenValidationFailed": {
     "message": "验证失败（HTTP $status$）",
     "placeholders": { "status": { "content": "$1", "example": "500" } }
