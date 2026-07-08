@@ -3,7 +3,7 @@ import { t, localizePage, initLocale, setLocale, LOCALE_KEY, type LocalePref } f
 const langSelect = document.getElementById("langSelect") as HTMLSelectElement | null;
 
 // Resolve the stored locale preference, reflect it in the picker, then localize.
-initLocale().then((pref) => {
+const localeReady = initLocale().then((pref) => {
   if (langSelect) langSelect.value = pref;
   localizePage();
 });
@@ -48,6 +48,7 @@ const FEATURE_KEYS = [
 chrome.storage.local.get<StoredSettings>(["githubToken", ...FEATURE_KEYS], (result) => {
   if (result.githubToken) {
     tokenInput.value = result.githubToken;
+    localeReady.then(() => validateToken(result.githubToken?.trim() ?? ""));
   }
   for (const key of FEATURE_KEYS) {
     const checkbox = document.getElementById(key) as HTMLInputElement;
@@ -57,11 +58,22 @@ chrome.storage.local.get<StoredSettings>(["githubToken", ...FEATURE_KEYS], (resu
 
 // --- Token validation on blur ---
 let lastValidatedToken = "";
+let validationRun = 0;
+
+function renderValidTokenStatus(user: string, expiration: string | null) {
+  const expirationText = expiration
+    ? t("tokenExpirationDate", expiration)
+    : t("tokenExpirationNone");
+  tokenStatus.className = "token-status valid";
+  tokenStatus.textContent = t("tokenValid", [user, expirationText]);
+}
 
 async function validateToken(token: string) {
+  const run = ++validationRun;
   if (!token) {
     tokenStatus.className = "token-status";
     tokenStatus.textContent = "";
+    lastValidatedToken = "";
     return;
   }
   if (token === lastValidatedToken) return;
@@ -74,10 +86,15 @@ async function validateToken(token: string) {
       headers: { Authorization: `Bearer ${token}` },
     });
 
+    if (run !== validationRun) return;
+
     if (response.ok) {
       const user = await response.json();
-      tokenStatus.className = "token-status valid";
-      tokenStatus.textContent = t("tokenValid", user.login);
+      if (run !== validationRun) return;
+      renderValidTokenStatus(
+        user.login,
+        response.headers.get("GitHub-Authentication-Token-Expiration")?.trim() || null,
+      );
       lastValidatedToken = token;
     } else if (response.status === 401) {
       tokenStatus.className = "token-status invalid";
@@ -89,6 +106,7 @@ async function validateToken(token: string) {
       lastValidatedToken = "";
     }
   } catch {
+    if (run !== validationRun) return;
     tokenStatus.className = "token-status invalid";
     tokenStatus.textContent = t("tokenNetworkError");
     lastValidatedToken = "";

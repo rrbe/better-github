@@ -114,9 +114,17 @@
 
   "validatingToken": { "message": "正在驗證權杖…" },
   "tokenValid": {
-    "message": "有效 — 已驗證為 $user$",
-    "placeholders": { "user": { "content": "$1", "example": "octocat" } }
+    "message": "有效 — 已驗證為 $user$ · $expiration$",
+    "placeholders": {
+      "user": { "content": "$1", "example": "octocat" },
+      "expiration": { "content": "$2", "example": "有效期至 2026-07-08 12:00:00 UTC" }
+    }
   },
+  "tokenExpirationDate": {
+    "message": "有效期至 $date$",
+    "placeholders": { "date": { "content": "$1", "example": "2026-07-08 12:00:00 UTC" } }
+  },
+  "tokenExpirationNone": { "message": "無過期時間" },
   "tokenInvalid": { "message": "無效權杖 — 驗證失敗" },
   "tokenValidationFailed": {
     "message": "驗證失敗（HTTP $status$）",

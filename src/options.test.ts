@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 const FEATURE_KEYS = [
   "feature-pr-branch-names",
@@ -89,7 +89,17 @@ describe("options page", () => {
     document.body.innerHTML = "";
   });
 
-  it("reflects stored settings into the form on load", async () => {
+  it("reflects stored settings and validates a stored token on load", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ login: "octocat" }), {
+          status: 200,
+          headers: { "GitHub-Authentication-Token-Expiration": "2026-07-08 12:00:00 UTC" },
+        }),
+      ),
+    );
+
     await loadOptions({ githubToken: "ghp_abc", "feature-default-sort": false });
 
     expect($<HTMLInputElement>("token").value).toBe("ghp_abc");
@@ -97,6 +107,11 @@ describe("options page", () => {
     expect($<HTMLInputElement>("feature-pr-branch-names").checked).toBe(true);
     expect($<HTMLInputElement>("feature-default-sort").checked).toBe(false);
     expect($("footer").innerHTML).toContain("9.9.9");
+    await vi.waitFor(() =>
+      expect($("tokenStatus").textContent).toBe(
+        "Valid — authenticated as octocat · expires 2026-07-08 12:00:00 UTC",
+      ),
+    );
   });
 
   it("persists the token and every flag when Save is clicked", async () => {
@@ -154,7 +169,10 @@ describe("options page", () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
-        new Response(JSON.stringify({ login: "octocat" }), { status: 200 }),
+        new Response(JSON.stringify({ login: "octocat" }), {
+          status: 200,
+          headers: { "GitHub-Authentication-Token-Expiration": "2026-07-08 12:00:00 UTC" },
+        }),
       ),
     );
 
@@ -162,7 +180,9 @@ describe("options page", () => {
     token.value = "ghp_valid";
     token.dispatchEvent(new Event("blur"));
     await vi.waitFor(() =>
-      expect($("tokenStatus").textContent).toBe("Valid — authenticated as octocat"),
+      expect($("tokenStatus").textContent).toBe(
+        "Valid — authenticated as octocat · expires 2026-07-08 12:00:00 UTC",
+      ),
     );
     expect($("tokenStatus").className).toContain("valid");
   });
