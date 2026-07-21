@@ -333,6 +333,7 @@ a.better-github-review-popover-item:hover {
 
 .better-github-label-prefix {
   display: inline-flex;
+  flex-wrap: wrap;
   gap: 6px;
 }
 
