@@ -98,14 +98,18 @@ describe("watch/fork/star popup", () => {
     document.getElementById("watch-counter")!.dispatchEvent(new Event("mouseenter"));
     await vi.advanceTimersByTimeAsync(300);
 
-    expect(document.querySelector(".bg-wfs-popup-empty")?.textContent).toBe("—");
-    const link = [...document.querySelectorAll<HTMLAnchorElement>(".bg-wfs-popup-footer a")].find(
-      (candidate) => candidate.target === "_blank",
-    )!;
+    const empty = document.querySelector(".bg-wfs-popup-empty")!;
+    expect(empty.textContent).toContain("—");
+    const link = empty.querySelector<HTMLAnchorElement>("a")!;
     expect(link.href).toBe(
       "https://github.blog/changelog/2026-06-30-upcoming-access-restrictions-to-public-api-endpoints-and-ui-views/",
     );
     expect(link.rel).toBe("noopener noreferrer");
+    expect(
+      [...document.querySelectorAll<HTMLAnchorElement>(".bg-wfs-popup-footer a")].some(
+        (candidate) => candidate.getAttribute("href") === "/owner/repo/watchers",
+      ),
+    ).toBe(true);
 
     vi.useRealTimers();
   });

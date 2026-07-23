@@ -112,15 +112,12 @@ function renderSocialList(
     return;
   }
 
-  list.innerHTML = '<div class="bg-wfs-popup-empty">—</div>';
-  const footerLink = list.parentElement?.querySelector<HTMLAnchorElement>(
-    ".bg-wfs-popup-footer a",
-  );
-  if (!footerLink) return;
-  footerLink.href = ACCESS_RESTRICTIONS_URL;
-  footerLink.target = "_blank";
-  footerLink.rel = "noopener noreferrer";
-  footerLink.textContent = t("githubAccessRestrictions");
+  list.innerHTML = `<div class="bg-wfs-popup-empty">
+    —<br>
+    <a href="${ACCESS_RESTRICTIONS_URL}" target="_blank" rel="noopener noreferrer">
+      ${t("githubAccessRestrictions")}
+    </a>
+  </div>`;
 }
 
 function renderForks(list: HTMLElement, items: ForkInfo[]): void {
