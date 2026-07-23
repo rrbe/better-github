@@ -40,6 +40,26 @@ describe("watch/fork/star popup", () => {
     expect(document.querySelector(".bg-wfs-popup")).toBeNull();
   });
 
+  it("finds repository actions after GitHub replaces the legacy wrappers and counter classes", () => {
+    document.body.innerHTML = `
+      <div id="repository-container-header">
+        <div><button id="watch-action"><svg class="octicon octicon-bell"></svg>Watch <span>4</span></button></div>
+        <div><button id="fork-action"><svg class="octicon octicon-repo-forked"></svg>Fork <span>2</span></button></div>
+        <div><button id="star-action"><svg class="octicon octicon-star"></svg>Star <span>9</span></button></div>
+      </div>
+    `;
+
+    injectWatchForkStarPopup();
+
+    expect(document.querySelectorAll(".bg-wfs-counter-wrap")).toHaveLength(3);
+    expect(document.querySelectorAll(".bg-wfs-popup")).toHaveLength(3);
+    expect(
+      [...document.querySelectorAll(".bg-wfs-popup-header span:last-child")].map(
+        (count) => count.textContent,
+      ),
+    ).toEqual(["4", "2", "9"]);
+  });
+
   it("loads and renders the user list when a counter is hovered", async () => {
     vi.useFakeTimers();
     vi.mocked(fetchWatchers).mockResolvedValue([
