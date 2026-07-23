@@ -40,6 +40,32 @@ describe("watch/fork/star popup", () => {
     expect(document.querySelector(".bg-wfs-popup")).toBeNull();
   });
 
+  it("finds repository actions after GitHub replaces the legacy wrappers and counter classes", () => {
+    document.body.innerHTML = `
+      <div data-testid="responsive-social-buttons">
+        <button data-testid="notifications-subscriptions-menu-button">
+          Watch <span data-component="CounterLabel">4</span>
+        </button>
+        <a data-testid="fork-button">
+          Fork <span data-component="CounterLabel">2</span>
+        </a>
+        <button data-testid="star-button">
+          Star <span data-component="CounterLabel">9</span>
+        </button>
+      </div>
+    `;
+
+    injectWatchForkStarPopup();
+
+    expect(document.querySelectorAll(".bg-wfs-counter-wrap")).toHaveLength(3);
+    expect(document.querySelectorAll(".bg-wfs-popup")).toHaveLength(3);
+    expect(
+      [...document.querySelectorAll(".bg-wfs-popup-header span:last-child")].map(
+        (count) => count.textContent,
+      ),
+    ).toEqual(["4", "2", "9"]);
+  });
+
   it("loads and renders the user list when a counter is hovered", async () => {
     vi.useFakeTimers();
     vi.mocked(fetchWatchers).mockResolvedValue([
@@ -60,6 +86,29 @@ describe("watch/fork/star popup", () => {
     expect(items).toHaveLength(2);
     expect(items[0].querySelector(".bg-wfs-popup-username")?.textContent).toBe("alice");
     expect(items[0].querySelector("img")?.getAttribute("alt")).toBe("alice");
+
+    vi.useRealTimers();
+  });
+
+  it("shows GitHub's restriction notice instead of a list for non-collaborators", async () => {
+    vi.useFakeTimers();
+    vi.mocked(fetchWatchers).mockResolvedValue({ restricted: true });
+
+    injectWatchForkStarPopup();
+    document.getElementById("watch-counter")!.dispatchEvent(new Event("mouseenter"));
+    await vi.advanceTimersByTimeAsync(300);
+
+    const empty = document.querySelector(".bg-wfs-popup-empty")!;
+    const link = empty.querySelector<HTMLAnchorElement>("a")!;
+    expect(link.href).toBe(
+      "https://github.blog/changelog/2026-06-30-upcoming-access-restrictions-to-public-api-endpoints-and-ui-views/",
+    );
+    expect(link.rel).toBe("noopener noreferrer");
+    expect(
+      [...document.querySelectorAll<HTMLAnchorElement>(".bg-wfs-popup-footer a")].some(
+        (candidate) => candidate.getAttribute("href") === "/owner/repo/watchers",
+      ),
+    ).toBe(true);
 
     vi.useRealTimers();
   });

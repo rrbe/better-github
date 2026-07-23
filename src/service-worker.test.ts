@@ -409,12 +409,12 @@ describe("service worker", () => {
 
   it("maps the stargazers REST payload", async () => {
     const state = await loadWorker("token");
-    vi.mocked(fetch).mockResolvedValue(
-      jsonResponse([
+    vi.mocked(fetch)
+      .mockResolvedValueOnce(jsonResponse({ permissions: { admin: true } }))
+      .mockResolvedValueOnce(jsonResponse([
         { user: { login: "octocat", avatar_url: "https://a/o.png", name: "Octo Cat" }, starred_at: "2026-01-01T00:00:00Z" },
         { user: { login: "mona", avatar_url: "https://a/m.png", name: null }, starred_at: "2026-01-02T00:00:00Z" },
-      ]),
-    );
+      ]));
 
     const response = await sendMessage(state.messageListeners[0], {
       type: "FETCH_STARGAZERS",
@@ -429,6 +429,27 @@ describe("service worker", () => {
         { login: "mona", avatarUrl: "https://a/m.png", name: null, starredAt: "2026-01-02T00:00:00Z" },
       ],
     });
+  });
+
+  it.each([
+    ["FETCH_STARGAZERS", "/stargazers"],
+    ["FETCH_WATCHERS", "/subscribers"],
+  ] as const)("skips %s for repositories without collaborator access", async (type, path) => {
+    const state = await loadWorker("token");
+    vi.mocked(fetch).mockResolvedValueOnce(
+      jsonResponse({ permissions: { pull: true, push: false } }),
+    );
+
+    const response = await sendMessage(state.messageListeners[0], {
+      type,
+      owner: "owner",
+      repo: "repo",
+    });
+
+    expect(response).toEqual({ ok: true, data: { restricted: true } });
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(fetch).mock.calls[0][0]).toBe("https://api.github.com/repos/owner/repo");
+    expect(vi.mocked(fetch).mock.calls.some(([url]) => String(url).includes(path))).toBe(false);
   });
 
   it("maps the forks REST payload", async () => {

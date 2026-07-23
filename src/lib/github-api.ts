@@ -9,6 +9,7 @@ import type {
   TagInfo,
   StargazerInfo,
   WatcherInfo,
+  SocialList,
   ForkInfo,
   ContributorInfo,
 } from "./messages";
@@ -47,6 +48,7 @@ export type {
   TagInfo,
   StargazerInfo,
   WatcherInfo,
+  SocialList,
   ForkInfo,
   ContributorInfo,
 };
@@ -197,9 +199,12 @@ export async function approvePR(
   }
 }
 
-export async function fetchStargazers(owner: string, repo: string): Promise<StargazerInfo[]> {
+export async function fetchStargazers(
+  owner: string,
+  repo: string,
+): Promise<SocialList<StargazerInfo>> {
   try {
-    return await sendMessage<StargazerInfo[]>({
+    return await sendMessage<SocialList<StargazerInfo>>({
       type: "FETCH_STARGAZERS",
       owner,
       repo,
@@ -210,9 +215,12 @@ export async function fetchStargazers(owner: string, repo: string): Promise<Star
   }
 }
 
-export async function fetchWatchers(owner: string, repo: string): Promise<WatcherInfo[]> {
+export async function fetchWatchers(
+  owner: string,
+  repo: string,
+): Promise<SocialList<WatcherInfo>> {
   try {
-    return await sendMessage<WatcherInfo[]>({
+    return await sendMessage<SocialList<WatcherInfo>>({
       type: "FETCH_WATCHERS",
       owner,
       repo,

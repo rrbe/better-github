@@ -6,6 +6,8 @@ import type { ForkInfo } from "../lib/github-api";
 
 const WRAP_CLASS = "bg-wfs-counter-wrap";
 const POPUP_CLASS = "bg-wfs-popup";
+const ACCESS_RESTRICTIONS_URL =
+  "https://github.blog/changelog/2026-06-30-upcoming-access-restrictions-to-public-api-endpoints-and-ui-views/";
 
 // Must match `.bg-wfs-popup { width }` in content.css — the popup is portaled to
 // <body> and positioned with fixed coordinates, so JS needs the width to right-
@@ -98,6 +100,23 @@ function renderUserList(
       </div>
     </a>
   `).join("");
+}
+
+function renderSocialList(
+  list: HTMLElement,
+  data: Awaited<ReturnType<typeof fetchStargazers | typeof fetchWatchers>>,
+  emptyMsg: string,
+): void {
+  if (Array.isArray(data)) {
+    renderUserList(list, data, emptyMsg);
+    return;
+  }
+
+  list.innerHTML = `<div class="bg-wfs-popup-empty">
+    <a href="${ACCESS_RESTRICTIONS_URL}" target="_blank" rel="noopener noreferrer">
+      ${t("githubAccessRestrictions")}
+    </a>
+  </div>`;
 }
 
 function renderForks(list: HTMLElement, items: ForkInfo[]): void {
@@ -240,31 +259,29 @@ export function injectWatchForkStarPopup(): void {
 
   const { owner, repo } = repoInfo;
 
-  // Check that pagehead-actions exist (repo page)
-  const actions = document.querySelector("ul.pagehead-actions");
-  if (!actions) return;
-
-  // Watch counter (Primer React component — don't move it, attach in-place)
-  const watchCounter = actions.querySelector('[class*="CounterLabel"]') as HTMLElement | null;
-  if (watchCounter) {
-    const countText = watchCounter.textContent?.trim() || "0";
-    attachPopup(watchCounter, {
+  const watchTargets = document.querySelectorAll<HTMLElement>(
+    'ul.pagehead-actions [class*="CounterLabel"], ' +
+      '[data-testid="notifications-subscriptions-menu-button"] [data-component="CounterLabel"]',
+  );
+  for (const watchTarget of watchTargets) {
+    attachPopup(watchTarget, {
       title: t("watchers"),
-      countText,
+      countText: watchTarget.textContent?.trim() || "0",
       viewAllUrl: `/${owner}/${repo}/watchers`,
     }, async (list) => {
       const data = await fetchWatchers(owner, repo);
-      renderUserList(list, data, t("noWatchers"));
+      renderSocialList(list, data, t("noWatchers"));
     });
   }
 
-  // Fork counter
-  const forkCounter = actions.querySelector("#fork-button .Counter") as HTMLElement | null;
-  if (forkCounter) {
-    const countText = forkCounter.textContent?.trim() || "0";
-    attachPopup(forkCounter, {
+  const forkTargets = document.querySelectorAll<HTMLElement>(
+    'ul.pagehead-actions #fork-button .Counter, ' +
+      '[data-testid="fork-button"] [data-component="CounterLabel"]',
+  );
+  for (const forkTarget of forkTargets) {
+    attachPopup(forkTarget, {
       title: t("forks"),
-      countText,
+      countText: forkTarget.textContent?.trim() || "0",
       viewAllUrl: `/${owner}/${repo}/forks`,
     }, async (list) => {
       const data = await fetchForks(owner, repo);
@@ -276,16 +293,18 @@ export function injectWatchForkStarPopup(): void {
   // so the popup works regardless of toggle state.
   // Share fetched data so toggling star state doesn't re-fetch.
   let starData: Awaited<ReturnType<typeof fetchStargazers>> | null = null;
-  const starCounters = actions.querySelectorAll(".Counter.js-social-count");
-  for (const starCounter of starCounters) {
-    const countText = starCounter.textContent?.trim() || "0";
-    attachPopup(starCounter as HTMLElement, {
+  const starTargets = document.querySelectorAll<HTMLElement>(
+    'ul.pagehead-actions .Counter.js-social-count, ' +
+      '[data-testid="star-button"] [data-component="CounterLabel"]',
+  );
+  for (const starTarget of starTargets) {
+    attachPopup(starTarget, {
       title: t("stargazers"),
-      countText,
+      countText: starTarget.textContent?.trim() || "0",
       viewAllUrl: `/${owner}/${repo}/stargazers`,
     }, async (list) => {
       if (!starData) starData = await fetchStargazers(owner, repo);
-      renderUserList(list, starData, t("noStargazers"));
+      renderSocialList(list, starData, t("noStargazers"));
     });
   }
 }

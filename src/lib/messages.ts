@@ -61,6 +61,8 @@ export interface WatcherInfo {
   name: string | null;
 }
 
+export type SocialList<T> = T[] | { restricted: true };
+
 export interface ForkInfo {
   owner: string;
   ownerAvatarUrl: string;

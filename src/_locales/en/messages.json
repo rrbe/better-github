@@ -167,6 +167,7 @@
   "noStargazers": { "message": "No stargazers yet" },
   "noForks": { "message": "No forks yet" },
   "failedToLoad": { "message": "Failed to load" },
+  "githubAccessRestrictions": { "message": "GitHub access restrictions" },
 
   "collapseTree": { "message": "Collapse tree" },
   "expandTree": { "message": "Expand tree" },
