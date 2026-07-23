@@ -113,7 +113,6 @@ function renderSocialList(
   }
 
   list.innerHTML = `<div class="bg-wfs-popup-empty">
-    —<br>
     <a href="${ACCESS_RESTRICTIONS_URL}" target="_blank" rel="noopener noreferrer">
       ${t("githubAccessRestrictions")}
     </a>

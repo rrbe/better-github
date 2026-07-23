@@ -99,7 +99,6 @@ describe("watch/fork/star popup", () => {
     await vi.advanceTimersByTimeAsync(300);
 
     const empty = document.querySelector(".bg-wfs-popup-empty")!;
-    expect(empty.textContent).toContain("—");
     const link = empty.querySelector<HTMLAnchorElement>("a")!;
     expect(link.href).toBe(
       "https://github.blog/changelog/2026-06-30-upcoming-access-restrictions-to-public-api-endpoints-and-ui-views/",
