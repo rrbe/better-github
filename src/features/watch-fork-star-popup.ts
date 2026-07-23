@@ -202,33 +202,6 @@ function reapOrphanedPopups(): void {
   }
 }
 
-function findActionTargets(
-  root: Element,
-  oldSelector: string,
-  iconSelector: string,
-): HTMLElement[] {
-  const targets = new Set(root.querySelectorAll<HTMLElement>(oldSelector));
-  for (const icon of root.querySelectorAll<HTMLElement>(iconSelector)) {
-    const control = icon.closest<HTMLElement>("a, button") ?? icon.parentElement;
-    if (!control) continue;
-    const action = control.closest<HTMLElement>("li") ?? control.parentElement ?? control;
-    targets.add(action.querySelector<HTMLElement>('[class*="Counter"], strong') ?? control);
-  }
-  return [...targets];
-}
-
-function getCountText(target: HTMLElement): string {
-  for (const value of [
-    target.textContent,
-    target.getAttribute("title"),
-    target.getAttribute("aria-label"),
-  ]) {
-    const count = value?.match(/\d[\d,.]*[kKmM]?/)?.[0];
-    if (count) return count;
-  }
-  return "0";
-}
-
 function attachPopup(
   counter: HTMLElement,
   config: PopupConfig,
@@ -267,23 +240,14 @@ export function injectWatchForkStarPopup(): void {
 
   const { owner, repo } = repoInfo;
 
-  const actions =
-    document.querySelector("#repository-container-header") ??
-    document.querySelector("ul.pagehead-actions") ??
-    document.querySelector("#repo-content-pjax-container");
-  if (!actions) return;
-
-  // Prefer the old counter selectors, then fall back to the action icon so
-  // GitHub can change its wrapper/component classes without disabling hover.
-  const watchTargets = findActionTargets(
-    actions,
-    '[class*="CounterLabel"]',
-    'svg[class*="octicon-bell"], svg[class*="octicon-eye"]',
+  const watchTargets = document.querySelectorAll<HTMLElement>(
+    'ul.pagehead-actions [class*="CounterLabel"], ' +
+      '[data-testid="notifications-subscriptions-menu-button"] [data-component="CounterLabel"]',
   );
   for (const watchTarget of watchTargets) {
     attachPopup(watchTarget, {
       title: t("watchers"),
-      countText: getCountText(watchTarget),
+      countText: watchTarget.textContent?.trim() || "0",
       viewAllUrl: `/${owner}/${repo}/watchers`,
     }, async (list) => {
       const data = await fetchWatchers(owner, repo);
@@ -291,15 +255,14 @@ export function injectWatchForkStarPopup(): void {
     });
   }
 
-  const forkTargets = findActionTargets(
-    actions,
-    "#fork-button .Counter",
-    'svg[class*="octicon-repo-forked"]',
+  const forkTargets = document.querySelectorAll<HTMLElement>(
+    'ul.pagehead-actions #fork-button .Counter, ' +
+      '[data-testid="fork-button"] [data-component="CounterLabel"]',
   );
   for (const forkTarget of forkTargets) {
     attachPopup(forkTarget, {
       title: t("forks"),
-      countText: getCountText(forkTarget),
+      countText: forkTarget.textContent?.trim() || "0",
       viewAllUrl: `/${owner}/${repo}/forks`,
     }, async (list) => {
       const data = await fetchForks(owner, repo);
@@ -311,15 +274,14 @@ export function injectWatchForkStarPopup(): void {
   // so the popup works regardless of toggle state.
   // Share fetched data so toggling star state doesn't re-fetch.
   let starData: Awaited<ReturnType<typeof fetchStargazers>> | null = null;
-  const starTargets = findActionTargets(
-    actions,
-    ".Counter.js-social-count",
-    'svg[class*="octicon-star"]',
+  const starTargets = document.querySelectorAll<HTMLElement>(
+    'ul.pagehead-actions .Counter.js-social-count, ' +
+      '[data-testid="star-button"] [data-component="CounterLabel"]',
   );
   for (const starTarget of starTargets) {
     attachPopup(starTarget, {
       title: t("stargazers"),
-      countText: getCountText(starTarget),
+      countText: starTarget.textContent?.trim() || "0",
       viewAllUrl: `/${owner}/${repo}/stargazers`,
     }, async (list) => {
       if (!starData) starData = await fetchStargazers(owner, repo);

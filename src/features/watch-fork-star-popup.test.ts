@@ -42,10 +42,16 @@ describe("watch/fork/star popup", () => {
 
   it("finds repository actions after GitHub replaces the legacy wrappers and counter classes", () => {
     document.body.innerHTML = `
-      <div id="repository-container-header">
-        <div><button id="watch-action"><svg class="octicon octicon-bell"></svg>Watch <span>4</span></button></div>
-        <div><button id="fork-action"><svg class="octicon octicon-repo-forked"></svg>Fork <span>2</span></button></div>
-        <div><button id="star-action"><svg class="octicon octicon-star"></svg>Star <span>9</span></button></div>
+      <div data-testid="responsive-social-buttons">
+        <button data-testid="notifications-subscriptions-menu-button">
+          Watch <span data-component="CounterLabel">4</span>
+        </button>
+        <a data-testid="fork-button">
+          Fork <span data-component="CounterLabel">2</span>
+        </a>
+        <button data-testid="star-button">
+          Star <span data-component="CounterLabel">9</span>
+        </button>
       </div>
     `;
 
