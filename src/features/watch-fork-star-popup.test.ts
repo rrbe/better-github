@@ -90,6 +90,26 @@ describe("watch/fork/star popup", () => {
     vi.useRealTimers();
   });
 
+  it("shows GitHub's restriction notice instead of a list for non-collaborators", async () => {
+    vi.useFakeTimers();
+    vi.mocked(fetchWatchers).mockResolvedValue({ restricted: true });
+
+    injectWatchForkStarPopup();
+    document.getElementById("watch-counter")!.dispatchEvent(new Event("mouseenter"));
+    await vi.advanceTimersByTimeAsync(300);
+
+    expect(document.querySelector(".bg-wfs-popup-empty")?.textContent).toBe("—");
+    const link = [...document.querySelectorAll<HTMLAnchorElement>(".bg-wfs-popup-footer a")].find(
+      (candidate) => candidate.target === "_blank",
+    )!;
+    expect(link.href).toBe(
+      "https://github.blog/changelog/2026-06-30-upcoming-access-restrictions-to-public-api-endpoints-and-ui-views/",
+    );
+    expect(link.rel).toBe("noopener noreferrer");
+
+    vi.useRealTimers();
+  });
+
   it("portals the popup to <body>, out of the stargazers anchor, so clicks can't leak to it", async () => {
     vi.useFakeTimers();
     // GitHub nests the star counter inside an `<a href=".../stargazers">`.

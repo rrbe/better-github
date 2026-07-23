@@ -10,6 +10,7 @@ import type {
   TagInfo,
   StargazerInfo,
   WatcherInfo,
+  SocialList,
   ForkInfo,
   ContributorInfo,
 } from "./lib/messages";
@@ -485,10 +486,44 @@ async function fetchRepoTags(owner: string, repo: string): Promise<TagInfo[]> {
   });
 }
 
-async function fetchStargazers(owner: string, repo: string): Promise<StargazerInfo[]> {
+async function canAccessSocialLists(owner: string, repo: string, token: string): Promise<boolean> {
+  if (!token) return false;
+
+  const cacheKey = `cache:social-list-access:${owner}/${repo}`;
+  const result = await cachedFetch<{ allowed: boolean }>(cacheKey, async () => {
+    const response = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
+      headers: restHeaders(token),
+    });
+    if (!response.ok) return { allowed: false };
+
+    const data: {
+      permissions?: { admin?: boolean; maintain?: boolean; push?: boolean; triage?: boolean };
+    } = await response.json();
+    const permissions = data.permissions;
+    // `pull` is true for every public repository visitor, so only elevated
+    // permissions prove that the token belongs to an admin or collaborator.
+    return {
+      allowed: Boolean(
+        permissions?.admin ||
+          permissions?.maintain ||
+          permissions?.push ||
+          permissions?.triage,
+      ),
+    };
+  });
+  return result.allowed;
+}
+
+async function fetchStargazers(
+  owner: string,
+  repo: string,
+): Promise<SocialList<StargazerInfo>> {
+  const token = await getToken();
+  if (!(await canAccessSocialLists(owner, repo, token))) return { restricted: true };
+
   const cacheKey = `cache:stargazers:${owner}/${repo}`;
-  return cachedFetch<StargazerInfo[]>(cacheKey, async () => {
-    const headers = restHeaders(await getToken(), "application/vnd.github.star+json");
+  return cachedFetch<SocialList<StargazerInfo>>(cacheKey, async () => {
+    const headers = restHeaders(token, "application/vnd.github.star+json");
     const url = `https://api.github.com/repos/${owner}/${repo}/stargazers?per_page=30`;
     const response = await fetch(url, { headers });
 
@@ -496,7 +531,7 @@ async function fetchStargazers(owner: string, repo: string): Promise<StargazerIn
       console.error(
         `[Better GitHub] Stargazers API error: ${response.status} ${response.statusText}`,
       );
-      return [];
+      return response.status === 403 || response.status === 404 ? { restricted: true } : [];
     }
 
     const data: Array<{
@@ -512,10 +547,16 @@ async function fetchStargazers(owner: string, repo: string): Promise<StargazerIn
   });
 }
 
-async function fetchWatchers(owner: string, repo: string): Promise<WatcherInfo[]> {
+async function fetchWatchers(
+  owner: string,
+  repo: string,
+): Promise<SocialList<WatcherInfo>> {
+  const token = await getToken();
+  if (!(await canAccessSocialLists(owner, repo, token))) return { restricted: true };
+
   const cacheKey = `cache:watchers:${owner}/${repo}`;
-  return cachedFetch<WatcherInfo[]>(cacheKey, async () => {
-    const headers = restHeaders(await getToken());
+  return cachedFetch<SocialList<WatcherInfo>>(cacheKey, async () => {
+    const headers = restHeaders(token);
     const url = `https://api.github.com/repos/${owner}/${repo}/subscribers?per_page=30`;
     const response = await fetch(url, { headers });
 
@@ -523,7 +564,7 @@ async function fetchWatchers(owner: string, repo: string): Promise<WatcherInfo[]
       console.error(
         `[Better GitHub] Watchers API error: ${response.status} ${response.statusText}`,
       );
-      return [];
+      return response.status === 403 || response.status === 404 ? { restricted: true } : [];
     }
 
     const data: Array<{ login: string; avatar_url: string; name?: string | null }> =

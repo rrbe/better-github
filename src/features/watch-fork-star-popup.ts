@@ -6,6 +6,8 @@ import type { ForkInfo } from "../lib/github-api";
 
 const WRAP_CLASS = "bg-wfs-counter-wrap";
 const POPUP_CLASS = "bg-wfs-popup";
+const ACCESS_RESTRICTIONS_URL =
+  "https://github.blog/changelog/2026-06-30-upcoming-access-restrictions-to-public-api-endpoints-and-ui-views/";
 
 // Must match `.bg-wfs-popup { width }` in content.css — the popup is portaled to
 // <body> and positioned with fixed coordinates, so JS needs the width to right-
@@ -98,6 +100,27 @@ function renderUserList(
       </div>
     </a>
   `).join("");
+}
+
+function renderSocialList(
+  list: HTMLElement,
+  data: Awaited<ReturnType<typeof fetchStargazers | typeof fetchWatchers>>,
+  emptyMsg: string,
+): void {
+  if (Array.isArray(data)) {
+    renderUserList(list, data, emptyMsg);
+    return;
+  }
+
+  list.innerHTML = '<div class="bg-wfs-popup-empty">—</div>';
+  const footerLink = list.parentElement?.querySelector<HTMLAnchorElement>(
+    ".bg-wfs-popup-footer a",
+  );
+  if (!footerLink) return;
+  footerLink.href = ACCESS_RESTRICTIONS_URL;
+  footerLink.target = "_blank";
+  footerLink.rel = "noopener noreferrer";
+  footerLink.textContent = t("githubAccessRestrictions");
 }
 
 function renderForks(list: HTMLElement, items: ForkInfo[]): void {
@@ -251,7 +274,7 @@ export function injectWatchForkStarPopup(): void {
       viewAllUrl: `/${owner}/${repo}/watchers`,
     }, async (list) => {
       const data = await fetchWatchers(owner, repo);
-      renderUserList(list, data, t("noWatchers"));
+      renderSocialList(list, data, t("noWatchers"));
     });
   }
 
@@ -285,7 +308,7 @@ export function injectWatchForkStarPopup(): void {
       viewAllUrl: `/${owner}/${repo}/stargazers`,
     }, async (list) => {
       if (!starData) starData = await fetchStargazers(owner, repo);
-      renderUserList(list, starData, t("noStargazers"));
+      renderSocialList(list, starData, t("noStargazers"));
     });
   }
 }

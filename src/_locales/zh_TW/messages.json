@@ -167,6 +167,7 @@
   "noStargazers": { "message": "尚無 Stargazers" },
   "noForks": { "message": "尚無 Forks" },
   "failedToLoad": { "message": "載入失敗" },
+  "githubAccessRestrictions": { "message": "GitHub 存取限制說明" },
 
   "collapseTree": { "message": "摺疊目錄樹" },
   "expandTree": { "message": "展開目錄樹" },
