@@ -8,6 +8,10 @@
 
 export const INFO_ROW_CLASS = "better-github-info-row";
 
+export type InfoRowItemKind = "branch" | "diff" | "labels" | "conflict" | "review";
+
+const INFO_ROW_ITEM_ORDER: InfoRowItemKind[] = ["branch", "diff", "labels", "conflict", "review"];
+
 export function getOrCreateInfoRow(row: Element): HTMLElement | null {
   const existing = row.querySelector<HTMLElement>(`.${INFO_ROW_CLASS}`);
   if (existing) return existing;
@@ -41,4 +45,26 @@ export function getOrCreateInfoRow(row: Element): HTMLElement | null {
   }
 
   return null;
+}
+
+export function insertInfoRowItem(row: Element, kind: InfoRowItemKind, item: HTMLElement): boolean {
+  const infoRow = getOrCreateInfoRow(row);
+  if (!infoRow) return false;
+
+  item.dataset.bgInfoRowItem = kind;
+
+  const current = infoRow.querySelector<HTMLElement>(`:scope > [data-bg-info-row-item="${kind}"]`);
+  if (current) {
+    current.replaceWith(item);
+    return true;
+  }
+
+  const itemIndex = INFO_ROW_ITEM_ORDER.indexOf(kind);
+  const next = [...infoRow.children].find((child) => {
+    const childKind = (child as HTMLElement).dataset.bgInfoRowItem as InfoRowItemKind | undefined;
+    const childIndex = childKind ? INFO_ROW_ITEM_ORDER.indexOf(childKind) : -1;
+    return childIndex === -1 || childIndex > itemIndex;
+  });
+  infoRow.insertBefore(item, next || null);
+  return true;
 }

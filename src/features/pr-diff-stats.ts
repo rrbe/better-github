@@ -1,6 +1,6 @@
 import { isPRListPage, getRepoInfo } from "../lib/page-detect";
 import { fetchPRDiffStats } from "../lib/github-api";
-import { getOrCreateInfoRow } from "../lib/info-row";
+import { insertInfoRowItem } from "../lib/info-row";
 import { buildDiffStatsBadge } from "../lib/diff-stats-badge";
 import { clearSkeletons } from "../lib/info-row-skeleton";
 
@@ -38,10 +38,7 @@ export async function injectPRDiffStats(): Promise<void> {
 
       if (row.querySelector(`.${BADGE_CLASS}`)) continue;
 
-      const infoRow = getOrCreateInfoRow(row);
-      if (!infoRow) continue;
-
-      infoRow.appendChild(buildDiffStatsBadge(stat, BADGE_CLASS));
+      insertInfoRowItem(row, "diff", buildDiffStatsBadge(stat, BADGE_CLASS));
     }
   } finally {
     clearSkeletons("prDiff");

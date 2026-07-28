@@ -1,5 +1,5 @@
 import { isIssueOrPRListPage } from "../lib/page-detect";
-import { getOrCreateInfoRow } from "../lib/info-row";
+import { insertInfoRowItem } from "../lib/info-row";
 
 const LABEL_WRAPPER_CLASS = "better-github-label-prefix";
 const HIDDEN_ORIGINAL_CLASS = "better-github-labels-hidden";
@@ -12,9 +12,6 @@ function processTrailingBadges(container: HTMLElement): void {
 	const labels = container.querySelectorAll<HTMLElement>("a");
 	if (labels.length === 0) return;
 
-	const infoRow = getOrCreateInfoRow(row);
-	if (!infoRow) return;
-
 	const wrapper = document.createElement("span");
 	wrapper.className = LABEL_WRAPPER_CLASS;
 
@@ -22,8 +19,8 @@ function processTrailingBadges(container: HTMLElement): void {
 		wrapper.appendChild(label.cloneNode(true) as HTMLElement);
 	}
 
+	if (!insertInfoRowItem(row, "labels", wrapper)) return;
 	container.classList.add(HIDDEN_ORIGINAL_CLASS);
-	infoRow.insertBefore(wrapper, infoRow.firstChild);
 }
 
 /** Process old Turbo DOM rows (PR list). */
@@ -36,18 +33,15 @@ function processOldRows(): void {
 		const labels = row.querySelectorAll<HTMLElement>("a.IssueLabel");
 		if (labels.length === 0) continue;
 
-		const infoRow = getOrCreateInfoRow(row);
-		if (!infoRow) continue;
-
 		const wrapper = document.createElement("span");
 		wrapper.className = LABEL_WRAPPER_CLASS;
 
 		for (const label of labels) {
 			wrapper.appendChild(label.cloneNode(true) as HTMLElement);
-			label.classList.add(HIDDEN_ORIGINAL_CLASS);
 		}
 
-		infoRow.insertBefore(wrapper, infoRow.firstChild);
+		if (!insertInfoRowItem(row, "labels", wrapper)) continue;
+		for (const label of labels) label.classList.add(HIDDEN_ORIGINAL_CLASS);
 	}
 }
 

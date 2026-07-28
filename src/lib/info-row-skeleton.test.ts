@@ -31,6 +31,11 @@ describe("reserveInfoRowSkeletons", () => {
 
     expect(document.querySelectorAll(".bg-skeleton-pill--branch")).toHaveLength(1);
     expect(document.querySelectorAll(".bg-skeleton-pill--pr-diff")).toHaveLength(1);
+    expect(
+      [...document.querySelector(".better-github-info-row")!.children].map(
+        (el) => (el as HTMLElement).dataset.bgInfoRowItem,
+      ),
+    ).toEqual(["branch", "diff"]);
 
     clearSkeletons("branch");
     expect(document.querySelector(".bg-skeleton-pill--branch")).toBeNull();

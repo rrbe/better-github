@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { getOrCreateInfoRow, INFO_ROW_CLASS } from "./info-row";
+import { getOrCreateInfoRow, INFO_ROW_CLASS, insertInfoRowItem } from "./info-row";
 
 describe("getOrCreateInfoRow", () => {
   beforeEach(() => {
@@ -61,5 +61,50 @@ describe("getOrCreateInfoRow", () => {
 
     expect(second).toBe(first);
     expect(row.querySelectorAll(`.${INFO_ROW_CLASS}`)).toHaveLength(1);
+  });
+
+  it("keeps items ordered and replaces skeleton slots in place", () => {
+    document.body.innerHTML = `
+      <li id="issue_5">
+        <a id="issue_5_link">Title</a>
+      </li>
+    `;
+    const row = document.getElementById("issue_5")!;
+    const item = (text: string) =>
+      Object.assign(document.createElement("span"), { textContent: text });
+
+    insertInfoRowItem(row, "review", item("review"));
+    insertInfoRowItem(row, "diff", item("diff skeleton"));
+    insertInfoRowItem(row, "conflict", item("conflict"));
+    insertInfoRowItem(row, "branch", item("branch skeleton"));
+
+    const infoRow = row.querySelector(`.${INFO_ROW_CLASS}`)!;
+    expect([...infoRow.children].map((el) => el.textContent)).toEqual([
+      "branch skeleton",
+      "diff skeleton",
+      "conflict",
+      "review",
+    ]);
+
+    insertInfoRowItem(row, "labels", item("labels"));
+
+    expect([...infoRow.children].map((el) => el.textContent)).toEqual([
+      "branch skeleton",
+      "diff skeleton",
+      "labels",
+      "conflict",
+      "review",
+    ]);
+
+    insertInfoRowItem(row, "diff", item("diff"));
+    insertInfoRowItem(row, "branch", item("branch"));
+
+    expect([...infoRow.children].map((el) => el.textContent)).toEqual([
+      "branch",
+      "diff",
+      "labels",
+      "conflict",
+      "review",
+    ]);
   });
 });
