@@ -55,7 +55,7 @@ export type {
   ContributorInfo,
 };
 
-/** Fetch objective facts about an account for the contributor card. Returns null
+/** Fetch objective facts about an account for the contributor profile card. Returns null
  * for an unknown user, a rate-limited request, or any failure (the caller then
  * renders nothing). owner/repo add the repo-relation row when on a repo page. */
 export async function fetchContributorInfo(
