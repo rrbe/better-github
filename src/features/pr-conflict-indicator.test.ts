@@ -83,4 +83,31 @@ describe("injectPRConflictIndicator", () => {
     expect(row11.querySelector(".better-github-conflict-indicator")).toBeNull();
     expect(row7.querySelector(".IssueLabel")).toBeNull();
   });
+
+  it("keeps an in-flight check alive when the page handler runs again", async () => {
+    let resolveStatuses!: (
+      statuses: Awaited<ReturnType<typeof fetchPRConflictStatuses>>,
+    ) => void;
+    vi.mocked(fetchPRConflictStatuses).mockReturnValue(
+      new Promise((resolve) => {
+        resolveStatuses = resolve;
+      }),
+    );
+
+    injectPRConflictIndicator();
+
+    const row7 = document.getElementById("issue_7")!;
+    observerCallback(
+      [{ target: row7, isIntersecting: true }] as unknown as IntersectionObserverEntry[],
+      {} as IntersectionObserver,
+    );
+    await vi.waitFor(() => expect(fetchPRConflictStatuses).toHaveBeenCalledTimes(1));
+
+    injectPRConflictIndicator();
+    resolveStatuses([{ number: 7, mergeable: "CONFLICTING" }]);
+
+    await vi.waitFor(() =>
+      expect(row7.querySelector(".better-github-conflict-indicator")).not.toBeNull(),
+    );
+  });
 });

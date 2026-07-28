@@ -6,6 +6,7 @@ import { t } from "../lib/i18n";
 const INDICATOR_CLASS = "better-github-conflict-indicator";
 
 let observer: IntersectionObserver | null = null;
+let observedRepo: string | null = null;
 let checkedRows = new WeakSet<Element>();
 let generation = 0;
 
@@ -66,6 +67,7 @@ export function cleanupPRConflictIndicator(): void {
   generation++;
   observer?.disconnect();
   observer = null;
+  observedRepo = null;
   checkedRows = new WeakSet<Element>();
 }
 
@@ -75,21 +77,27 @@ export function injectPRConflictIndicator(): void {
   const info = getRepoInfo();
   if (!info) return;
 
-  const currentGeneration = ++generation;
-  observer?.disconnect();
-  const currentObserver = new IntersectionObserver((entries) => {
-    const visibleRows: Element[] = [];
-    for (const entry of entries) {
-      if (!entry.isIntersecting || checkedRows.has(entry.target)) continue;
-      checkedRows.add(entry.target);
-      currentObserver.unobserve(entry.target);
-      visibleRows.push(entry.target);
-    }
-    if (visibleRows.length > 0) {
-      void checkRows(visibleRows, info.owner, info.repo, currentGeneration);
-    }
-  });
-  observer = currentObserver;
+  const repoKey = `${info.owner}/${info.repo}`;
+  if (!observer || observedRepo !== repoKey) {
+    const currentGeneration = ++generation;
+    observer?.disconnect();
+    checkedRows = new WeakSet<Element>();
+    observedRepo = repoKey;
+
+    const currentObserver = new IntersectionObserver((entries) => {
+      const visibleRows: Element[] = [];
+      for (const entry of entries) {
+        if (!entry.isIntersecting || checkedRows.has(entry.target)) continue;
+        checkedRows.add(entry.target);
+        currentObserver.unobserve(entry.target);
+        visibleRows.push(entry.target);
+      }
+      if (visibleRows.length > 0) {
+        void checkRows(visibleRows, info.owner, info.repo, currentGeneration);
+      }
+    });
+    observer = currentObserver;
+  }
 
   for (const row of document.querySelectorAll("[id^='issue_']:not([id$='_link'])")) {
     if (!checkedRows.has(row) && !row.querySelector(`.${INDICATOR_CLASS}`)) {
