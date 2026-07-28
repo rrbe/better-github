@@ -44,7 +44,7 @@
   font-size: 12px;
   font-weight: 600;
   line-height: 20px;
-  color: var(--fgColor-danger, var(--color-danger-fg, #d1242f));
+  color: var(--fgColor-attention, var(--color-attention-fg, #9a6700));
   white-space: nowrap;
 }
 
