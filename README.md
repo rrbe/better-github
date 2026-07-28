@@ -8,7 +8,9 @@ Better GitHub is a Chrome extension that enhances the GitHub experience. Inspire
 
 **Open source and zero-tracking** — no analytics, no telemetry; all your data stays in your browser. (Some features require a GitHub token with the `repo` scope.)
 
-<img src="docs/screenshots/main_screenshot.png" width=600/>
+| Without Better GitHub | With Better GitHub |
+| :---: | :---: |
+| <img src="docs/screenshots/main_screenshot_without_better_github.png" alt="GitHub without Better GitHub" width="600" /> | <img src="docs/screenshots/main_screenshot_with_better_github.png" alt="GitHub with Better GitHub" width="600" /> |
 
 ### Features Overview
 
@@ -19,6 +21,8 @@ Better GitHub is a Chrome extension that enhances the GitHub experience. Inspire
 Every feature can be individually toggled on or off in the settings.
 
 > **Note:** Because GitHub frequently A/B tests features and offers extra toggles under Feature Preview, features that are hard to maintain or change often may not be added — the goal is to keep the project at a manageable complexity.
+
+Please feel free to [file an issue](https://github.com/rrbe/better-github/issues) to share your suggestions and bug reports.
 
 ## Feature Details
 
