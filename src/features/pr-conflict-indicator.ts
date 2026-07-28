@@ -1,6 +1,6 @@
 import { isPRListPage, getRepoInfo } from "../lib/page-detect";
 import { fetchPRConflictStatuses } from "../lib/github-api";
-import { getOrCreateInfoRow } from "../lib/info-row";
+import { insertInfoRowItem } from "../lib/info-row";
 import { t } from "../lib/i18n";
 
 const INDICATOR_CLASS = "better-github-conflict-indicator";
@@ -52,15 +52,12 @@ async function checkRows(
       continue;
     }
 
-    const infoRow = getOrCreateInfoRow(row);
-    if (!infoRow) continue;
-
     const indicator = document.createElement("span");
     indicator.className = INDICATOR_CLASS;
     indicator.textContent = t("prConflicts");
     indicator.title = t("prConflictsTitle");
     indicator.setAttribute("role", "status");
-    infoRow.appendChild(indicator);
+    insertInfoRowItem(row, "conflict", indicator);
   }
 }
 

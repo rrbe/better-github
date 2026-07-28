@@ -1,6 +1,6 @@
 import { isPRListPage, getRepoInfo, getPRListParams } from "../lib/page-detect";
 import { fetchPRBranches } from "../lib/github-api";
-import { getOrCreateInfoRow } from "../lib/info-row";
+import { insertInfoRowItem } from "../lib/info-row";
 import { clearSkeletons } from "../lib/info-row-skeleton";
 import { t } from "../lib/i18n";
 
@@ -69,16 +69,13 @@ export async function injectPRBranchNames(): Promise<void> {
 
       if (row.querySelector(`.${BADGE_CLASS}`)) continue;
 
-      const infoRow = getOrCreateInfoRow(row);
-      if (!infoRow) continue;
-
       const badge = document.createElement("span");
       badge.className = BADGE_CLASS;
       badge.textContent = branchName;
       badge.dataset.branch = branchName;
       badge.title = t("branchCopyTitle");
 
-      infoRow.appendChild(badge);
+      insertInfoRowItem(row, "branch", badge);
     }
   } finally {
     clearSkeletons("branch");

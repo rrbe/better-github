@@ -1,6 +1,6 @@
 import { isPRListPage, isCommitsListPage, getRepoInfo } from "./page-detect";
 import { collectCommitRows, MAIN_CONTENT_INNER_SELECTOR } from "./commit-dom";
-import { getOrCreateInfoRow } from "./info-row";
+import { insertInfoRowItem } from "./info-row";
 
 export type SkeletonKind = "branch" | "prDiff" | "commitDiff";
 
@@ -61,11 +61,8 @@ function reservePRListSkeletons(flags: SkeletonFlags): void {
     const needDiff = wantDiff && !present.has(prDiff.real) && !present.has(prDiff.skeleton);
     if (!needBranch && !needDiff) continue;
 
-    const infoRow = getOrCreateInfoRow(row);
-    if (!infoRow) continue;
-
-    if (needBranch) infoRow.appendChild(buildPill(branch.skeleton));
-    if (needDiff) infoRow.appendChild(buildPill(prDiff.skeleton));
+    if (needBranch) insertInfoRowItem(row, "branch", buildPill(branch.skeleton));
+    if (needDiff) insertInfoRowItem(row, "diff", buildPill(prDiff.skeleton));
   }
 }
 

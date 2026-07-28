@@ -1,7 +1,7 @@
 import { isPRListPage, getRepoInfo } from "../lib/page-detect";
 import { fetchPRReviewStatuses, fetchReviewThreadDetails } from "../lib/github-api";
 import type { ReviewThreadDetail } from "../lib/messages";
-import { getOrCreateInfoRow } from "../lib/info-row";
+import { insertInfoRowItem } from "../lib/info-row";
 // Aliased to `i18n` because this module already uses `t` as a thread loop var.
 import { t as i18n } from "../lib/i18n";
 
@@ -276,9 +276,6 @@ export async function injectPRReviewStatus(): Promise<void> {
 
     if (row.querySelector(`.${STATUS_CLASS}`)) continue;
 
-    const infoRow = getOrCreateInfoRow(row);
-    if (!infoRow) continue;
-
     const badge = document.createElement("span");
     badge.className = STATUS_CLASS;
 
@@ -298,6 +295,6 @@ export async function injectPRReviewStatus(): Promise<void> {
       setupPopover(badge, info.owner, info.repo, prNumber);
     }
 
-    infoRow.appendChild(badge);
+    insertInfoRowItem(row, "review", badge);
   }
 }
