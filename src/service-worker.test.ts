@@ -315,6 +315,40 @@ describe("service worker", () => {
     expect(listBody).not.toContain("comments(");
   });
 
+  it("maps GraphQL mergeability for conflict indicators", async () => {
+    const state = await loadWorker("token");
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse({
+        data: {
+          repository: {
+            pr_1: { mergeable: "CONFLICTING" },
+            pr_2: { mergeable: "MERGEABLE" },
+            pr_3: { mergeable: "UNKNOWN" },
+          },
+        },
+      }),
+    );
+
+    const response = await sendMessage(state.messageListeners[0], {
+      type: "FETCH_PR_CONFLICT_STATUSES",
+      owner: "owner",
+      repo: "repo",
+      prNumbers: [3, 1, 2],
+    });
+
+    expect(response).toEqual({
+      ok: true,
+      data: [
+        { number: 1, mergeable: "CONFLICTING" },
+        { number: 2, mergeable: "MERGEABLE" },
+        { number: 3, mergeable: "UNKNOWN" },
+      ],
+    });
+    const query = JSON.parse(vi.mocked(fetch).mock.calls[0][1]?.body as string).query as string;
+    expect(query).toContain("mergeable");
+    expect(query).not.toContain("mergeStateStatus");
+  });
+
   it("fetches a single PR's unresolved thread details on demand", async () => {
     const state = await loadWorker("token");
     vi.mocked(fetch).mockResolvedValue(

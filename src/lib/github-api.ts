@@ -1,6 +1,7 @@
 import type {
   ServiceWorkerRequest,
   PRBranchInfo,
+  PRConflictStatus,
   PRReviewStatus,
   ReviewThreadDetail,
   PRDiffStats,
@@ -41,6 +42,7 @@ function sendMessage<T>(request: ServiceWorkerRequest): Promise<T> {
 
 export type {
   PRReviewStatus,
+  PRConflictStatus,
   ReviewThreadDetail,
   PRDiffStats,
   CommitDiffStats,
@@ -90,6 +92,24 @@ export async function fetchPRBranches(
     });
   } catch (err) {
     console.error("[Better GitHub] Failed to fetch PR branches:", err);
+    return [];
+  }
+}
+
+export async function fetchPRConflictStatuses(
+  owner: string,
+  repo: string,
+  prNumbers: number[],
+): Promise<PRConflictStatus[]> {
+  try {
+    return await sendMessage<PRConflictStatus[]>({
+      type: "FETCH_PR_CONFLICT_STATUSES",
+      owner,
+      repo,
+      prNumbers,
+    });
+  } catch (err) {
+    console.error("[Better GitHub] Failed to fetch PR conflict statuses:", err);
     return [];
   }
 }

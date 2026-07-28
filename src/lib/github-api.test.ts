@@ -4,6 +4,7 @@ import {
   fetchCommitDiffStats,
   fetchForks,
   fetchPRBranches,
+  fetchPRConflictStatuses,
   fetchPRDiffStats,
   fetchPRReviewStatuses,
   fetchRepoTags,
@@ -80,6 +81,7 @@ describe("github-api bridge", () => {
   // Every wrapper forwards a distinct request type and resolves the worker's
   // data on success — table-driven so each one is exercised.
   const cases: Array<{ name: string; type: string; run: () => Promise<unknown> }> = [
+    { name: "fetchPRConflictStatuses", type: "FETCH_PR_CONFLICT_STATUSES", run: () => fetchPRConflictStatuses("o", "r", [1]) },
     { name: "fetchPRReviewStatuses", type: "FETCH_PR_REVIEW_STATUSES", run: () => fetchPRReviewStatuses("o", "r", [1]) },
     { name: "fetchPRDiffStats", type: "FETCH_PR_DIFF_STATS", run: () => fetchPRDiffStats("o", "r", [1]) },
     { name: "fetchCommitDiffStats", type: "FETCH_COMMIT_DIFF_STATS", run: () => fetchCommitDiffStats("o", "r", ["abc"]) },

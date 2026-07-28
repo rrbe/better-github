@@ -49,6 +49,12 @@
   "featPrBranchNamesDesc": {
     "message": "Display source branch name next to each PR title. Click the badge to copy."
   },
+  "featPrConflictIndicatorName": { "message": "PR Conflict Indicator" },
+  "featPrConflictIndicatorDesc": {
+    "message": "Show a conflict warning on PR list items with merge conflicts. Requires a token."
+  },
+  "prConflicts": { "message": "Conflicts" },
+  "prConflictsTitle": { "message": "This PR has merge conflicts" },
   "featPrReviewStatusName": { "message": "PR Review Status" },
   "featPrReviewStatusDesc": {
     "message": "Show review thread resolution status (resolved / unresolved) on the PR list. Requires a token."

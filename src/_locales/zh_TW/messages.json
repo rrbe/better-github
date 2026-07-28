@@ -49,6 +49,12 @@
   "featPrBranchNamesDesc": {
     "message": "在每個 PR 標題旁顯示來源分支名稱，點擊徽章即可複製。"
   },
+  "featPrConflictIndicatorName": { "message": "PR 衝突標識" },
+  "featPrConflictIndicatorDesc": {
+    "message": "在存在合併衝突的 PR 清單項目上顯示衝突警告。需要權杖。"
+  },
+  "prConflicts": { "message": "存在衝突" },
+  "prConflictsTitle": { "message": "此 PR 存在合併衝突" },
   "featPrReviewStatusName": { "message": "PR 審查狀態" },
   "featPrReviewStatusDesc": {
     "message": "在 PR 清單上顯示審查對話的解決狀態（已解決 / 未解決）。需要權杖。"

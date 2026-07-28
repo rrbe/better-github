@@ -37,6 +37,17 @@
   color: var(--fgColor-success, var(--color-success-fg, #1a7f37)) !important;
 }
 
+/* PR conflict status — intentionally plain text, not a GitHub-style label. */
+.better-github-conflict-indicator {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--fgColor-danger, var(--color-danger-fg, #d1242f));
+  white-space: nowrap;
+}
+
 /* PR Review Status Badge */
 .better-github-review-status {
   display: inline-block;

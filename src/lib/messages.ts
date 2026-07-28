@@ -3,6 +3,11 @@ export interface PRBranchInfo {
   headRef: string;
 }
 
+export interface PRConflictStatus {
+  number: number;
+  mergeable: "CONFLICTING" | "MERGEABLE" | "UNKNOWN";
+}
+
 export interface ReviewThreadDetail {
   /** File path the thread is anchored to (empty for file-level / outdated threads). */
   path: string;
@@ -99,6 +104,7 @@ export interface ContributorInfo {
 
 export type ServiceWorkerRequest =
   | { type: "FETCH_PR_BRANCHES"; owner: string; repo: string; state: string; page: number }
+  | { type: "FETCH_PR_CONFLICT_STATUSES"; owner: string; repo: string; prNumbers: number[] }
   | { type: "FETCH_PR_REVIEW_STATUSES"; owner: string; repo: string; prNumbers: number[] }
   | { type: "FETCH_PR_REVIEW_THREAD_DETAILS"; owner: string; repo: string; prNumber: number }
   | { type: "FETCH_PR_DIFF_STATS"; owner: string; repo: string; prNumbers: number[] }

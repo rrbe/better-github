@@ -13,7 +13,7 @@ Better GitHub 是一个增强 GitHub 使用体验的 Chrome 插件，灵感源�
 ### 功能概览
 
 - **Contributor Profile 增强** -- 帮你快速识别一个贡献者是不是“只会乱提交代码的纯 AI Coding 用户”
-- **更好的 PR（拉取请求）与 Issue（问题）列表** —— 支持按最近更新排序，分支名称、评审状态及代码差异统计（diff stats）一目了然。
+- **更好的 PR（拉取请求）与 Issue（问题）列表** —— 支持按最近更新排序，分支名称、冲突警告、评审状态及代码差异统计（diff stats）一目了然。
 - **仓库额外扩展** —— 提供专门的 Releases 标签页、对关注者/分叉/点赞数（watchers/forks/stars）悬停预览，以及提交标签（commit tags）和代码差异统计。
 
 所有功能均可在设置中单独开启或关闭。
@@ -46,6 +46,8 @@ Better GitHub 是一个增强 GitHub 使用体验的 Chrome 插件，灵感源�
       <summary>示例截图</summary>
       <img src="docs/screenshots/pr-branch-name.png" alt="PR 分支名与 Review 状态" width="600" />
    </details>
+
+- **PR 冲突标识** — 在存在合并冲突的 PR 列表项上显示警告。只读取状态，不会创建或修改仓库 Label。需要 token。
 
 - **PR Review 状态** — 在 PR 列表展示 review thread 的解决状态（已解决 / 未解决）。仅在 PR 存在 review thread 时显示，没有 review 评论的 PR 不会出现标记，draft PR 也不会。
 
