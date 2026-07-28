@@ -1,9 +1,9 @@
-// Contributor background card.
+// Contributor profile card.
 //
 // GitHub shows a hovercard when you hover a username. We attach a panel of
 // *objective facts* to it — account age, relation to this repo, historical merge
-// rate, activity — so the reader can judge whether an account looks suspicious.
-// Facts only: no score, no "suspicious" label, no red. See docs/pr-signals-plan.md.
+// history, and activity. Facts only: no score, labels, or warnings.
+// See docs/contributor-profile-card.md.
 //
 // DOM verified against a live page (2026-06):
 //   .js-hovercard-content                ← the reused popover root; STABLE

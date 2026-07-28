@@ -748,7 +748,7 @@ a.better-github-review-popover-item:hover {
   background: var(--bgColor-muted, var(--color-canvas-subtle, #f6f8fa));
 }
 
-/* Contributor background card — a section of objective facts that continues
+/* Contributor profile card — a section of objective facts that continues
    GitHub's native user hovercard so the two read as ONE card. Anchored in the
    stable popover root (a sibling after .Popover-message, not inside the body
    GitHub re-renders), so it never flickers. The merged look: no gap, the panel's

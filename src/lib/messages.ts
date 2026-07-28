@@ -76,8 +76,8 @@ export interface ForkInfo {
   stargazersCount: number;
 }
 
-/** Objective facts about a GitHub account, for the contributor background card.
- * Pure-fact only — no scoring. See docs/pr-signals-plan.md. */
+/** Objective facts about a GitHub account, for the contributor profile card.
+ * Pure-fact only — no scoring. See docs/contributor-profile-card.md. */
 export interface ContributorInfo {
   login: string;
   /** ISO timestamp of account creation (REST `created_at`). */

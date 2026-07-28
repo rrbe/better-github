@@ -630,13 +630,13 @@ async function fetchForks(owner: string, repo: string): Promise<ForkInfo[]> {
   });
 }
 
-// --- Contributor background card ---
+// --- Contributor profile card ---
 //
 // Objective facts about an account, fetched lazily on hover (one user at a
 // time). Each piece is cached independently so hovering the same user again —
 // or on a different repo — reuses what it can. Search/GraphQL failures degrade
 // to 0/null, which makes the card simply omit that row rather than show a wrong
-// number. See docs/pr-signals-plan.md.
+// number. See docs/contributor-profile-card.md.
 
 // Run a Search-issues query and return its total_count; 0 on any failure so the
 // card omits the affected row instead of rendering a misleading value.

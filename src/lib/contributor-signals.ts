@@ -1,4 +1,4 @@
-// Pure derivations for the contributor background card. No DOM, no network —
+// Pure derivations for the contributor profile card. No DOM, no network —
 // these turn the raw ContributorInfo (fetched in the service worker) into the
 // values the card displays. Kept separate so the logic is unit-testable and the
 // DOM/i18n layer only formats.
