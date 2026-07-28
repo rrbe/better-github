@@ -14,6 +14,14 @@ function getPRNumber(row: Element): number | null {
   return Number.isInteger(number) ? number : null;
 }
 
+function hasConflictLabel(row: Element): boolean {
+  return [...row.querySelectorAll(".IssueLabel")].some((label) =>
+    /^conflicts?$/i.test(
+      label.getAttribute("data-name")?.trim() || label.textContent?.trim() || "",
+    ),
+  );
+}
+
 async function checkRows(
   rows: Element[],
   owner: string,
@@ -23,8 +31,9 @@ async function checkRows(
   const rowByNumber = new Map<number, Element>();
   for (const row of rows) {
     const number = getPRNumber(row);
-    if (number !== null) rowByNumber.set(number, row);
+    if (number !== null && !hasConflictLabel(row)) rowByNumber.set(number, row);
   }
+  if (rowByNumber.size === 0) return;
 
   const statuses = await fetchPRConflictStatuses(owner, repo, [...rowByNumber.keys()]);
   if (currentGeneration !== generation) return;
@@ -33,14 +42,20 @@ async function checkRows(
     if (mergeable !== "CONFLICTING") continue;
 
     const row = rowByNumber.get(number);
-    if (!row?.isConnected || row.querySelector(`.${INDICATOR_CLASS}`)) continue;
+    if (
+      !row?.isConnected ||
+      row.querySelector(`.${INDICATOR_CLASS}`) ||
+      hasConflictLabel(row)
+    ) {
+      continue;
+    }
 
     const infoRow = getOrCreateInfoRow(row);
     if (!infoRow) continue;
 
     const indicator = document.createElement("span");
     indicator.className = INDICATOR_CLASS;
-    indicator.textContent = `⚠ ${t("prConflicts")}`;
+    indicator.textContent = t("prConflicts");
     indicator.title = t("prConflictsTitle");
     indicator.setAttribute("role", "status");
     infoRow.appendChild(indicator);

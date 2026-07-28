@@ -29,6 +29,14 @@ describe("injectPRConflictIndicator", () => {
       <div id="issue_7"><a id="issue_7_link">Conflict</a></div>
       <div id="issue_8"><a id="issue_8_link">Clean</a></div>
       <div id="issue_9"><a id="issue_9_link">Off screen</a></div>
+      <div id="issue_10">
+        <a id="issue_10_link">Labeled conflict</a>
+        <a class="IssueLabel" data-name="cOnFlIcTs">cOnFlIcTs</a>
+      </div>
+      <div id="issue_11">
+        <a id="issue_11_link">Singular labeled conflict</a>
+        <a class="IssueLabel">CONFLICT</a>
+      </div>
     `;
   });
 
@@ -46,14 +54,18 @@ describe("injectPRConflictIndicator", () => {
 
     injectPRConflictIndicator();
 
-    expect(observe).toHaveBeenCalledTimes(3);
+    expect(observe).toHaveBeenCalledTimes(5);
 
     const row7 = document.getElementById("issue_7")!;
     const row8 = document.getElementById("issue_8")!;
+    const row10 = document.getElementById("issue_10")!;
+    const row11 = document.getElementById("issue_11")!;
     observerCallback(
       [
         { target: row7, isIntersecting: true },
         { target: row8, isIntersecting: true },
+        { target: row10, isIntersecting: true },
+        { target: row11, isIntersecting: true },
       ] as unknown as IntersectionObserverEntry[],
       {} as IntersectionObserver,
     );
@@ -63,9 +75,12 @@ describe("injectPRConflictIndicator", () => {
 
     const indicator = row7.querySelector(".better-github-conflict-indicator");
     expect(indicator?.tagName).toBe("SPAN");
-    expect(indicator?.textContent).toBe("⚠ Conflicts");
+    expect(indicator?.textContent).toBe("Conflicts");
     expect(indicator?.getAttribute("title")).toBe("This PR has merge conflicts");
+    expect(indicator?.getAttribute("href")).toBeNull();
     expect(row8.querySelector(".better-github-conflict-indicator")).toBeNull();
-    expect(document.querySelector(".IssueLabel")).toBeNull();
+    expect(row10.querySelector(".better-github-conflict-indicator")).toBeNull();
+    expect(row11.querySelector(".better-github-conflict-indicator")).toBeNull();
+    expect(row7.querySelector(".IssueLabel")).toBeNull();
   });
 });
