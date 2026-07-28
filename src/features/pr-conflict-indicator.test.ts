@@ -85,9 +85,7 @@ describe("injectPRConflictIndicator", () => {
   });
 
   it("keeps an in-flight check alive when the page handler runs again", async () => {
-    let resolveStatuses!: (
-      statuses: Awaited<ReturnType<typeof fetchPRConflictStatuses>>,
-    ) => void;
+    let resolveStatuses!: (statuses: Awaited<ReturnType<typeof fetchPRConflictStatuses>>) => void;
     vi.mocked(fetchPRConflictStatuses).mockReturnValue(
       new Promise((resolve) => {
         resolveStatuses = resolve;
@@ -109,5 +107,34 @@ describe("injectPRConflictIndicator", () => {
     await vi.waitFor(() =>
       expect(row7.querySelector(".better-github-conflict-indicator")).not.toBeNull(),
     );
+  });
+
+  it("retries unknown and missing statuses on the next polling pass", async () => {
+    vi.mocked(fetchPRConflictStatuses)
+      .mockResolvedValueOnce([{ number: 7, mergeable: "UNKNOWN" }])
+      .mockResolvedValueOnce([
+        { number: 7, mergeable: "CONFLICTING" },
+        { number: 8, mergeable: "MERGEABLE" },
+      ]);
+
+    injectPRConflictIndicator();
+
+    const row7 = document.getElementById("issue_7")!;
+    const row8 = document.getElementById("issue_8")!;
+    const entries = [
+      { target: row7, isIntersecting: true },
+      { target: row8, isIntersecting: true },
+    ] as unknown as IntersectionObserverEntry[];
+    observerCallback(entries, {} as IntersectionObserver);
+    await vi.waitFor(() => expect(fetchPRConflictStatuses).toHaveBeenCalledTimes(1));
+    await Promise.resolve();
+
+    injectPRConflictIndicator();
+    expect(observe.mock.calls.filter(([row]) => row === row7)).toHaveLength(2);
+    expect(observe.mock.calls.filter(([row]) => row === row8)).toHaveLength(2);
+
+    observerCallback(entries, {} as IntersectionObserver);
+    await vi.waitFor(() => expect(fetchPRConflictStatuses).toHaveBeenCalledTimes(2));
+    expect(row7.querySelector(".better-github-conflict-indicator")).not.toBeNull();
   });
 });

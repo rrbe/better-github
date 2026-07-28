@@ -39,15 +39,16 @@ async function checkRows(
   const statuses = await fetchPRConflictStatuses(owner, repo, [...rowByNumber.keys()]);
   if (currentGeneration !== generation) return;
 
-  for (const { number, mergeable } of statuses) {
+  const statusByNumber = new Map(statuses.map(({ number, mergeable }) => [number, mergeable]));
+  for (const [number, row] of rowByNumber) {
+    const mergeable = statusByNumber.get(number);
+    if (mergeable !== "MERGEABLE" && mergeable !== "CONFLICTING") {
+      checkedRows.delete(row);
+      continue;
+    }
     if (mergeable !== "CONFLICTING") continue;
 
-    const row = rowByNumber.get(number);
-    if (
-      !row?.isConnected ||
-      row.querySelector(`.${INDICATOR_CLASS}`) ||
-      hasConflictLabel(row)
-    ) {
+    if (!row?.isConnected || row.querySelector(`.${INDICATOR_CLASS}`) || hasConflictLabel(row)) {
       continue;
     }
 
