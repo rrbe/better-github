@@ -1,6 +1,10 @@
 import { onPageReady, startNavigation } from "./lib/navigation";
 import { initLocale, setLocale, LOCALE_KEY, type LocalePref } from "./lib/i18n";
 import { injectPRBranchNames } from "./features/pr-branch-names";
+import {
+  cleanupPRConflictIndicator,
+  injectPRConflictIndicator,
+} from "./features/pr-conflict-indicator";
 import { injectPRReviewStatus } from "./features/pr-review-status";
 import { injectPRDiffStats } from "./features/pr-diff-stats";
 import { injectReleasesTab } from "./features/release-tab";
@@ -22,6 +26,7 @@ import { applyPageMarker } from "./lib/page-marker";
 
 const FEATURE_KEYS = [
   "feature-pr-branch-names",
+  "feature-pr-conflict-indicator",
   "feature-pr-review-status",
   "feature-pr-diff-stats",
   "feature-release-tab",
@@ -41,6 +46,7 @@ type FeatureKey = (typeof FEATURE_KEYS)[number];
 // CSS classes used by each feature's injected elements
 const FEATURE_CLASSES: Record<FeatureKey, string[]> = {
   "feature-pr-branch-names": ["better-github-branch-badge", "bg-skeleton-pill--branch"],
+  "feature-pr-conflict-indicator": ["better-github-conflict-indicator"],
   "feature-pr-review-status": ["better-github-review-status"],
   "feature-pr-diff-stats": ["better-github-diff-stats", "bg-skeleton-pill--pr-diff"],
   "feature-release-tab": ["better-github-releases-tab"],
@@ -59,6 +65,7 @@ const FEATURE_CLASSES: Record<FeatureKey, string[]> = {
 // DOM run a cleanup hook on disable, before removeFeatureElements() strips their
 // elements by class.
 const FEATURE_CLEANUPS: Partial<Record<FeatureKey, () => void>> = {
+  "feature-pr-conflict-indicator": cleanupPRConflictIndicator,
   "feature-pr-label-position": cleanupPRLabelPosition,
   "feature-watch-fork-star-popup": cleanupWatchForkStarPopup,
   "feature-contributor-card": cleanupContributorCard,
@@ -100,6 +107,9 @@ function injectFeature(key: FeatureKey): void {
   switch (key) {
     case "feature-pr-branch-names":
       injectPRBranchNames();
+      break;
+    case "feature-pr-conflict-indicator":
+      injectPRConflictIndicator();
       break;
     case "feature-pr-review-status":
       injectPRReviewStatus();

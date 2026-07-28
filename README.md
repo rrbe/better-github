@@ -13,7 +13,7 @@ Better GitHub is a Chrome extension that enhances the GitHub experience. Inspire
 ### Features Overview
 
 - **Contributor profile insights** — quickly tell whether a contributor is just an "AI-coding account that spams low-quality commits."
-- **Better PR and issue lists** — sort by most recently updated, with branch names, review status, and diff stats all at a glance.
+- **Better PR and issue lists** — sort by most recently updated, with branch names, conflict warnings, review status, and diff stats all at a glance.
 - **Repository extras** — a dedicated Releases tab, hover previews for watcher/fork/star counts, plus commit tags and diff stats.
 
 Every feature can be individually toggled on or off in the settings.
@@ -46,6 +46,8 @@ Every feature can be individually toggled on or off in the settings.
       <summary>Screenshot</summary>
       <img src="docs/screenshots/pr-branch-name.png" alt="PR Branch Names" width="600" />
    </details>
+
+- **PR Conflict Indicator** — Show a warning on PR list items that have merge conflicts. This is a read-only status and does not create or modify repository labels. Requires a token.
 
 - **PR Review Status** — Show review thread resolution status (resolved / unresolved) on the PR list. Only appears on PRs that have review threads; PRs without any review comments won't show a badge. Draft PRs are also excluded.
 

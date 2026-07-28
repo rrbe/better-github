@@ -26,6 +26,7 @@ interface StoredSettings {
 
 const FEATURE_KEYS = [
   "feature-pr-branch-names",
+  "feature-pr-conflict-indicator",
   "feature-pr-review-status",
   "feature-pr-diff-stats",
   "feature-release-tab",

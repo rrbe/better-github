@@ -2,6 +2,7 @@ import type {
   ServiceWorkerRequest,
   ServiceWorkerResponse,
   PRBranchInfo,
+  PRConflictStatus,
   PRReviewStatus,
   ReviewThreadDetail,
   PRDiffStats,
@@ -213,6 +214,30 @@ async function fetchPRReviewStatuses(
       };
       const resolvedThreads = threads.nodes.filter((t) => t.isResolved).length;
       return { number: n, totalThreads: threads.totalCount, resolvedThreads };
+    },
+  });
+}
+
+async function fetchPRConflictStatuses(
+  owner: string,
+  repo: string,
+  prNumbers: number[],
+): Promise<PRConflictStatus[]> {
+  return fetchGraphQLBatch<number, PRConflictStatus>({
+    cachePrefix: "conflicts",
+    owner,
+    repo,
+    keys: [...prNumbers].sort((a, b) => a - b),
+    aliasFor: (n) => `pr_${n}`,
+    buildNodeQuery: (n) => `pullRequest(number: ${n}) {
+      mergeable
+    }`,
+    parseNode: (n, pr) => {
+      const mergeable = pr.mergeable;
+      if (mergeable !== "CONFLICTING" && mergeable !== "MERGEABLE" && mergeable !== "UNKNOWN") {
+        return null;
+      }
+      return { number: n, mergeable };
     },
   });
 }
@@ -748,6 +773,11 @@ async function handleMessage(
       return {
         ok: true,
         data: await fetchPRBranches(request.owner, request.repo, request.state, request.page),
+      };
+    case "FETCH_PR_CONFLICT_STATUSES":
+      return {
+        ok: true,
+        data: await fetchPRConflictStatuses(request.owner, request.repo, request.prNumbers),
       };
     case "FETCH_PR_REVIEW_STATUSES":
       return {
