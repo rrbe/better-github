@@ -232,6 +232,7 @@ describe("service worker", () => {
     });
     expect(fetch).toHaveBeenCalledTimes(1);
     expect(vi.mocked(fetch).mock.calls[0][0]).toBe("https://api.github.com/graphql");
+    expect(chrome.storage.local.get).toHaveBeenCalledTimes(1);
   });
 
   it("falls back to exact REST requests for public filtered lists", async () => {

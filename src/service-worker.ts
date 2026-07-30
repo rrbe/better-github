@@ -98,6 +98,7 @@ async function fetchPRBranches(
       owner,
       repo,
       keys: requested,
+      token,
       aliasFor: (number) => `pr_${number}`,
       buildNodeQuery: (number) => `pullRequest(number: ${number}) {
         headRefName
@@ -153,6 +154,7 @@ interface GraphQLBatchSpec<K extends string | number, V> {
   owner: string;
   repo: string;
   keys: K[];
+  token?: string;
   aliasFor: (k: K) => string;
   buildNodeQuery: (k: K) => string;
   parseNode: (k: K, node: Record<string, unknown>) => V | null;
@@ -163,7 +165,7 @@ async function fetchGraphQLBatch<K extends string | number, V>(
 ): Promise<V[]> {
   if (spec.keys.length === 0) return [];
 
-  const token = await getToken();
+  const token = spec.token ?? (await getToken());
   if (!token) return [];
 
   const cacheKey = `cache:${spec.cachePrefix}:${spec.owner}/${spec.repo}:${spec.keys.join(",")}`;
