@@ -1,8 +1,9 @@
 import * as esbuild from "esbuild";
-import { cpSync, mkdirSync } from "fs";
+import { cpSync, mkdirSync, rmSync } from "fs";
 
 const watch = process.argv.includes("--watch");
 
+rmSync("dist", { recursive: true, force: true });
 mkdirSync("dist", { recursive: true });
 
 // Copy static files to dist
