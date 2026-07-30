@@ -50,14 +50,19 @@ export async function injectPRBranchNames(): Promise<void> {
   const existing = document.querySelectorAll(`.${BADGE_CLASS}`);
   if (existing.length > 0) return;
 
+  const prRows = document.querySelectorAll("[id^='issue_']:not([id$='_link'])");
+  const prNumbers = [...prRows]
+    .map((row) => Number(row.id.replace("issue_", "")))
+    .filter(Number.isInteger);
+  if (prNumbers.length === 0) return;
+
   try {
     const { state, page } = getPRListParams();
-    const branches = await fetchPRBranches(info.owner, info.repo, state, page);
+    const branches = await fetchPRBranches(info.owner, info.repo, prNumbers, state, page);
 
     if (branches.length === 0) return;
 
     const branchMap = new Map(branches.map((b) => [b.number, b.headRef]));
-    const prRows = document.querySelectorAll("[id^='issue_']");
 
     for (const row of prRows) {
       const id = row.getAttribute("id");

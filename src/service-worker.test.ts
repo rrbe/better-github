@@ -130,7 +130,7 @@ describe("service worker", () => {
   });
 
   it("coalesces concurrent requests and caches successful PR branch responses", async () => {
-    const state = await loadWorker("token");
+    const state = await loadWorker();
     const fetchDeferred = deferred<Response>();
     const fetchMock = vi.mocked(fetch);
     fetchMock.mockReturnValue(fetchDeferred.promise);
@@ -139,6 +139,7 @@ describe("service worker", () => {
       type: "FETCH_PR_BRANCHES",
       owner: "owner",
       repo: "repo",
+      prNumbers: [7],
       state: "open",
       page: 1,
     };
@@ -157,7 +158,7 @@ describe("service worker", () => {
 
   it("returns fresh cached data without fetching", async () => {
     vi.spyOn(Date, "now").mockReturnValue(1_000);
-    const state = await loadWorker("token");
+    const state = await loadWorker();
     state.sessionStore["cache:branches:owner/repo:open:1"] = {
       data: [{ number: 1, headRef: "cached" }],
       timestamp: 900,
@@ -167,6 +168,7 @@ describe("service worker", () => {
       type: "FETCH_PR_BRANCHES",
       owner: "owner",
       repo: "repo",
+      prNumbers: [1],
       state: "open",
       page: 1,
     });
@@ -177,7 +179,7 @@ describe("service worker", () => {
 
   it("expires stale cache entries before fetching", async () => {
     vi.spyOn(Date, "now").mockReturnValue(10 * 60 * 1000);
-    const state = await loadWorker("token");
+    const state = await loadWorker();
     state.sessionStore["cache:branches:owner/repo:open:1"] = {
       data: [{ number: 1, headRef: "stale" }],
       timestamp: 0,
@@ -188,6 +190,7 @@ describe("service worker", () => {
       type: "FETCH_PR_BRANCHES",
       owner: "owner",
       repo: "repo",
+      prNumbers: [2],
       state: "open",
       page: 1,
     });
@@ -196,6 +199,63 @@ describe("service worker", () => {
     expect(state.sessionStore["cache:branches:owner/repo:open:1"]).toMatchObject({
       data: [{ number: 2, headRef: "fresh" }],
     });
+  });
+
+  it("fetches branches by visible PR number when the list page response does not match", async () => {
+    const state = await loadWorker("token");
+    vi.mocked(fetch).mockResolvedValueOnce(
+      jsonResponse({
+        data: {
+          repository: {
+            pr_7: { headRefName: "feature/a" },
+            pr_8: { headRefName: "fix/b" },
+          },
+        },
+      }),
+    );
+
+    const response = await sendMessage(state.messageListeners[0], {
+      type: "FETCH_PR_BRANCHES",
+      owner: "owner",
+      repo: "repo",
+      prNumbers: [8, 7],
+      state: "open",
+      page: 1,
+    });
+
+    expect(response).toEqual({
+      ok: true,
+      data: [
+        { number: 7, headRef: "feature/a" },
+        { number: 8, headRef: "fix/b" },
+      ],
+    });
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(fetch).mock.calls[0][0]).toBe("https://api.github.com/graphql");
+  });
+
+  it("falls back to exact REST requests for public filtered lists", async () => {
+    const state = await loadWorker();
+    vi.mocked(fetch)
+      .mockResolvedValueOnce(jsonResponse([]))
+      .mockResolvedValueOnce(jsonResponse({ number: 7, head: { ref: "feature/a" } }));
+
+    const response = await sendMessage(state.messageListeners[0], {
+      type: "FETCH_PR_BRANCHES",
+      owner: "owner",
+      repo: "repo",
+      prNumbers: [7],
+      state: "open",
+      page: 1,
+    });
+
+    expect(response).toEqual({
+      ok: true,
+      data: [{ number: 7, headRef: "feature/a" }],
+    });
+    expect(vi.mocked(fetch).mock.calls[1][0]).toBe(
+      "https://api.github.com/repos/owner/repo/pulls/7",
+    );
   });
 
   it("does not call GraphQL-backed endpoints without a token", async () => {
