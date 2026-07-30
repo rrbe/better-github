@@ -41,8 +41,7 @@ describe("injectPRDiffStats", () => {
     const [owner, repo, numbers] = vi.mocked(fetchPRDiffStats).mock.calls[0];
     expect(owner).toBe("owner");
     expect(repo).toBe("repo");
-    expect(numbers).toContain(7);
-    expect(numbers).toContain(8);
+    expect(numbers).toEqual([7, 8]);
 
     const badge7 = document.querySelector("#issue_7 .better-github-diff-stats") as HTMLElement;
     expect(badge7).not.toBeNull();

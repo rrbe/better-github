@@ -49,8 +49,7 @@ describe("injectPRReviewStatus", () => {
     const [owner, repo, numbers] = vi.mocked(fetchPRReviewStatuses).mock.calls[0];
     expect(owner).toBe("owner");
     expect(repo).toBe("repo");
-    expect(numbers).toContain(7);
-    expect(numbers).toContain(8);
+    expect(numbers).toEqual([7, 8]);
 
     // All resolved → check-marked "All resolved" state, with a simple tooltip
     // (no popover, so no overlap risk).

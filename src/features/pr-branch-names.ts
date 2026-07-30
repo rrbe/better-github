@@ -3,6 +3,7 @@ import { fetchPRBranches } from "../lib/github-api";
 import { insertInfoRowItem } from "../lib/info-row";
 import { clearSkeletons } from "../lib/info-row-skeleton";
 import { t } from "../lib/i18n";
+import { collectPRRows } from "../lib/pr-list-dom";
 
 const BADGE_CLASS = "better-github-branch-badge";
 const COPIED_CLASS = "better-github-branch-copied";
@@ -50,10 +51,8 @@ export async function injectPRBranchNames(): Promise<void> {
   const existing = document.querySelectorAll(`.${BADGE_CLASS}`);
   if (existing.length > 0) return;
 
-  const prRows = document.querySelectorAll("[id^='issue_']:not([id$='_link'])");
-  const prNumbers = [...prRows]
-    .map((row) => Number(row.id.replace("issue_", "")))
-    .filter(Number.isInteger);
+  const prRows = collectPRRows();
+  const prNumbers = [...prRows.keys()];
   if (prNumbers.length === 0) return;
 
   try {
@@ -64,11 +63,7 @@ export async function injectPRBranchNames(): Promise<void> {
 
     const branchMap = new Map(branches.map((b) => [b.number, b.headRef]));
 
-    for (const row of prRows) {
-      const id = row.getAttribute("id");
-      if (!id) continue;
-
-      const prNumber = parseInt(id.replace("issue_", ""), 10);
+    for (const [prNumber, row] of prRows) {
       const branchName = branchMap.get(prNumber);
       if (!branchName) continue;
 
