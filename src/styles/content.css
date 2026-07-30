@@ -261,6 +261,64 @@ a.better-github-review-popover-item:hover {
   color: var(--fgColor-muted, var(--color-fg-muted, #656d76));
 }
 
+/* Release Asset Downloads */
+.better-github-asset-downloads {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-left: auto;
+  padding: 0 16px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  text-align: right;
+  text-decoration: none;
+  color: color-mix(
+    in srgb,
+    var(--better-github-heat-color) var(--better-github-download-heat, 0%),
+    var(--fgColor-muted, var(--color-fg-muted, #656d76))
+  ) !important;
+}
+
+.better-github-asset-downloads:hover {
+  text-decoration: underline;
+}
+
+.better-github-asset-downloads svg {
+  flex-shrink: 0;
+}
+
+.better-github-asset-downloads[data-better-github-dl-heat="2"] {
+  --better-github-download-heat: 12%;
+}
+.better-github-asset-downloads[data-better-github-dl-heat="3"] {
+  --better-github-download-heat: 22%;
+}
+.better-github-asset-downloads[data-better-github-dl-heat="4"] {
+  --better-github-download-heat: 33%;
+}
+.better-github-asset-downloads[data-better-github-dl-heat="5"] {
+  --better-github-download-heat: 44%;
+}
+.better-github-asset-downloads[data-better-github-dl-heat="6"] {
+  --better-github-download-heat: 56%;
+}
+.better-github-asset-downloads[data-better-github-dl-heat="7"] {
+  --better-github-download-heat: 67%;
+}
+.better-github-asset-downloads[data-better-github-dl-heat="8"] {
+  --better-github-download-heat: 78%;
+}
+.better-github-asset-downloads[data-better-github-dl-heat="9"] {
+  --better-github-download-heat: 89%;
+}
+.better-github-asset-downloads[data-better-github-dl-heat="10"] {
+  --better-github-download-heat: 100%;
+}
+
 /* File Age Color — heat map for recent commits */
 :root {
   --better-github-heat-color: #c24e00;

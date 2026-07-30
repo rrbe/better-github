@@ -16,7 +16,7 @@ Better GitHub 是一个增强 GitHub 使用体验的 Chrome 插件，灵感源�
 
 - **Contributor Profile 增强** -- 帮你快速识别一个贡献者是不是“只会乱提交代码的纯 AI Coding 用户”
 - **更好的 PR（拉取请求）与 Issue（问题）列表** —— 支持按最近更新排序，分支名称、冲突警告、评审状态及代码差异统计（diff stats）一目了然。
-- **仓库额外扩展** —— 提供专门的 Releases 标签页、对关注者/分叉/点赞数（watchers/forks/stars）悬停预览，以及提交标签（commit tags）和代码差异统计。
+- **仓库额外扩展** —— 展示 Release 资源下载量，提供专门的 Releases 标签页、对关注者/分叉/点赞数（watchers/forks/stars）悬停预览，以及提交标签（commit tags）和代码差异统计。
 
 所有功能均可在设置中单独开启或关闭。
 
@@ -118,6 +118,8 @@ Better GitHub 是一个增强 GitHub 使用体验的 Chrome 插件，灵感源�
 
 ### 仓库页面
 
+- **Release 资源下载量** — 显示每个 Release 资源的下载次数，包括 GitHub 可能留空的零下载资源。GitHub 原生下载量仍在灰度中；如果页面同时出现两份下载量，可在扩展选项中关闭此功能。
+
 - **Releases Tab** — 在仓库导航栏添加 Releases 标签页，快速访问。
 
    <details>
@@ -140,10 +142,6 @@ Better GitHub 是一个增强 GitHub 使用体验的 Chrome 插件，灵感源�
    </details>
 
 除"最近提交 Commit Message 颜色"外，所有功能均可在扩展选项中单独开关。
-
-## 已删除功能
-
-- **Release 资源下载量** — 已删除。2026 年 7 月 1 日发现 GitHub 官方更新了 Release 页面，已原生支持显示 release asset 下载量。
 
 ## 自行打包安装
 

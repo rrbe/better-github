@@ -575,6 +575,37 @@ describe("service worker", () => {
     expect(vi.mocked(fetch).mock.calls[0][0]).toContain("/repos/owner/repo/forks");
   });
 
+  it("fetches a release by tag and keeps zero-download assets", async () => {
+    const state = await loadWorker("token");
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse({
+        tag_name: "release/1.0",
+        assets: [
+          { name: "app.zip", download_count: 42 },
+          { name: "empty.zip", download_count: 0 },
+        ],
+      }),
+    );
+
+    const response = await sendMessage(state.messageListeners[0], {
+      type: "FETCH_RELEASE_DOWNLOADS",
+      owner: "owner",
+      repo: "repo",
+      tag: "release/1.0",
+    });
+
+    expect(response).toEqual({
+      ok: true,
+      data: [
+        { tag: "release/1.0", name: "app.zip", downloadCount: 42 },
+        { tag: "release/1.0", name: "empty.zip", downloadCount: 0 },
+      ],
+    });
+    expect(vi.mocked(fetch).mock.calls[0][0]).toBe(
+      "https://api.github.com/repos/owner/repo/releases/tags/release%2F1.0",
+    );
+  });
+
   it("reads tag commit OIDs from the GraphQL refs response", async () => {
     const state = await loadWorker("token");
     vi.mocked(fetch).mockResolvedValue(
