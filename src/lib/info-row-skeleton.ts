@@ -1,7 +1,6 @@
 import { isPRListPage, isCommitsListPage, getRepoInfo } from "./page-detect";
 import { collectCommitRows, MAIN_CONTENT_INNER_SELECTOR } from "./commit-dom";
 import { insertInfoRowItem } from "./info-row";
-import { collectPRRows } from "./pr-list-dom";
 
 export type SkeletonKind = "branch" | "prDiff" | "commitDiff";
 
@@ -54,7 +53,7 @@ function reservePRListSkeletons(flags: SkeletonFlags): void {
     .map((c) => `.${c}`)
     .join(", ");
 
-  for (const row of collectPRRows().values()) {
+  for (const row of document.querySelectorAll("[id^='issue_']")) {
     const present = new Set(
       [...row.querySelectorAll(probeSelector)].flatMap((el) => [...el.classList]),
     );

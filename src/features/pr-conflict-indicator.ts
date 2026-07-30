@@ -1,7 +1,6 @@
 import { isPRListPage, getRepoInfo } from "../lib/page-detect";
 import { fetchPRConflictStatuses } from "../lib/github-api";
 import { insertInfoRowItem } from "../lib/info-row";
-import { collectPRRows, getPRNumber } from "../lib/pr-list-dom";
 import { t } from "../lib/i18n";
 
 const INDICATOR_CLASS = "better-github-conflict-indicator";
@@ -10,6 +9,11 @@ let observer: IntersectionObserver | null = null;
 let observedRepo: string | null = null;
 let checkedRows = new WeakSet<Element>();
 let generation = 0;
+
+function getPRNumber(row: Element): number | null {
+  const number = Number(row.id.replace("issue_", ""));
+  return Number.isInteger(number) ? number : null;
+}
 
 function hasConflictLabel(row: Element): boolean {
   return [...row.querySelectorAll(".IssueLabel")].some((label) =>
@@ -93,7 +97,7 @@ export function injectPRConflictIndicator(): void {
     observer = currentObserver;
   }
 
-  for (const row of collectPRRows().values()) {
+  for (const row of document.querySelectorAll("[id^='issue_']:not([id$='_link'])")) {
     if (!checkedRows.has(row) && !row.querySelector(`.${INDICATOR_CLASS}`)) {
       observer.observe(row);
     }

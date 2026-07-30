@@ -3,7 +3,6 @@ import { fetchPRDiffStats } from "../lib/github-api";
 import { insertInfoRowItem } from "../lib/info-row";
 import { buildDiffStatsBadge } from "../lib/diff-stats-badge";
 import { clearSkeletons } from "../lib/info-row-skeleton";
-import { collectPRRows } from "../lib/pr-list-dom";
 
 const BADGE_CLASS = "better-github-diff-stats";
 
@@ -13,8 +12,14 @@ export async function injectPRDiffStats(): Promise<void> {
   const info = getRepoInfo();
   if (!info) return;
 
-  const prRows = collectPRRows();
-  const prNumbers = [...prRows.keys()];
+  const prRows = document.querySelectorAll("[id^='issue_']");
+  const prNumbers: number[] = [];
+  for (const row of prRows) {
+    const id = row.getAttribute("id");
+    if (!id) continue;
+    prNumbers.push(parseInt(id.replace("issue_", ""), 10));
+  }
+
   if (prNumbers.length === 0) return;
 
   try {
@@ -23,7 +28,11 @@ export async function injectPRDiffStats(): Promise<void> {
 
     const statsMap = new Map(stats.map((s) => [s.number, s]));
 
-    for (const [prNumber, row] of prRows) {
+    for (const row of prRows) {
+      const id = row.getAttribute("id");
+      if (!id) continue;
+
+      const prNumber = parseInt(id.replace("issue_", ""), 10);
       const stat = statsMap.get(prNumber);
       if (!stat) continue;
 
