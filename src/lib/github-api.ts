@@ -79,6 +79,7 @@ export async function fetchContributorInfo(
 export async function fetchPRBranches(
   owner: string,
   repo: string,
+  prNumbers: number[],
   state: string = "open",
   page: number = 1,
 ): Promise<PRBranchInfo[]> {
@@ -87,6 +88,7 @@ export async function fetchPRBranches(
       type: "FETCH_PR_BRANCHES",
       owner,
       repo,
+      prNumbers,
       state,
       page,
     });

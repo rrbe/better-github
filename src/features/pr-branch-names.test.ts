@@ -41,6 +41,20 @@ describe("injectPRBranchNames", () => {
     expect(document.querySelectorAll(".bg-skeleton-pill--branch")).toHaveLength(0);
   });
 
+  it("requests the visible PR numbers on filtered search pages", async () => {
+    setUrl(`${GH}/owner/repo/pulls?q=pre+bid+sort%3Aupdated-desc+`);
+    twoPRRows();
+    vi.mocked(fetchPRBranches).mockResolvedValue([
+      { number: 7, headRef: "feature/a" },
+      { number: 8, headRef: "fix/b" },
+    ]);
+
+    await injectPRBranchNames();
+
+    expect(fetchPRBranches).toHaveBeenCalledWith("owner", "repo", [7, 8], "open", 1);
+    expect(document.querySelectorAll(".better-github-branch-badge")).toHaveLength(2);
+  });
+
   it("ignores PR numbers the API did not return", async () => {
     twoPRRows();
     vi.mocked(fetchPRBranches).mockResolvedValue([{ number: 7, headRef: "feature/a" }]);

@@ -86,14 +86,33 @@ async function fetchPRBranches(
   repo: string,
   state: string,
   page: number,
+  prNumbers: number[],
 ): Promise<PRBranchInfo[]> {
+  const requested = [...new Set(prNumbers)].sort((a, b) => a - b);
+  if (requested.length === 0) return [];
+
+  const token = await getToken();
+  if (token) {
+    return fetchGraphQLBatch<number, PRBranchInfo>({
+      cachePrefix: "branches",
+      owner,
+      repo,
+      keys: requested,
+      aliasFor: (number) => `pr_${number}`,
+      buildNodeQuery: (number) => `pullRequest(number: ${number}) {
+        headRefName
+      }`,
+      parseNode: (number, pr) =>
+        typeof pr.headRefName === "string" ? { number, headRef: pr.headRefName } : null,
+    });
+  }
+
   const cacheKey = `cache:branches:${owner}/${repo}:${state}:${page}`;
-  return cachedFetch<PRBranchInfo[]>(cacheKey, async () => {
+  const pageBranches = await cachedFetch<PRBranchInfo[]>(cacheKey, async () => {
     const perPage = 30;
     const url = `https://api.github.com/repos/${owner}/${repo}/pulls?state=${state}&sort=updated&direction=desc&page=${page}&per_page=${perPage}`;
 
-    const headers = restHeaders(await getToken());
-    const response = await fetch(url, { headers });
+    const response = await fetch(url, { headers: restHeaders(token) });
 
     if (!response.ok) {
       console.error(`[Better GitHub] API error: ${response.status} ${response.statusText}`);
@@ -106,6 +125,27 @@ async function fetchPRBranches(
       headRef: pr.head.ref,
     }));
   });
+
+  const missing = requested.filter(
+    (number) => !pageBranches.some((branch) => branch.number === number),
+  );
+  const exactBranches = await Promise.all(
+    missing.map((number) =>
+      cachedFetch<PRBranchInfo[]>(`cache:branches:${owner}/${repo}:pr:${number}`, async () => {
+        const response = await fetch(
+          `https://api.github.com/repos/${owner}/${repo}/pulls/${number}`,
+          { headers: restHeaders(token) },
+        );
+        if (!response.ok) {
+          console.error(`[Better GitHub] API error: ${response.status} ${response.statusText}`);
+          return [];
+        }
+        const pull = (await response.json()) as { number: number; head: { ref: string } };
+        return [{ number: pull.number, headRef: pull.head.ref }];
+      }),
+    ),
+  );
+  return pageBranches.concat(...exactBranches);
 }
 
 interface GraphQLBatchSpec<K extends string | number, V> {
@@ -772,7 +812,7 @@ async function handleMessage(
     case "FETCH_PR_BRANCHES":
       return {
         ok: true,
-        data: await fetchPRBranches(request.owner, request.repo, request.state, request.page),
+        data: await fetchPRBranches(request.owner, request.repo, request.state, request.page, request.prNumbers),
       };
     case "FETCH_PR_CONFLICT_STATUSES":
       return {

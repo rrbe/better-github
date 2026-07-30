@@ -45,28 +45,28 @@ describe("github-api bridge", () => {
   it("forwards a typed request and resolves the worker's data on success", async () => {
     const runtime = mockRuntime({ response: { ok: true, data: [{ number: 7, headRef: "feature/a" }] } });
 
-    const result = await fetchPRBranches("owner", "repo", "open", 2);
+    const result = await fetchPRBranches("owner", "repo", [7], "open", 2);
 
     expect(result).toEqual([{ number: 7, headRef: "feature/a" }]);
     expect(runtime.sendMessage).toHaveBeenCalledWith(
-      { type: "FETCH_PR_BRANCHES", owner: "owner", repo: "repo", state: "open", page: 2 },
+      { type: "FETCH_PR_BRANCHES", owner: "owner", repo: "repo", prNumbers: [7], state: "open", page: 2 },
       expect.any(Function),
     );
   });
 
   it("swallows an ok:false response and returns the empty default", async () => {
     mockRuntime({ response: { ok: false, error: "boom" } });
-    expect(await fetchPRBranches("owner", "repo")).toEqual([]);
+    expect(await fetchPRBranches("owner", "repo", [1])).toEqual([]);
   });
 
   it("treats chrome.runtime.lastError as a failure", async () => {
     mockRuntime({ response: { ok: true, data: [] }, lastError: { message: "port closed" } });
-    expect(await fetchPRBranches("owner", "repo")).toEqual([]);
+    expect(await fetchPRBranches("owner", "repo", [1])).toEqual([]);
   });
 
   it("rejects without messaging when the extension context is invalidated", async () => {
     const runtime = mockRuntime({ id: undefined });
-    expect(await fetchPRBranches("owner", "repo")).toEqual([]);
+    expect(await fetchPRBranches("owner", "repo", [1])).toEqual([]);
     expect(runtime.sendMessage).not.toHaveBeenCalled();
   });
 
