@@ -1,6 +1,6 @@
 import { isPRListPage, isCommitsListPage, getRepoInfo } from "./page-detect";
 import { collectCommitRows, MAIN_CONTENT_INNER_SELECTOR } from "./commit-dom";
-import { insertInfoRowItem } from "./info-row";
+import { INFO_ROW_CLASS, insertInfoRowItem } from "./info-row";
 
 export type SkeletonKind = "branch" | "prDiff" | "commitDiff";
 
@@ -14,6 +14,10 @@ const SKELETONS: Record<SkeletonKind, { skeleton: string; real: string }> = {
 };
 
 const SKELETON_BASE_CLASS = "bg-skeleton-pill";
+const reservedPRSkeletons = {
+  branch: new WeakSet<Element>(),
+  prDiff: new WeakSet<Element>(),
+};
 
 export interface SkeletonFlags {
   "feature-pr-branch-names"?: boolean;
@@ -53,16 +57,28 @@ function reservePRListSkeletons(flags: SkeletonFlags): void {
     .map((c) => `.${c}`)
     .join(", ");
 
-  for (const row of document.querySelectorAll("[id^='issue_']")) {
+  for (const row of document.querySelectorAll("[id^='issue_']:not([id$='_link'])")) {
     const present = new Set(
       [...row.querySelectorAll(probeSelector)].flatMap((el) => [...el.classList]),
     );
-    const needBranch = wantBranch && !present.has(branch.real) && !present.has(branch.skeleton);
-    const needDiff = wantDiff && !present.has(prDiff.real) && !present.has(prDiff.skeleton);
+    const needBranch =
+      wantBranch &&
+      !reservedPRSkeletons.branch.has(row) &&
+      !present.has(branch.real) &&
+      !present.has(branch.skeleton);
+    const needDiff =
+      wantDiff &&
+      !reservedPRSkeletons.prDiff.has(row) &&
+      !present.has(prDiff.real) &&
+      !present.has(prDiff.skeleton);
     if (!needBranch && !needDiff) continue;
 
-    if (needBranch) insertInfoRowItem(row, "branch", buildPill(branch.skeleton));
-    if (needDiff) insertInfoRowItem(row, "diff", buildPill(prDiff.skeleton));
+    if (needBranch && insertInfoRowItem(row, "branch", buildPill(branch.skeleton))) {
+      reservedPRSkeletons.branch.add(row);
+    }
+    if (needDiff && insertInfoRowItem(row, "diff", buildPill(prDiff.skeleton))) {
+      reservedPRSkeletons.prDiff.add(row);
+    }
   }
 }
 
@@ -82,5 +98,9 @@ function reserveCommitsListSkeletons(flags: SkeletonFlags): void {
 }
 
 export function clearSkeletons(kind: SkeletonKind): void {
-  document.querySelectorAll(`.${SKELETONS[kind].skeleton}`).forEach((el) => el.remove());
+  for (const skeleton of document.querySelectorAll(`.${SKELETONS[kind].skeleton}`)) {
+    const infoRow = skeleton.closest(`.${INFO_ROW_CLASS}`);
+    skeleton.remove();
+    if (infoRow?.childElementCount === 0) infoRow.remove();
+  }
 }

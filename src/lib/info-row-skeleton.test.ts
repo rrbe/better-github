@@ -40,6 +40,15 @@ describe("reserveInfoRowSkeletons", () => {
     clearSkeletons("branch");
     expect(document.querySelector(".bg-skeleton-pill--branch")).toBeNull();
     expect(document.querySelector(".bg-skeleton-pill--pr-diff")).not.toBeNull();
+
+    clearSkeletons("prDiff");
+    expect(document.querySelector(".better-github-info-row")).toBeNull();
+    reserveInfoRowSkeletons({
+      "feature-pr-branch-names": true,
+      "feature-pr-diff-stats": true,
+    });
+    expect(document.querySelector(".bg-skeleton-pill--branch")).toBeNull();
+    expect(document.querySelector(".bg-skeleton-pill--pr-diff")).toBeNull();
   });
 
   it("reserves commit diff skeletons on commits list pages", () => {
