@@ -76,6 +76,12 @@ export interface ForkInfo {
   stargazersCount: number;
 }
 
+export interface ReleaseAssetDownload {
+  tag: string;
+  name: string;
+  downloadCount: number;
+}
+
 /** Objective facts about a GitHub account, for the contributor profile card.
  * Pure-fact only — no scoring. See docs/contributor-profile-card.md. */
 export interface ContributorInfo {
@@ -114,6 +120,7 @@ export type ServiceWorkerRequest =
   | { type: "FETCH_STARGAZERS"; owner: string; repo: string }
   | { type: "FETCH_WATCHERS"; owner: string; repo: string }
   | { type: "FETCH_FORKS"; owner: string; repo: string }
+  | { type: "FETCH_RELEASE_DOWNLOADS"; owner: string; repo: string; tag: string }
   | { type: "FETCH_CONTRIBUTOR_INFO"; login: string; owner?: string; repo?: string };
 
 export type ServiceWorkerResponse<T> = { ok: true; data: T } | { ok: false; error: string };

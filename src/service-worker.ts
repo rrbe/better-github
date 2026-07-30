@@ -13,6 +13,7 @@ import type {
   WatcherInfo,
   SocialList,
   ForkInfo,
+  ReleaseAssetDownload,
   ContributorInfo,
 } from "./lib/messages";
 
@@ -672,6 +673,39 @@ async function fetchForks(owner: string, repo: string): Promise<ForkInfo[]> {
   });
 }
 
+interface RawRelease {
+  tag_name: string;
+  assets?: Array<{ name: string; download_count: number }>;
+}
+
+async function fetchReleaseDownloads(
+  owner: string,
+  repo: string,
+  tag: string,
+): Promise<ReleaseAssetDownload[]> {
+  const cacheKey = `cache:releasedl:${owner}/${repo}:tag:${tag}`;
+  return cachedFetch<ReleaseAssetDownload[]>(cacheKey, async () => {
+    const headers = restHeaders(await getToken(), "application/vnd.github+json");
+    const url = `https://api.github.com/repos/${owner}/${repo}/releases/tags/${encodeURIComponent(tag)}`;
+    const response = await fetch(url, { headers });
+
+    if (!response.ok) {
+      console.error(
+        `[Better GitHub] Release downloads API error: ${response.status} ${response.statusText}`,
+      );
+      return [];
+    }
+
+    const release: RawRelease = await response.json();
+    if (!release.tag_name || !Array.isArray(release.assets)) return [];
+    return release.assets.map((asset) => ({
+      tag: release.tag_name,
+      name: asset.name,
+      downloadCount: asset.download_count,
+    }));
+  });
+}
+
 // --- Contributor profile card ---
 //
 // Objective facts about an account, fetched lazily on hover (one user at a
@@ -854,6 +888,11 @@ async function handleMessage(
       return { ok: true, data: await fetchWatchers(request.owner, request.repo) };
     case "FETCH_FORKS":
       return { ok: true, data: await fetchForks(request.owner, request.repo) };
+    case "FETCH_RELEASE_DOWNLOADS":
+      return {
+        ok: true,
+        data: await fetchReleaseDownloads(request.owner, request.repo, request.tag),
+      };
     case "FETCH_CONTRIBUTOR_INFO":
       return {
         ok: true,

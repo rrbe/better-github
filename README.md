@@ -16,7 +16,7 @@ Better GitHub is a Chrome extension that enhances the GitHub experience. Inspire
 
 - **Contributor profile insights** — quickly tell whether a contributor is just an "AI-coding account that spams low-quality commits."
 - **Better PR and issue lists** — sort by most recently updated, with branch names, conflict warnings, review status, and diff stats all at a glance.
-- **Repository extras** — a dedicated Releases tab, hover previews for watcher/fork/star counts, plus commit tags and diff stats.
+- **Repository extras** — release asset download counts, a dedicated Releases tab, hover previews for watcher/fork/star counts, plus commit tags and diff stats.
 
 Every feature can be individually toggled on or off in the settings.
 
@@ -118,6 +118,8 @@ Please feel free to [file an issue](https://github.com/rrbe/better-github/issues
 
 ### Repository
 
+- **Release Asset Downloads** — Show the download count for every release asset, including zero-download assets that GitHub may leave blank. GitHub's native counts are still rolling out; disable this feature in the extension options if both counts appear.
+
 - **Releases Tab** — Add a Releases tab to the repository navigation bar for quick access.
 
    <details>
@@ -140,10 +142,6 @@ Please feel free to [file an issue](https://github.com/rrbe/better-github/issues
    </details>
 
 All features except Recent Commit Message Color can be individually toggled on/off in the extension options.
-
-## Removed Features
-
-- **Release Asset Downloads** — Removed after GitHub updated the Releases page to show release asset download counts natively. Discovered on 2026-07-01.
 
 ## Build from Source
 
