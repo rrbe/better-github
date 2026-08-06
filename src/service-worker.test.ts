@@ -382,9 +382,9 @@ describe("service worker", () => {
       jsonResponse({
         data: {
           repository: {
-            pr_1: { mergeable: "CONFLICTING" },
-            pr_2: { mergeable: "MERGEABLE" },
-            pr_3: { mergeable: "UNKNOWN" },
+            pr_1: { state: "OPEN", mergeable: "CONFLICTING" },
+            pr_2: { state: "OPEN", mergeable: "MERGEABLE" },
+            pr_3: { state: "OPEN", mergeable: "UNKNOWN" },
           },
         },
       }),
@@ -400,12 +400,13 @@ describe("service worker", () => {
     expect(response).toEqual({
       ok: true,
       data: [
-        { number: 1, mergeable: "CONFLICTING" },
-        { number: 2, mergeable: "MERGEABLE" },
-        { number: 3, mergeable: "UNKNOWN" },
+        { number: 1, state: "OPEN", mergeable: "CONFLICTING" },
+        { number: 2, state: "OPEN", mergeable: "MERGEABLE" },
+        { number: 3, state: "OPEN", mergeable: "UNKNOWN" },
       ],
     });
     const query = JSON.parse(vi.mocked(fetch).mock.calls[0][1]?.body as string).query as string;
+    expect(query).toContain("state");
     expect(query).toContain("mergeable");
     expect(query).not.toContain("mergeStateStatus");
   });

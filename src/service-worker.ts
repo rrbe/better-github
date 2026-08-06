@@ -273,14 +273,19 @@ async function fetchPRConflictStatuses(
     keys: [...prNumbers].sort((a, b) => a - b),
     aliasFor: (n) => `pr_${n}`,
     buildNodeQuery: (n) => `pullRequest(number: ${n}) {
+      state
       mergeable
     }`,
     parseNode: (n, pr) => {
+      const state = pr.state;
       const mergeable = pr.mergeable;
-      if (mergeable !== "CONFLICTING" && mergeable !== "MERGEABLE" && mergeable !== "UNKNOWN") {
+      if (
+        (state !== "OPEN" && state !== "CLOSED" && state !== "MERGED") ||
+        (mergeable !== "CONFLICTING" && mergeable !== "MERGEABLE" && mergeable !== "UNKNOWN")
+      ) {
         return null;
       }
-      return { number: n, mergeable };
+      return { number: n, state, mergeable };
     },
   });
 }
