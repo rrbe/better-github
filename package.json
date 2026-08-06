@@ -12,13 +12,13 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@types/chrome": "^0.1.38",
-    "@vitest/coverage-v8": "4.1.7",
+    "@types/chrome": "^0.2.5",
+    "@vitest/coverage-v8": "4.1.10",
     "esbuild": "^0.28.1",
-    "happy-dom": "^20.9.0",
-    "oxfmt": "^0.41.0",
-    "oxlint": "^1.56.0",
+    "happy-dom": "^20.11.1",
+    "oxfmt": "^0.62.0",
+    "oxlint": "^1.77.0",
     "typescript": "^5.9.3",
-    "vitest": "^4.1.7"
+    "vitest": "^4.1.10"
   }
 }
