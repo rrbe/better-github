@@ -5,6 +5,7 @@ export interface PRBranchInfo {
 
 export interface PRConflictStatus {
   number: number;
+  state: "OPEN" | "CLOSED" | "MERGED";
   mergeable: "CONFLICTING" | "MERGEABLE" | "UNKNOWN";
 }
 

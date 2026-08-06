@@ -48,8 +48,8 @@ describe("injectPRConflictIndicator", () => {
 
   it("checks only visible PRs and renders a conflict status without creating a label", async () => {
     vi.mocked(fetchPRConflictStatuses).mockResolvedValue([
-      { number: 7, mergeable: "CONFLICTING" },
-      { number: 8, mergeable: "MERGEABLE" },
+      { number: 7, state: "OPEN", mergeable: "CONFLICTING" },
+      { number: 8, state: "OPEN", mergeable: "MERGEABLE" },
     ]);
 
     injectPRConflictIndicator();
@@ -102,7 +102,7 @@ describe("injectPRConflictIndicator", () => {
     await vi.waitFor(() => expect(fetchPRConflictStatuses).toHaveBeenCalledTimes(1));
 
     injectPRConflictIndicator();
-    resolveStatuses([{ number: 7, mergeable: "CONFLICTING" }]);
+    resolveStatuses([{ number: 7, state: "OPEN", mergeable: "CONFLICTING" }]);
 
     await vi.waitFor(() =>
       expect(row7.querySelector(".better-github-conflict-indicator")).not.toBeNull(),
@@ -111,10 +111,10 @@ describe("injectPRConflictIndicator", () => {
 
   it("retries unknown and missing statuses on the next polling pass", async () => {
     vi.mocked(fetchPRConflictStatuses)
-      .mockResolvedValueOnce([{ number: 7, mergeable: "UNKNOWN" }])
+      .mockResolvedValueOnce([{ number: 7, state: "OPEN", mergeable: "UNKNOWN" }])
       .mockResolvedValueOnce([
-        { number: 7, mergeable: "CONFLICTING" },
-        { number: 8, mergeable: "MERGEABLE" },
+        { number: 7, state: "OPEN", mergeable: "CONFLICTING" },
+        { number: 8, state: "OPEN", mergeable: "MERGEABLE" },
       ]);
 
     injectPRConflictIndicator();
@@ -136,5 +136,24 @@ describe("injectPRConflictIndicator", () => {
     observerCallback(entries, {} as IntersectionObserver);
     await vi.waitFor(() => expect(fetchPRConflictStatuses).toHaveBeenCalledTimes(2));
     expect(row7.querySelector(".better-github-conflict-indicator")).not.toBeNull();
+  });
+
+  it("ignores merged stacked PR conflicts without retrying them", async () => {
+    vi.mocked(fetchPRConflictStatuses).mockResolvedValue([
+      { number: 7, state: "MERGED", mergeable: "CONFLICTING" },
+    ]);
+
+    injectPRConflictIndicator();
+
+    const row7 = document.getElementById("issue_7")!;
+    observerCallback(
+      [{ target: row7, isIntersecting: true }] as unknown as IntersectionObserverEntry[],
+      {} as IntersectionObserver,
+    );
+    await vi.waitFor(() => expect(fetchPRConflictStatuses).toHaveBeenCalledTimes(1));
+
+    injectPRConflictIndicator();
+    expect(observe.mock.calls.filter(([row]) => row === row7)).toHaveLength(1);
+    expect(row7.querySelector(".better-github-conflict-indicator")).toBeNull();
   });
 });
