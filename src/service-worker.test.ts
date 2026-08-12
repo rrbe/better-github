@@ -607,6 +607,105 @@ describe("service worker", () => {
     );
   });
 
+  it("fetches the release totalCount through GraphQL when a token is available", async () => {
+    const state = await loadWorker("token");
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse({ data: { repository: { releases: { totalCount: 22 } } } }),
+    );
+
+    const response = await sendMessage(state.messageListeners[0], {
+      type: "FETCH_RELEASE_COUNT",
+      owner: "owner",
+      repo: "repo",
+    });
+
+    expect(response).toEqual({ ok: true, data: 22 });
+    const [url, init] = vi.mocked(fetch).mock.calls[0];
+    expect(url).toBe("https://api.github.com/graphql");
+    expect(init).toMatchObject({ method: "POST" });
+    const body = JSON.parse(String(init?.body));
+    expect(body.variables).toEqual({ owner: "owner", repo: "repo" });
+    expect(body.query).toContain("releases(first: 1)");
+    expect(body.query).toContain("totalCount");
+  });
+
+  it("derives anonymous release counts from REST pagination", async () => {
+    const state = await loadWorker();
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(JSON.stringify([{ id: 1 }]), {
+        headers: {
+          Link: '<https://api.github.com/repositories/1/releases?per_page=1&page=2>; rel="next", <https://api.github.com/repositories/1/releases?per_page=1&page=22>; rel="last"',
+        },
+      }),
+    );
+
+    const response = await sendMessage(state.messageListeners[0], {
+      type: "FETCH_RELEASE_COUNT",
+      owner: "owner",
+      repo: "repo",
+    });
+
+    expect(response).toEqual({ ok: true, data: 22 });
+    expect(vi.mocked(fetch).mock.calls[0][0]).toBe(
+      "https://api.github.com/repos/owner/repo/releases?per_page=1&page=1",
+    );
+  });
+
+  it.each([
+    ["a non-OK response", new Response(null, { status: 403 })],
+    ["GraphQL errors", jsonResponse({ errors: [{ type: "RATE_LIMITED" }] })],
+  ])("falls back to REST release counts after %s", async (_failure, graphqlResponse) => {
+    const state = await loadWorker("token");
+    vi.mocked(fetch)
+      .mockResolvedValueOnce(graphqlResponse)
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify([{ id: 1 }]), {
+          headers: {
+            Link: '<https://api.github.com/repositories/1/releases?per_page=1&page=7>; rel="last"',
+          },
+        }),
+      );
+
+    const response = await sendMessage(state.messageListeners[0], {
+      type: "FETCH_RELEASE_COUNT",
+      owner: "owner",
+      repo: "repo",
+    });
+
+    expect(response).toEqual({ ok: true, data: 7 });
+    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(vi.mocked(fetch).mock.calls[1][0]).toBe(
+      "https://api.github.com/repos/owner/repo/releases?per_page=1&page=1",
+    );
+  });
+
+  it("caches a zero release count and silently returns null on API failure", async () => {
+    const state = await loadWorker();
+    vi.mocked(fetch).mockResolvedValue(jsonResponse([]));
+    const request: ServiceWorkerRequest = {
+      type: "FETCH_RELEASE_COUNT",
+      owner: "owner",
+      repo: "repo",
+    };
+
+    expect(await sendMessage(state.messageListeners[0], request)).toEqual({ ok: true, data: 0 });
+    expect(await sendMessage(state.messageListeners[0], request)).toEqual({ ok: true, data: 0 });
+    expect(fetch).toHaveBeenCalledTimes(1);
+
+    vi.mocked(fetch).mockResolvedValue(new Response(null, { status: 500 }));
+    const failed = await sendMessage(state.messageListeners[0], {
+      ...request,
+      repo: "failed",
+    });
+    expect(failed).toEqual({ ok: true, data: null });
+    expect(await sendMessage(state.messageListeners[0], { ...request, repo: "failed" })).toEqual({
+      ok: true,
+      data: null,
+    });
+    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(console.error).not.toHaveBeenCalled();
+  });
+
   it("reads tag commit OIDs from the GraphQL refs response", async () => {
     const state = await loadWorker("token");
     vi.mocked(fetch).mockResolvedValue(

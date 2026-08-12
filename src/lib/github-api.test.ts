@@ -7,6 +7,7 @@ import {
   fetchPRConflictStatuses,
   fetchPRDiffStats,
   fetchPRReviewStatuses,
+  fetchReleaseCount,
   fetchRepoTags,
   fetchStargazers,
   fetchWatchers,
@@ -76,6 +77,20 @@ describe("github-api bridge", () => {
     const result = await approvePR("owner", "repo", 1, "lgtm");
 
     expect(result).toEqual({ success: false, error: "Not authorized" });
+  });
+
+  it("forwards release count requests and silently returns null on failure", async () => {
+    const runtime = mockRuntime({ response: { ok: true, data: 22 } });
+
+    expect(await fetchReleaseCount("owner", "repo")).toBe(22);
+    expect(runtime.sendMessage).toHaveBeenCalledWith(
+      { type: "FETCH_RELEASE_COUNT", owner: "owner", repo: "repo" },
+      expect.any(Function),
+    );
+
+    mockRuntime({ response: { ok: false, error: "down" } });
+    expect(await fetchReleaseCount("owner", "repo")).toBeNull();
+    expect(console.error).not.toHaveBeenCalled();
   });
 
   // Every wrapper forwards a distinct request type and resolves the worker's

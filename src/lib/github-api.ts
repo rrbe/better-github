@@ -268,6 +268,18 @@ export async function fetchForks(owner: string, repo: string): Promise<ForkInfo[
   }
 }
 
+export async function fetchReleaseCount(owner: string, repo: string): Promise<number | null> {
+  try {
+    return await sendMessage<number | null>({
+      type: "FETCH_RELEASE_COUNT",
+      owner,
+      repo,
+    });
+  } catch {
+    return null;
+  }
+}
+
 export async function fetchReleaseDownloads(
   owner: string,
   repo: string,

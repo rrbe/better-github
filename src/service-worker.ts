@@ -18,6 +18,7 @@ import type {
 } from "./lib/messages";
 
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const CACHE_MISS = Symbol("cache-miss");
 
 // In-memory map of in-flight fetches to coalesce concurrent requests for the same key
 const inflight = new Map<string, Promise<unknown>>();
@@ -27,13 +28,13 @@ interface CacheEntry<T> {
   timestamp: number;
 }
 
-async function getCached<T>(key: string): Promise<T | null> {
+async function getCached<T>(key: string): Promise<T | typeof CACHE_MISS> {
   const result = await chrome.storage.session.get(key);
   const entry = result[key] as CacheEntry<T> | undefined;
-  if (!entry) return null;
+  if (!entry) return CACHE_MISS;
   if (Date.now() - entry.timestamp > CACHE_TTL) {
     chrome.storage.session.remove(key);
-    return null;
+    return CACHE_MISS;
   }
   return entry.data;
 }
@@ -44,7 +45,7 @@ async function setCache<T>(key: string, data: T): Promise<void> {
 
 async function cachedFetch<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
   const cached = await getCached<T>(key);
-  if (cached) return cached;
+  if (cached !== CACHE_MISS) return cached;
 
   const existing = inflight.get(key);
   if (existing) return existing as Promise<T>;
@@ -683,6 +684,71 @@ interface RawRelease {
   assets?: Array<{ name: string; download_count: number }>;
 }
 
+interface ReleaseCountGraphQLResponse {
+  data?: {
+    repository?: {
+      releases?: { totalCount?: number };
+    } | null;
+  };
+  errors?: unknown[];
+}
+
+function parseLastPage(linkHeader: string): number | null {
+  for (const part of linkHeader.split(",")) {
+    if (!part.includes('rel="last"')) continue;
+    const url = part.match(/<([^>]+)>/)?.[1];
+    if (!url) return null;
+    const page = Number(new URL(url).searchParams.get("page"));
+    return Number.isInteger(page) && page > 0 ? page : null;
+  }
+  return null;
+}
+
+async function fetchReleaseCount(owner: string, repo: string): Promise<number | null> {
+  const cacheKey = `cache:releasecount:${owner}/${repo}`;
+  return cachedFetch<number | null>(cacheKey, async () => {
+    const token = await getToken();
+
+    if (token) {
+      const query = `query($owner: String!, $repo: String!) {
+  repository(owner: $owner, name: $repo) {
+    releases(first: 1) {
+      totalCount
+    }
+  }
+}`;
+      const response = await fetch("https://api.github.com/graphql", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ query, variables: { owner, repo } }),
+      });
+      if (response.ok) {
+        const json = (await response.json()) as ReleaseCountGraphQLResponse;
+        if (!json.errors) {
+          const count = json.data?.repository?.releases?.totalCount;
+          return typeof count === "number" && Number.isInteger(count) && count >= 0 ? count : null;
+        }
+      }
+    }
+
+    const response = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/releases?per_page=1&page=1`,
+      { headers: restHeaders(token, "application/vnd.github+json") },
+    );
+    if (!response.ok) return null;
+
+    const releases = await response.json();
+    if (!Array.isArray(releases)) return null;
+
+    const linkHeader = response.headers.get("Link");
+    if (!linkHeader) return releases.length;
+    return parseLastPage(linkHeader);
+  });
+}
+
 async function fetchReleaseDownloads(
   owner: string,
   repo: string,
@@ -893,6 +959,8 @@ async function handleMessage(
       return { ok: true, data: await fetchWatchers(request.owner, request.repo) };
     case "FETCH_FORKS":
       return { ok: true, data: await fetchForks(request.owner, request.repo) };
+    case "FETCH_RELEASE_COUNT":
+      return { ok: true, data: await fetchReleaseCount(request.owner, request.repo) };
     case "FETCH_RELEASE_DOWNLOADS":
       return {
         ok: true,

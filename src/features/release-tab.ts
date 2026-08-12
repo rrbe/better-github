@@ -1,5 +1,6 @@
 import { isRepoPage, getRepoInfo, isReleasesPage } from "../lib/page-detect";
 import { t } from "../lib/i18n";
+import { fetchReleaseCount } from "../lib/github-api";
 
 const TAB_CLASS = "better-github-releases-tab";
 
@@ -25,6 +26,10 @@ export function injectReleasesTab(): void {
     document.querySelector<HTMLElement>("nav[aria-label='Repository'] ul");
 
   if (!nav) return;
+
+  const nativeCounterTemplate = nav
+    .querySelector<HTMLElement>('[data-component="counter"]')
+    ?.cloneNode(true) as HTMLElement | undefined;
 
   // Check if Releases tab already exists natively
   const links = nav.querySelectorAll("a");
@@ -59,7 +64,7 @@ export function injectReleasesTab(): void {
 
   // Remove counter if cloned
   releasesTab
-    .querySelectorAll(".Counter, [data-view-component].Counter")
+    .querySelectorAll('[data-component="counter"], .Counter, [data-view-component].Counter')
     .forEach((el) => el.remove());
 
   // Replace SVG icon with the tag icon
@@ -92,6 +97,7 @@ export function injectReleasesTab(): void {
   }
 
   nav.appendChild(releasesTab);
+  void appendReleaseCount(link, nativeCounterTemplate, info.owner, info.repo);
 
   // GitHub's Catalyst/Turbo components may re-apply aria-current after injection.
   // Watch the link and strip any selected state that shouldn't be there.
@@ -109,6 +115,50 @@ export function injectReleasesTab(): void {
     attributes: true,
     attributeFilter: ["aria-current", "class"],
   });
+}
+
+async function appendReleaseCount(
+  link: HTMLAnchorElement,
+  nativeCounterTemplate: HTMLElement | undefined,
+  owner: string,
+  repo: string,
+) {
+  const count = await fetchReleaseCount(owner, repo);
+  if (count === null || count === 0 || !link.isConnected) return;
+
+  const currentRepo = getRepoInfo();
+  if (currentRepo?.owner !== owner || currentRepo.repo !== repo) return;
+
+  link.appendChild(createCounter(nativeCounterTemplate, count));
+}
+
+function createCounter(nativeCounterTemplate: HTMLElement | undefined, count: number): HTMLElement {
+  if (nativeCounterTemplate) {
+    const counter = nativeCounterTemplate.cloneNode(true) as HTMLElement;
+    const label = counter.querySelector<HTMLElement>('[data-component="CounterLabel"]');
+    if (label) label.textContent = String(count);
+
+    const hiddenLabel = counter.querySelector<HTMLElement>('[class*="VisuallyHidden"]');
+    if (hiddenLabel) hiddenLabel.textContent = `\u00a0(${count})`;
+    return counter;
+  }
+
+  const counter = document.createElement("span");
+  counter.dataset.component = "counter";
+
+  const label = document.createElement("span");
+  label.className = "Counter";
+  label.dataset.component = "CounterLabel";
+  label.dataset.variant = "secondary";
+  label.ariaHidden = "true";
+  label.textContent = String(count);
+
+  const hiddenLabel = document.createElement("span");
+  hiddenLabel.className = "sr-only";
+  hiddenLabel.textContent = `\u00a0(${count})`;
+
+  counter.append(label, hiddenLabel);
+  return counter;
 }
 
 function findReferenceTab(nav: HTMLElement): HTMLElement | null {
