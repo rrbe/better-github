@@ -61,7 +61,7 @@ function reservePRListSkeletons(flags: SkeletonFlags): void {
   const info = getRepoInfo();
   if (!info) return;
 
-  for (const row of collectPRRows(info.owner, info.repo, { includeCompact: wantBranch }).values()) {
+  for (const row of collectPRRows(info.owner, info.repo).values()) {
     const present = new Set(
       [...row.querySelectorAll(probeSelector)].flatMap((el) => [...el.classList]),
     );

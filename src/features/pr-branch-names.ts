@@ -48,9 +48,7 @@ export async function injectPRBranchNames(): Promise<void> {
   if (!info) return;
 
   const prRows = new Map(
-    [...collectPRRows(info.owner, info.repo, { includeCompact: true })].filter(
-      ([, row]) => !row.querySelector(`.${BADGE_CLASS}`),
-    ),
+    [...collectPRRows(info.owner, info.repo)].filter(([, row]) => !row.querySelector(`.${BADGE_CLASS}`)),
   );
   const prNumbers = [...prRows.keys()];
   if (prNumbers.length === 0) return;
@@ -74,7 +72,7 @@ export async function injectPRBranchNames(): Promise<void> {
       badge.className = BADGE_CLASS;
       badge.textContent = branchName;
       badge.dataset.branch = branchName;
-      badge.title = `${branchName}\n${t("branchCopyTitle")}`;
+      badge.title = t("branchCopyTitle");
 
       insertInfoRowItem(row, "branch", badge);
     }

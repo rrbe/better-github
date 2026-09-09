@@ -15,6 +15,9 @@ export type InfoRowItemKind = "branch" | "diff" | "labels" | "conflict" | "revie
 const INFO_ROW_ITEM_ORDER: InfoRowItemKind[] = ["branch", "diff", "labels", "conflict", "review"];
 
 export function getOrCreateInfoRow(row: Element): HTMLElement | null {
+  // Also guard async results started before the user changed density.
+  if (isCompactPRRow(row)) return null;
+
   const existing = row.querySelector<HTMLElement>(`.${INFO_ROW_CLASS}`);
   if (existing) return existing;
 
@@ -50,9 +53,6 @@ export function getOrCreateInfoRow(row: Element): HTMLElement | null {
 }
 
 export function insertInfoRowItem(row: Element, kind: InfoRowItemKind, item: HTMLElement): boolean {
-  // Also guard async results started before the user changed density.
-  if (kind !== "branch" && isCompactPRRow(row)) return false;
-
   const infoRow = getOrCreateInfoRow(row);
   if (!infoRow) return false;
 

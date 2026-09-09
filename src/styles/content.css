@@ -7,32 +7,9 @@
   margin-top: 4px;
 }
 
-/* Compact rows show only the branch, without adding a metadata line. */
+/* Follow density changes immediately, retaining badges for the default view. */
 react-app[app-name="pull-requests"] [data-density="compact"] .better-github-info-row {
   display: none;
-}
-
-react-app[app-name="pull-requests"] [data-density="compact"]
-  .better-github-info-row:has(> [data-bg-info-row-item="branch"]) {
-  display: flex;
-  flex-wrap: nowrap;
-  align-self: center;
-  min-width: 0;
-  max-width: 160px;
-  margin-top: 0;
-  gap: 0;
-}
-
-react-app[app-name="pull-requests"] [data-density="compact"]
-  .better-github-info-row > :not([data-bg-info-row-item="branch"]) {
-  display: none;
-}
-
-react-app[app-name="pull-requests"] [data-density="compact"]
-  .better-github-info-row > [data-bg-info-row-item="branch"] {
-  box-sizing: border-box;
-  min-width: 0;
-  max-width: 160px;
 }
 
 /* PR Branch Name Badge */

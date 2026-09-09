@@ -28,7 +28,6 @@ describe("collectPRRows", () => {
     list.setAttribute("data-density", "compact");
     expect(isCompactPRRow(row)).toBe(true);
     expect(collectPRRows("owner", "repo").size).toBe(0);
-    expect([...collectPRRows("owner", "repo", { includeCompact: true }).keys()]).toEqual([7]);
     list.setAttribute("data-density", "default");
     expect([...collectPRRows("owner", "repo").keys()]).toEqual([7]);
   });
