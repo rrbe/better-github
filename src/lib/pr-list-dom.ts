@@ -4,6 +4,10 @@ export const PR_DASHBOARD_SELECTOR = 'react-app[app-name="pull-requests"]';
 const TITLE_SELECTOR = 'a[data-testid="listitem-title-link"]';
 export const TRAILING_LABELS_SELECTOR = '[class*="trailingBadgesContainer"]';
 
+export function isCompactPRRow(row: Element): boolean {
+  return row.closest(`${PR_DASHBOARD_SELECTOR} [data-density="compact"]`) !== null;
+}
+
 export function getPRRowNumber(row: Element): number | null {
   const classic = row.id.match(/^issue_(\d+)$/);
   if (classic) return Number(classic[1]);
@@ -25,7 +29,7 @@ export function collectPRRows(owner: string, repo: string): Map<number, Element>
     `${PR_DASHBOARD_SELECTOR} ${TITLE_SELECTOR}`,
   )) {
     const row = title.closest("li");
-    if (!row || title.origin !== location.origin) continue;
+    if (!row || isCompactPRRow(row) || title.origin !== location.origin) continue;
     const number = getPRRowNumber(row);
     if (number !== null && title.pathname.toLowerCase() === `${pullPath}${number}`) {
       rows.set(number, row);

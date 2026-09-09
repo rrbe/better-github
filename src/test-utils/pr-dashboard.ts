@@ -17,5 +17,5 @@ export function dashboardRow(number: number, label = "Feature"): string {
 }
 
 export function dashboard(...rows: string[]): string {
-  return `<react-app app-name="pull-requests"><ul role="list" data-listview-component="items-list">${rows.join("")}</ul></react-app>`;
+  return `<react-app app-name="pull-requests"><ul role="list" data-listview-component="items-list" data-density="default">${rows.join("")}</ul></react-app>`;
 }

@@ -1,4 +1,4 @@
-import { TRAILING_LABELS_SELECTOR } from "../lib/pr-list-dom";
+import { isCompactPRRow, TRAILING_LABELS_SELECTOR } from "../lib/pr-list-dom";
 import { isIssueOrPRListPage } from "../lib/page-detect";
 import { insertInfoRowItem } from "../lib/info-row";
 
@@ -8,7 +8,7 @@ const HIDDEN_ORIGINAL_CLASS = "better-github-labels-hidden";
 /** Process a trailing badges container (new React DOM). */
 function processTrailingBadges(container: HTMLElement): void {
 	const row = container.closest<HTMLElement>("li");
-	if (!row || row.querySelector(`.${LABEL_WRAPPER_CLASS}`)) return;
+	if (!row || isCompactPRRow(row) || row.querySelector(`.${LABEL_WRAPPER_CLASS}`)) return;
 
 	const labels = container.querySelectorAll<HTMLElement>("a, button");
 	if (labels.length === 0) return;
