@@ -17,7 +17,11 @@ export function getPRRowNumber(row: Element): number | null {
   return match ? Number(match[1]) : null;
 }
 
-export function collectPRRows(owner: string, repo: string): Map<number, Element> {
+export function collectPRRows(
+  owner: string,
+  repo: string,
+  { includeCompact = false }: { includeCompact?: boolean } = {},
+): Map<number, Element> {
   const rows = new Map<number, Element>();
   for (const row of document.querySelectorAll('[id^="issue_"]:not([id$="_link"])')) {
     const number = getPRRowNumber(row);
@@ -29,7 +33,8 @@ export function collectPRRows(owner: string, repo: string): Map<number, Element>
     `${PR_DASHBOARD_SELECTOR} ${TITLE_SELECTOR}`,
   )) {
     const row = title.closest("li");
-    if (!row || isCompactPRRow(row) || title.origin !== location.origin) continue;
+    if (!row || (!includeCompact && isCompactPRRow(row)) || title.origin !== location.origin)
+      continue;
     const number = getPRRowNumber(row);
     if (number !== null && title.pathname.toLowerCase() === `${pullPath}${number}`) {
       rows.set(number, row);

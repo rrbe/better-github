@@ -65,7 +65,7 @@ describe("repository PR dashboard preview", () => {
     expect(fetchPRBranches).toHaveBeenCalledWith("owner", "repo", [7], "open", 1);
   });
 
-  it("does not reserve, fetch or relocate labels when loaded in compact density", async () => {
+  it("loads only the branch when opened in compact density", async () => {
     document.querySelector("ul")!.setAttribute("data-density", "compact");
     const observe = vi.fn();
     vi.stubGlobal(
@@ -75,11 +75,15 @@ describe("repository PR dashboard preview", () => {
         disconnect = vi.fn();
       },
     );
+    reserveInfoRowSkeletons({ "feature-pr-branch-names": true, "feature-pr-diff-stats": true });
+    expect(document.querySelectorAll(".bg-skeleton-pill--branch")).toHaveLength(1);
+    expect(document.querySelector(".bg-skeleton-pill--pr-diff")).toBeNull();
     await injectBadges();
     injectPRConflictIndicator();
-    expect(document.querySelector(".better-github-info-row")).toBeNull();
+    expect(document.querySelectorAll(".better-github-info-row > *")).toHaveLength(1);
+    expect(document.querySelector(".better-github-branch-badge")?.textContent).toBe("feature/7");
     expect(document.querySelector(".better-github-labels-hidden")).toBeNull();
-    expect(fetchPRBranches).not.toHaveBeenCalled();
+    expect(fetchPRBranches).toHaveBeenCalledTimes(1);
     expect(fetchPRDiffStats).not.toHaveBeenCalled();
     expect(fetchPRReviewStatuses).not.toHaveBeenCalled();
     expect(fetchPRConflictStatuses).not.toHaveBeenCalled();
@@ -90,7 +94,7 @@ describe("repository PR dashboard preview", () => {
     expect(document.querySelectorAll(".better-github-info-row > *")).toHaveLength(4);
   });
 
-  it("ignores in-flight badge results after switching to compact and restores on return", async () => {
+  it("keeps the in-flight branch result in compact while deferring other badges", async () => {
     let resolveBranches!: (value: Awaited<ReturnType<typeof fetchPRBranches>>) => void;
     let resolveDiff!: (value: Awaited<ReturnType<typeof fetchPRDiffStats>>) => void;
     let resolveReview!: (value: Awaited<ReturnType<typeof fetchPRReviewStatuses>>) => void;
@@ -115,14 +119,39 @@ describe("repository PR dashboard preview", () => {
     resolveDiff([{ number: 7, additions: 12, deletions: 3, changedFiles: 2 }]);
     resolveReview([{ number: 7, totalThreads: 3, resolvedThreads: 1 }]);
     await pending;
+    expect(document.querySelector(".better-github-branch-badge")?.textContent).toBe("feature/7");
     expect(
       document.querySelector(
-        ".bg-skeleton-pill, .better-github-branch-badge, .better-github-diff-stats, .better-github-review-status",
+        ".bg-skeleton-pill, .better-github-diff-stats, .better-github-review-status",
       ),
     ).toBeNull();
     document.querySelector("ul")!.setAttribute("data-density", "default");
     await injectBadges();
     expect(document.querySelectorAll(".better-github-info-row > *")).toHaveLength(4);
+  });
+
+  it("copies the full compact branch and exposes its full name in the tooltip", async () => {
+    document.querySelector("ul")!.setAttribute("data-density", "compact");
+    const branch = "feature/very-long-branch-name-for-compact-dashboard";
+    vi.mocked(fetchPRBranches).mockResolvedValueOnce([{ number: 7, headRef: branch }]);
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal("navigator", { clipboard: { writeText } });
+    await injectPRBranchNames();
+    const badge = document.querySelector<HTMLElement>(".better-github-branch-badge")!;
+    expect(badge.title).toContain(branch);
+    badge.click();
+    expect(writeText).toHaveBeenCalledWith(branch);
+  });
+
+  it("keeps compact empty when the branch feature is disabled", async () => {
+    document.querySelector("ul")!.setAttribute("data-density", "compact");
+    reserveInfoRowSkeletons({ "feature-pr-branch-names": false, "feature-pr-diff-stats": true });
+    injectPRLabelPosition();
+    await Promise.all([injectPRDiffStats(), injectPRReviewStatus()]);
+    expect(document.querySelector(".better-github-info-row")).toBeNull();
+    expect(fetchPRBranches).not.toHaveBeenCalled();
+    expect(fetchPRDiffStats).not.toHaveBeenCalled();
+    expect(fetchPRReviewStatuses).not.toHaveBeenCalled();
   });
 
   it("reuses existing badges when returning to default density without refetching", async () => {
