@@ -21,6 +21,18 @@ describe("collectPRRows", () => {
     expect([...rows.values()].every((row) => row.tagName === "LI")).toBe(true);
   });
 
+  it.each([
+    ["OWNER", "repo", "owner/repo"],
+    ["owner", "REPO", "owner/repo"],
+    ["OWNER", "REPO", "owner/repo"],
+    ["owner", "repo", "Owner/Repo"],
+  ])("matches %s/%s against canonical title links for %s", (owner, repo, linkedRepo) => {
+    setUrl(`https://github.com/${owner}/${repo}/pulls`);
+    document.body.innerHTML = dashboard(dashboardRow(7).replaceAll("owner/repo", linkedRepo));
+
+    expect([...collectPRRows(owner, repo).keys()]).toEqual([7]);
+  });
+
   it("ignores other repos, external links, issue links and links outside the dashboard", () => {
     document.body.innerHTML =
       dashboard(

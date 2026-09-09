@@ -20,13 +20,14 @@ export function collectPRRows(owner: string, repo: string): Map<number, Element>
     if (number !== null) rows.set(number, row);
   }
 
+  const pullPath = `/${owner}/${repo}/pull/`.toLowerCase();
   for (const title of document.querySelectorAll<HTMLAnchorElement>(
     `${PR_DASHBOARD_SELECTOR} ${TITLE_SELECTOR}`,
   )) {
     const row = title.closest("li");
     if (!row || title.origin !== location.origin) continue;
     const number = getPRRowNumber(row);
-    if (number !== null && title.pathname === `/${owner}/${repo}/pull/${number}`) {
+    if (number !== null && title.pathname.toLowerCase() === `${pullPath}${number}`) {
       rows.set(number, row);
     }
   }
