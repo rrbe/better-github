@@ -65,6 +65,87 @@ describe("repository PR dashboard preview", () => {
     expect(fetchPRBranches).toHaveBeenCalledWith("owner", "repo", [7], "open", 1);
   });
 
+  it("does not reserve, fetch or relocate labels when loaded in compact density", async () => {
+    document.querySelector("ul")!.setAttribute("data-density", "compact");
+    const observe = vi.fn();
+    vi.stubGlobal(
+      "IntersectionObserver",
+      class {
+        observe = observe;
+        disconnect = vi.fn();
+      },
+    );
+    await injectBadges();
+    injectPRConflictIndicator();
+    expect(document.querySelector(".better-github-info-row")).toBeNull();
+    expect(document.querySelector(".better-github-labels-hidden")).toBeNull();
+    expect(fetchPRBranches).not.toHaveBeenCalled();
+    expect(fetchPRDiffStats).not.toHaveBeenCalled();
+    expect(fetchPRReviewStatuses).not.toHaveBeenCalled();
+    expect(fetchPRConflictStatuses).not.toHaveBeenCalled();
+    expect(observe).not.toHaveBeenCalled();
+
+    document.querySelector("ul")!.setAttribute("data-density", "default");
+    await injectBadges();
+    expect(document.querySelectorAll(".better-github-info-row > *")).toHaveLength(4);
+  });
+
+  it("ignores in-flight badge results after switching to compact and restores on return", async () => {
+    let resolveBranches!: (value: Awaited<ReturnType<typeof fetchPRBranches>>) => void;
+    let resolveDiff!: (value: Awaited<ReturnType<typeof fetchPRDiffStats>>) => void;
+    let resolveReview!: (value: Awaited<ReturnType<typeof fetchPRReviewStatuses>>) => void;
+    vi.mocked(fetchPRBranches).mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveBranches = resolve;
+      }),
+    );
+    vi.mocked(fetchPRDiffStats).mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveDiff = resolve;
+      }),
+    );
+    vi.mocked(fetchPRReviewStatuses).mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveReview = resolve;
+      }),
+    );
+    const pending = injectBadges();
+    document.querySelector("ul")!.setAttribute("data-density", "compact");
+    resolveBranches([{ number: 7, headRef: "feature/7" }]);
+    resolveDiff([{ number: 7, additions: 12, deletions: 3, changedFiles: 2 }]);
+    resolveReview([{ number: 7, totalThreads: 3, resolvedThreads: 1 }]);
+    await pending;
+    expect(
+      document.querySelector(
+        ".bg-skeleton-pill, .better-github-branch-badge, .better-github-diff-stats, .better-github-review-status",
+      ),
+    ).toBeNull();
+    document.querySelector("ul")!.setAttribute("data-density", "default");
+    await injectBadges();
+    expect(document.querySelectorAll(".better-github-info-row > *")).toHaveLength(4);
+  });
+
+  it("reuses existing badges when returning to default density without refetching", async () => {
+    await injectBadges();
+    const info = document.querySelector(".better-github-info-row")!;
+    const original = document.querySelector<HTMLButtonElement>(
+      "[class*='trailingBadgesContainer'] button",
+    )!;
+    const filter = vi.fn();
+    original.addEventListener("click", filter);
+    document.querySelector("ul")!.setAttribute("data-density", "compact");
+    await injectBadges();
+    original.click();
+    expect(filter).toHaveBeenCalledTimes(1);
+    document.querySelector("ul")!.setAttribute("data-density", "default");
+    await injectBadges();
+    expect(document.querySelector(".better-github-info-row")).toBe(info);
+    expect(fetchPRBranches).toHaveBeenCalledTimes(1);
+    expect(fetchPRDiffStats).toHaveBeenCalledTimes(1);
+    expect(fetchPRReviewStatuses).toHaveBeenCalledTimes(1);
+    expect(document.querySelectorAll(".better-github-info-row")).toHaveLength(1);
+  });
+
   it("enhances added and replaced React rows while keeping existing rows idempotent", async () => {
     await injectBadges();
     document.querySelector("ul")!.insertAdjacentHTML("beforeend", dashboardRow(8));
@@ -148,5 +229,54 @@ describe("repository PR dashboard preview", () => {
     );
     expect(fetchPRConflictStatuses).toHaveBeenCalledWith("owner", "repo", [7]);
     expect(document.querySelectorAll(".better-github-conflict-indicator")).toHaveLength(1);
+  });
+
+  it("pauses observed conflict checks in compact and recovers pending results on return", async () => {
+    let callback!: IntersectionObserverCallback;
+    vi.stubGlobal(
+      "IntersectionObserver",
+      class {
+        constructor(cb: IntersectionObserverCallback) {
+          callback = cb;
+        }
+        observe = vi.fn();
+        unobserve = vi.fn();
+        disconnect = vi.fn();
+      },
+    );
+    let resolve!: (value: Awaited<ReturnType<typeof fetchPRConflictStatuses>>) => void;
+    vi.mocked(fetchPRConflictStatuses).mockReturnValueOnce(
+      new Promise((r) => {
+        resolve = r;
+      }),
+    );
+    const list = document.querySelector("ul")!;
+    const row: Element = document.querySelector("li")!;
+    const visible = () =>
+      callback(
+        [{ target: row, isIntersecting: true }] as IntersectionObserverEntry[],
+        {} as IntersectionObserver,
+      );
+    injectPRConflictIndicator();
+    list.setAttribute("data-density", "compact");
+    visible();
+    expect(fetchPRConflictStatuses).not.toHaveBeenCalled();
+    list.setAttribute("data-density", "default");
+    visible();
+    expect(fetchPRConflictStatuses).toHaveBeenCalledTimes(1);
+    list.setAttribute("data-density", "compact");
+    resolve([{ number: 7, state: "OPEN", mergeable: "CONFLICTING" }]);
+    await Promise.resolve();
+    expect(row.querySelector(".better-github-conflict-indicator")).toBeNull();
+    vi.mocked(fetchPRConflictStatuses).mockResolvedValue([
+      { number: 7, state: "OPEN", mergeable: "CONFLICTING" },
+    ]);
+    list.setAttribute("data-density", "default");
+    injectPRConflictIndicator();
+    visible();
+    await vi.waitFor(() =>
+      expect(row.querySelector(".better-github-conflict-indicator")).not.toBeNull(),
+    );
+    expect(fetchPRConflictStatuses).toHaveBeenCalledTimes(2);
   });
 });

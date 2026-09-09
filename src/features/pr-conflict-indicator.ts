@@ -1,4 +1,9 @@
-import { collectPRRows, getPRRowNumber, TRAILING_LABELS_SELECTOR } from "../lib/pr-list-dom";
+import {
+  collectPRRows,
+  getPRRowNumber,
+  isCompactPRRow,
+  TRAILING_LABELS_SELECTOR,
+} from "../lib/pr-list-dom";
 import { isPRListPage, getRepoInfo } from "../lib/page-detect";
 import { fetchPRConflictStatuses } from "../lib/github-api";
 import { insertInfoRowItem } from "../lib/info-row";
@@ -37,6 +42,10 @@ async function checkRows(
 
   const statusByNumber = new Map(statuses.map((status) => [status.number, status]));
   for (const [number, row] of rowByNumber) {
+    if (isCompactPRRow(row)) {
+      checkedRows.delete(row);
+      continue;
+    }
     const status = statusByNumber.get(number);
     if (!status || (status.state === "OPEN" && status.mergeable === "UNKNOWN")) {
       checkedRows.delete(row);
@@ -81,7 +90,8 @@ export function injectPRConflictIndicator(): void {
     const currentObserver = new IntersectionObserver((entries) => {
       const visibleRows: Element[] = [];
       for (const entry of entries) {
-        if (!entry.isIntersecting || checkedRows.has(entry.target)) continue;
+        if (!entry.isIntersecting || checkedRows.has(entry.target) || isCompactPRRow(entry.target))
+          continue;
         checkedRows.add(entry.target);
         currentObserver.unobserve(entry.target);
         visibleRows.push(entry.target);

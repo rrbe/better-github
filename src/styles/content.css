@@ -7,6 +7,11 @@
   margin-top: 4px;
 }
 
+/* Follow density changes immediately, retaining badges for the default view. */
+react-app[app-name="pull-requests"] [data-density="compact"] .better-github-info-row {
+  display: none;
+}
+
 /* PR Branch Name Badge */
 .better-github-branch-badge {
   display: inline-block;
@@ -410,7 +415,7 @@ a.better-github-review-popover-item:hover {
   gap: 6px;
 }
 
-.better-github-labels-hidden {
+.better-github-labels-hidden:not(react-app[app-name="pull-requests"] [data-density="compact"] *) {
   display: none !important;
 }
 

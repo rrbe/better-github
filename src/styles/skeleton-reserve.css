@@ -26,6 +26,9 @@
 
 [data-bg-page="pr-list"] .js-issue-row:has(.better-github-info-row)::after,
 [data-bg-page="pr-list"]
+  react-app[app-name="pull-requests"] [data-density="compact"]
+  [class*="MainContent-module__inner"]::after,
+[data-bg-page="pr-list"]
   li[role="listitem"]
   [class*="MainContent-module__inner"]:has(.better-github-info-row)::after,
 [data-bg-page="pr-list"]

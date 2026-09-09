@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { setUrl } from "../test-utils/url";
 import { dashboard, dashboardRow } from "../test-utils/pr-dashboard";
-import { collectPRRows } from "./pr-list-dom";
+import { collectPRRows, isCompactPRRow } from "./pr-list-dom";
 
 describe("collectPRRows", () => {
   beforeEach(() => {
@@ -19,6 +19,23 @@ describe("collectPRRows", () => {
     const rows = collectPRRows("owner", "repo");
     expect([...rows.keys()]).toEqual([7, 8]);
     expect([...rows.values()].every((row) => row.tagName === "LI")).toBe(true);
+  });
+
+  it("skips compact dashboard rows and collects them again at default density", () => {
+    document.body.innerHTML = dashboard(dashboardRow(7));
+    const list = document.querySelector("ul")!;
+    const row = document.querySelector("li")!;
+    list.setAttribute("data-density", "compact");
+    expect(isCompactPRRow(row)).toBe(true);
+    expect(collectPRRows("owner", "repo").size).toBe(0);
+    list.setAttribute("data-density", "default");
+    expect([...collectPRRows("owner", "repo").keys()]).toEqual([7]);
+  });
+
+  it("does not treat other React lists as the compact PR dashboard", () => {
+    document.body.innerHTML =
+      '<react-app app-name="issues-react"><ul data-density="compact"><li></li></ul></react-app>';
+    expect(isCompactPRRow(document.querySelector("li")!)).toBe(false);
   });
 
   it.each([
