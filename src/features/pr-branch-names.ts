@@ -1,3 +1,4 @@
+import { collectPRRows } from "../lib/pr-list-dom";
 import { isPRListPage, getRepoInfo, getPRListParams } from "../lib/page-detect";
 import { fetchPRBranches } from "../lib/github-api";
 import { insertInfoRowItem } from "../lib/info-row";
@@ -46,14 +47,10 @@ export async function injectPRBranchNames(): Promise<void> {
   const info = getRepoInfo();
   if (!info) return;
 
-  // Skip if already injected for current page state
-  const existing = document.querySelectorAll(`.${BADGE_CLASS}`);
-  if (existing.length > 0) return;
-
-  const prRows = document.querySelectorAll("[id^='issue_']:not([id$='_link'])");
-  const prNumbers = [...prRows]
-    .map((row) => Number(row.id.replace("issue_", "")))
-    .filter(Number.isInteger);
+  const prRows = new Map(
+    [...collectPRRows(info.owner, info.repo)].filter(([, row]) => !row.querySelector(`.${BADGE_CLASS}`)),
+  );
+  const prNumbers = [...prRows.keys()];
   if (prNumbers.length === 0) return;
 
   try {
@@ -64,11 +61,8 @@ export async function injectPRBranchNames(): Promise<void> {
 
     const branchMap = new Map(branches.map((b) => [b.number, b.headRef]));
 
-    for (const row of prRows) {
-      const id = row.getAttribute("id");
-      if (!id) continue;
-
-      const prNumber = parseInt(id.replace("issue_", ""), 10);
+    for (const [prNumber, row] of prRows) {
+      if (!row.isConnected) continue;
       const branchName = branchMap.get(prNumber);
       if (!branchName) continue;
 

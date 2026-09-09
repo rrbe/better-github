@@ -1,3 +1,4 @@
+import { collectPRRows } from "./pr-list-dom";
 import { isPRListPage, isCommitsListPage, getRepoInfo } from "./page-detect";
 import { collectCommitRows, MAIN_CONTENT_INNER_SELECTOR } from "./commit-dom";
 import { INFO_ROW_CLASS, insertInfoRowItem } from "./info-row";
@@ -57,7 +58,10 @@ function reservePRListSkeletons(flags: SkeletonFlags): void {
     .map((c) => `.${c}`)
     .join(", ");
 
-  for (const row of document.querySelectorAll("[id^='issue_']:not([id$='_link'])")) {
+  const info = getRepoInfo();
+  if (!info) return;
+
+  for (const row of collectPRRows(info.owner, info.repo).values()) {
     const present = new Set(
       [...row.querySelectorAll(probeSelector)].flatMap((el) => [...el.classList]),
     );
