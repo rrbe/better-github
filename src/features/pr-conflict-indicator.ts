@@ -1,3 +1,4 @@
+import { collectPRRows, getPRRowNumber, TRAILING_LABELS_SELECTOR } from "../lib/pr-list-dom";
 import { isPRListPage, getRepoInfo } from "../lib/page-detect";
 import { fetchPRConflictStatuses } from "../lib/github-api";
 import { insertInfoRowItem } from "../lib/info-row";
@@ -10,13 +11,8 @@ let observedRepo: string | null = null;
 let checkedRows = new WeakSet<Element>();
 let generation = 0;
 
-function getPRNumber(row: Element): number | null {
-  const number = Number(row.id.replace("issue_", ""));
-  return Number.isInteger(number) ? number : null;
-}
-
 function hasConflictLabel(row: Element): boolean {
-  return [...row.querySelectorAll(".IssueLabel")].some((label) =>
+  return [...row.querySelectorAll(`.IssueLabel, ${TRAILING_LABELS_SELECTOR} button`)].some((label) =>
     /^conflicts?$/i.test(
       label.getAttribute("data-name")?.trim() || label.textContent?.trim() || "",
     ),
@@ -31,7 +27,7 @@ async function checkRows(
 ): Promise<void> {
   const rowByNumber = new Map<number, Element>();
   for (const row of rows) {
-    const number = getPRNumber(row);
+    const number = getPRRowNumber(row);
     if (number !== null && !hasConflictLabel(row)) rowByNumber.set(number, row);
   }
   if (rowByNumber.size === 0) return;
@@ -97,7 +93,7 @@ export function injectPRConflictIndicator(): void {
     observer = currentObserver;
   }
 
-  for (const row of document.querySelectorAll("[id^='issue_']:not([id$='_link'])")) {
+  for (const row of collectPRRows(info.owner, info.repo).values()) {
     if (!checkedRows.has(row) && !row.querySelector(`.${INDICATOR_CLASS}`)) {
       observer.observe(row);
     }

@@ -14,6 +14,7 @@
 
 [data-bg-page="pr-list"] .js-issue-row::after,
 [data-bg-page="pr-list"] li[role="listitem"] [class*="MainContent-module__inner"]::after,
+[data-bg-page="pr-list"] react-app[app-name="pull-requests"] li [class*="MainContent-module__inner"]::after,
 [data-bg-page="commits-list"]
   li[data-testid="commit-row-item"]
   [class*="MainContent-module__inner"]::after {
@@ -26,6 +27,9 @@
 [data-bg-page="pr-list"] .js-issue-row:has(.better-github-info-row)::after,
 [data-bg-page="pr-list"]
   li[role="listitem"]
+  [class*="MainContent-module__inner"]:has(.better-github-info-row)::after,
+[data-bg-page="pr-list"]
+  react-app[app-name="pull-requests"] li
   [class*="MainContent-module__inner"]:has(.better-github-info-row)::after,
 [data-bg-page="commits-list"]
   li[data-testid="commit-row-item"]

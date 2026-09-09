@@ -1,3 +1,4 @@
+import { collectPRRows } from "../lib/pr-list-dom";
 import { isPRListPage, getRepoInfo } from "../lib/page-detect";
 import { fetchPRReviewStatuses, fetchReviewThreadDetails } from "../lib/github-api";
 import type { ReviewThreadDetail } from "../lib/messages";
@@ -246,18 +247,10 @@ export async function injectPRReviewStatus(): Promise<void> {
   const info = getRepoInfo();
   if (!info) return;
 
-  // Skip if already injected
-  if (document.querySelectorAll(`.${STATUS_CLASS}`).length > 0) return;
-
-  // Collect PR numbers from the page
-  const prRows = document.querySelectorAll("[id^='issue_']");
-  const prNumbers: number[] = [];
-  for (const row of prRows) {
-    const id = row.getAttribute("id");
-    if (!id) continue;
-    prNumbers.push(parseInt(id.replace("issue_", ""), 10));
-  }
-
+  const prRows = new Map(
+    [...collectPRRows(info.owner, info.repo)].filter(([, row]) => !row.querySelector(`.${STATUS_CLASS}`)),
+  );
+  const prNumbers = [...prRows.keys()];
   if (prNumbers.length === 0) return;
 
   const statuses = await fetchPRReviewStatuses(info.owner, info.repo, prNumbers);
@@ -266,11 +259,8 @@ export async function injectPRReviewStatus(): Promise<void> {
 
   const statusMap = new Map(statuses.map((s) => [s.number, s]));
 
-  for (const row of prRows) {
-    const id = row.getAttribute("id");
-    if (!id) continue;
-
-    const prNumber = parseInt(id.replace("issue_", ""), 10);
+  for (const [prNumber, row] of prRows) {
+    if (!row.isConnected) continue;
     const status = statusMap.get(prNumber);
     if (!status || status.totalThreads === 0) continue;
 
