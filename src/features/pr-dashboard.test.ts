@@ -65,6 +65,21 @@ describe("repository PR dashboard preview", () => {
     expect(fetchPRBranches).toHaveBeenCalledWith("owner", "repo", [7], "open", 1);
   });
 
+  it("prefetches SSR data without showing badges or moving labels before hydration", async () => {
+    const app = document.querySelector("react-app")!;
+    app.setAttribute("data-ssr", "true");
+    await injectBadges();
+    expect(fetchPRBranches).toHaveBeenCalled();
+    expect(fetchPRDiffStats).toHaveBeenCalled();
+    expect(document.querySelector(".better-github-info-row")).toBeNull();
+    expect(document.querySelector(".better-github-labels-hidden")).toBeNull();
+    app.innerHTML = `<ul>${dashboardRow(7)}</ul>`;
+    app.classList.add("loaded");
+    await injectBadges();
+    expect(document.querySelectorAll(".better-github-info-row")).toHaveLength(1);
+    expect(document.querySelectorAll(".better-github-info-row > *")).toHaveLength(4);
+  });
+
   it("does not reserve, fetch or relocate labels when loaded in compact density", async () => {
     document.querySelector("ul")!.setAttribute("data-density", "compact");
     const observe = vi.fn();

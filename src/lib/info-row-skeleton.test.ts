@@ -1,6 +1,8 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { setUrl } from "../test-utils/url";
 import { reserveInfoRowSkeletons, clearSkeletons } from "./info-row-skeleton";
+import { insertInfoRowItem } from "./info-row";
+import { repoDashboard, dashboardRow } from "../test-utils/pr-dashboard";
 
 const GH = "https://github.com";
 const SHA = "0123456789abcdef0123456789abcdef01234567";
@@ -66,8 +68,36 @@ describe("reserveInfoRowSkeletons", () => {
 
     expect(document.querySelectorAll(".bg-skeleton-pill--commit-diff")).toHaveLength(1);
     expect(
-      document.querySelector("[class*='MainContent-module__inner']")?.lastElementChild?.classList
-        .contains("bg-skeleton-pill--commit-diff"),
+      document
+        .querySelector("[class*='MainContent-module__inner']")
+        ?.lastElementChild?.classList.contains("bg-skeleton-pill--commit-diff"),
     ).toBe(true);
+  });
+
+  it("expires a stalled badge placeholder without removing completed or late data", () => {
+    vi.useFakeTimers();
+    try {
+      setUrl(`${GH}/owner/repo/pulls`);
+      document.body.innerHTML = repoDashboard(dashboardRow(7));
+      const flags = { "feature-pr-branch-names": true, "feature-pr-diff-stats": true };
+      reserveInfoRowSkeletons(flags);
+      const row = document.querySelector("li")!;
+      const branch = document.createElement("span");
+      branch.className = "better-github-branch-badge";
+      insertInfoRowItem(row, "branch", branch);
+      vi.advanceTimersByTime(5000);
+      expect(branch.isConnected).toBe(true);
+      expect(document.querySelector(".bg-skeleton-pill")).toBeNull();
+      reserveInfoRowSkeletons(flags);
+      expect(document.querySelector(".bg-skeleton-pill")).toBeNull();
+      const diff = document.createElement("span");
+      expect(insertInfoRowItem(row, "diff", diff)).toBe(true);
+      expect(diff.isConnected).toBe(true);
+      document.querySelector("ul")!.innerHTML = dashboardRow(7);
+      reserveInfoRowSkeletons(flags);
+      expect(document.querySelector(".bg-skeleton-pill")).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

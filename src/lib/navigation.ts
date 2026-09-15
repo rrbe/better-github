@@ -1,3 +1,7 @@
+import { isPRListPage } from "./page-detect";
+import { PR_DASHBOARD_SELECTOR, PR_TITLE_SELECTOR } from "./pr-list-dom";
+import { watchPRListReady } from "./pr-list-ready";
+
 type PageHandler = () => void;
 
 const handlers: PageHandler[] = [];
@@ -7,6 +11,7 @@ export function onPageReady(handler: PageHandler): void {
 }
 
 function runHandlers(): void {
+  if (isPRListPage()) watchPRListReady(scheduleHandlers);
   for (const handler of handlers) {
     try {
       handler();
@@ -44,8 +49,33 @@ window.addEventListener("popstate", () => {
 // injected elements) without changing the URL. All inject functions are
 // idempotent (they check for existing elements first), so this is safe.
 let pollInterval: ReturnType<typeof setInterval> | null = null;
+let rowObserver: MutationObserver | null = null;
+let rowFrame: number | null = null;
+
+function observePRRows(): void {
+  if (rowObserver) return;
+  const selector = `[id^="issue_"]:not([id$="_link"]), ${PR_DASHBOARD_SELECTOR} ${PR_TITLE_SELECTOR}`;
+  rowObserver = new MutationObserver((mutations) => {
+    if (!isPRListPage() || rowFrame !== null) return;
+    // Inspect only added subtrees. Our badges contain no PR title links, so
+    // injecting them does not schedule another pass.
+    const hasRows = mutations.some((mutation) =>
+      [...mutation.addedNodes].some(
+        (node) =>
+          node instanceof Element && (node.matches(selector) || node.querySelector(selector)),
+      ),
+    );
+    if (!hasRows) return;
+    rowFrame = requestAnimationFrame(() => {
+      rowFrame = null;
+      if (isPRListPage()) runHandlers();
+    });
+  });
+  rowObserver.observe(document.body, { childList: true, subtree: true });
+}
 
 export function startNavigation(): void {
+  observePRRows();
   runHandlers();
 
   if (!pollInterval) {

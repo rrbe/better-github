@@ -1,4 +1,5 @@
 import { isCompactPRRow } from "./pr-list-dom";
+import { isPRListReady } from "./pr-list-ready";
 
 /**
  * Shared "info row" below the meta line in PR/issue list items.
@@ -16,7 +17,7 @@ const INFO_ROW_ITEM_ORDER: InfoRowItemKind[] = ["branch", "diff", "labels", "con
 
 export function getOrCreateInfoRow(row: Element): HTMLElement | null {
   // Also guard async results started before the user changed density.
-  if (isCompactPRRow(row)) return null;
+  if (isCompactPRRow(row) || !isPRListReady(row)) return null;
 
   const existing = row.querySelector<HTMLElement>(`.${INFO_ROW_CLASS}`);
   if (existing) return existing;
