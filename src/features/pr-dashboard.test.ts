@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { dashboard, dashboardRow } from "../test-utils/pr-dashboard";
+import { dashboardRow, repoDashboard } from "../test-utils/pr-dashboard";
 import { setUrl } from "../test-utils/url";
 import { collectPRRows } from "../lib/pr-list-dom";
 import { reserveInfoRowSkeletons } from "../lib/info-row-skeleton";
@@ -27,7 +27,7 @@ describe("repository PR dashboard preview", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     setUrl("https://github.com/owner/repo/pulls");
-    document.body.innerHTML = dashboard(dashboardRow(7));
+    document.body.innerHTML = repoDashboard(dashboardRow(7));
     vi.mocked(fetchPRBranches).mockImplementation(async (_owner, _repo, numbers) =>
       numbers.map((number) => ({ number, headRef: `feature/${number}` })),
     );
@@ -208,7 +208,7 @@ describe("repository PR dashboard preview", () => {
         disconnect = vi.fn();
       },
     );
-    document.body.innerHTML = dashboard(
+    document.body.innerHTML = repoDashboard(
       dashboardRow(7),
       dashboardRow(8, "Conflicts"),
       dashboardRow(9),

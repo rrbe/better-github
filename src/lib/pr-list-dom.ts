@@ -1,6 +1,6 @@
 // The repository dashboard preview renders a pull-requests React app. Detect
 // the rendered DOM, since client-env feature flags can outlive SPA navigation.
-export const PR_DASHBOARD_SELECTOR = 'react-app[app-name="pull-requests"]';
+export const PR_DASHBOARD_SELECTOR = 'react-app:is([app-name="pull-requests"], [app-name="repo"])';
 const TITLE_SELECTOR = 'a[data-testid="listitem-title-link"]';
 export const TRAILING_LABELS_SELECTOR = '[class*="trailingBadgesContainer"]';
 

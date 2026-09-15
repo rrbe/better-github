@@ -8,7 +8,9 @@
 }
 
 /* Follow density changes immediately, retaining badges for the default view. */
-react-app[app-name="pull-requests"] [data-density="compact"] .better-github-info-row {
+react-app:is([app-name="pull-requests"], [app-name="repo"])
+  [data-density="compact"]
+  .better-github-info-row {
   display: none;
 }
 
@@ -415,7 +417,9 @@ a.better-github-review-popover-item:hover {
   gap: 6px;
 }
 
-.better-github-labels-hidden:not(react-app[app-name="pull-requests"] [data-density="compact"] *) {
+.better-github-labels-hidden:not(
+  react-app:is([app-name="pull-requests"], [app-name="repo"]) [data-density="compact"] *
+) {
   display: none !important;
 }
 
