@@ -1,4 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { setUrl } from "../test-utils/url";
+import { repoDashboard, dashboardRow } from "../test-utils/pr-dashboard";
 
 type NavModule = typeof import("./navigation");
 
@@ -8,7 +10,21 @@ async function loadNavigation(): Promise<NavModule> {
 }
 
 describe("navigation", () => {
+  let observers: MutationObserver[];
   beforeEach(() => {
+    observers = [];
+    const NativeObserver = MutationObserver;
+    vi.stubGlobal(
+      "MutationObserver",
+      class extends NativeObserver {
+        constructor(callback: MutationCallback) {
+          super(callback);
+          observers.push(this);
+        }
+      },
+    );
+    document.body.innerHTML = "";
+    setUrl("https://github.com/owner/repo/pulls");
     vi.useFakeTimers();
     // navigation.ts attaches document/window listeners at module load with no
     // teardown, so resetModules()+reimport leaves prior listeners attached.
@@ -18,6 +34,8 @@ describe("navigation", () => {
   });
 
   afterEach(() => {
+    for (const observer of observers) observer.disconnect();
+    vi.unstubAllGlobals();
     vi.useRealTimers();
     vi.restoreAllMocks();
   });
@@ -94,6 +112,43 @@ describe("navigation", () => {
     expect(handler).toHaveBeenCalledTimes(1);
   });
 
+  it("handles late React rows in one frame without waiting for the poll or reacting to badges", async () => {
+    const { onPageReady, startNavigation } = await loadNavigation();
+    const handler = vi.fn();
+    onPageReady(handler);
+    startNavigation();
+
+    document.body.innerHTML = repoDashboard(dashboardRow(7));
+    document.querySelector("ul")!.insertAdjacentHTML("beforeend", dashboardRow(8));
+    await vi.advanceTimersByTimeAsync(50);
+    expect(handler).toHaveBeenCalledTimes(2);
+
+    document
+      .querySelector("li")!
+      .insertAdjacentHTML("beforeend", '<span class="better-github-branch-badge">feature</span>');
+    await vi.advanceTimersByTimeAsync(50);
+    expect(handler).toHaveBeenCalledTimes(2);
+
+    document.body.innerHTML = repoDashboard(dashboardRow(7));
+    await vi.advanceTimersByTimeAsync(50);
+    expect(handler).toHaveBeenCalledTimes(3);
+  });
+
+  it("handles late classic PR rows but ignores row additions outside PR lists", async () => {
+    const { onPageReady, startNavigation } = await loadNavigation();
+    const handler = vi.fn();
+    onPageReady(handler);
+    startNavigation();
+    document.body.innerHTML = '<div id="issue_7"></div>';
+    await vi.advanceTimersByTimeAsync(50);
+    expect(handler).toHaveBeenCalledTimes(2);
+
+    setUrl("https://github.com/owner/repo/issues");
+    document.body.innerHTML = '<div id="issue_8"></div>';
+    await vi.advanceTimersByTimeAsync(50);
+    expect(handler).toHaveBeenCalledTimes(2);
+  });
+
   // Kept last: this registers a throwing handler whose module-level listeners
   // leak (see beforeEach), so running it after the others avoids re-firing the
   // throw inside their assertions.
@@ -111,9 +166,6 @@ describe("navigation", () => {
 
     expect(boom).toHaveBeenCalledTimes(1);
     expect(after).toHaveBeenCalledTimes(1);
-    expect(console.error).toHaveBeenCalledWith(
-      "[Better GitHub] Handler error:",
-      expect.any(Error),
-    );
+    expect(console.error).toHaveBeenCalledWith("[Better GitHub] Handler error:", expect.any(Error));
   });
 });

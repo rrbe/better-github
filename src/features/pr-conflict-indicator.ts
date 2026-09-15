@@ -62,7 +62,7 @@ async function checkRows(
     indicator.textContent = t("prConflicts");
     indicator.title = t("prConflictsTitle");
     indicator.setAttribute("role", "status");
-    insertInfoRowItem(row, "conflict", indicator);
+    if (!insertInfoRowItem(row, "conflict", indicator)) checkedRows.delete(row);
   }
 }
 

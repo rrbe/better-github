@@ -19,3 +19,7 @@ export function dashboardRow(number: number, label = "Feature"): string {
 export function dashboard(...rows: string[]): string {
   return `<react-app app-name="pull-requests"><ul role="list" data-listview-component="items-list" data-density="default">${rows.join("")}</ul></react-app>`;
 }
+
+export function repoDashboard(...rows: string[]): string {
+  return `<react-app app-name="repo"><ul role="list" data-listview-component="items-list" data-density="default">${rows.join("")}</ul></react-app>`;
+}

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { setUrl } from "../test-utils/url";
-import { dashboard, dashboardRow } from "../test-utils/pr-dashboard";
+import { dashboard, dashboardRow, repoDashboard } from "../test-utils/pr-dashboard";
 import { collectPRRows, isCompactPRRow } from "./pr-list-dom";
 
 describe("collectPRRows", () => {
@@ -19,6 +19,11 @@ describe("collectPRRows", () => {
     const rows = collectPRRows("owner", "repo");
     expect([...rows.keys()]).toEqual([7, 8]);
     expect([...rows.values()].every((row) => row.tagName === "LI")).toBe(true);
+  });
+
+  it("recognizes the current repository React app", () => {
+    document.body.innerHTML = repoDashboard(dashboardRow(7), dashboardRow(8));
+    expect([...collectPRRows("owner", "repo").keys()]).toEqual([7, 8]);
   });
 
   it("skips compact dashboard rows and collects them again at default density", () => {

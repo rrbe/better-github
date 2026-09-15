@@ -14,7 +14,10 @@
 
 [data-bg-page="pr-list"] .js-issue-row::after,
 [data-bg-page="pr-list"] li[role="listitem"] [class*="MainContent-module__inner"]::after,
-[data-bg-page="pr-list"] react-app[app-name="pull-requests"] li [class*="MainContent-module__inner"]::after,
+[data-bg-page="pr-list"]
+  react-app:is([app-name="pull-requests"], [app-name="repo"])
+  li
+  [class*="MainContent-module__inner"]::after,
 [data-bg-page="commits-list"]
   li[data-testid="commit-row-item"]
   [class*="MainContent-module__inner"]::after {
@@ -26,13 +29,15 @@
 
 [data-bg-page="pr-list"] .js-issue-row:has(.better-github-info-row)::after,
 [data-bg-page="pr-list"]
-  react-app[app-name="pull-requests"] [data-density="compact"]
+  react-app:is([app-name="pull-requests"], [app-name="repo"])
+  [data-density="compact"]
   [class*="MainContent-module__inner"]::after,
 [data-bg-page="pr-list"]
   li[role="listitem"]
   [class*="MainContent-module__inner"]:has(.better-github-info-row)::after,
 [data-bg-page="pr-list"]
-  react-app[app-name="pull-requests"] li
+  react-app:is([app-name="pull-requests"], [app-name="repo"])
+  li
   [class*="MainContent-module__inner"]:has(.better-github-info-row)::after,
 [data-bg-page="commits-list"]
   li[data-testid="commit-row-item"]

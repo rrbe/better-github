@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { dashboard, dashboardRow } from "../test-utils/pr-dashboard";
+import { dashboardRow, repoDashboard } from "../test-utils/pr-dashboard";
 import { setUrl } from "../test-utils/url";
 import { collectPRRows } from "../lib/pr-list-dom";
 import { reserveInfoRowSkeletons } from "../lib/info-row-skeleton";
@@ -27,7 +27,7 @@ describe("repository PR dashboard preview", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     setUrl("https://github.com/owner/repo/pulls");
-    document.body.innerHTML = dashboard(dashboardRow(7));
+    document.body.innerHTML = repoDashboard(dashboardRow(7));
     vi.mocked(fetchPRBranches).mockImplementation(async (_owner, _repo, numbers) =>
       numbers.map((number) => ({ number, headRef: `feature/${number}` })),
     );
@@ -63,6 +63,21 @@ describe("repository PR dashboard preview", () => {
     expect(info.querySelector(".better-github-review-status")?.textContent).toBe("2 unresolved");
     expect(document.querySelectorAll(".bg-skeleton-pill")).toHaveLength(0);
     expect(fetchPRBranches).toHaveBeenCalledWith("owner", "repo", [7], "open", 1);
+  });
+
+  it("prefetches SSR data without showing badges or moving labels before hydration", async () => {
+    const app = document.querySelector("react-app")!;
+    app.setAttribute("data-ssr", "true");
+    await injectBadges();
+    expect(fetchPRBranches).toHaveBeenCalled();
+    expect(fetchPRDiffStats).toHaveBeenCalled();
+    expect(document.querySelector(".better-github-info-row")).toBeNull();
+    expect(document.querySelector(".better-github-labels-hidden")).toBeNull();
+    app.innerHTML = `<ul>${dashboardRow(7)}</ul>`;
+    app.classList.add("loaded");
+    await injectBadges();
+    expect(document.querySelectorAll(".better-github-info-row")).toHaveLength(1);
+    expect(document.querySelectorAll(".better-github-info-row > *")).toHaveLength(4);
   });
 
   it("does not reserve, fetch or relocate labels when loaded in compact density", async () => {
@@ -208,7 +223,7 @@ describe("repository PR dashboard preview", () => {
         disconnect = vi.fn();
       },
     );
-    document.body.innerHTML = dashboard(
+    document.body.innerHTML = repoDashboard(
       dashboardRow(7),
       dashboardRow(8, "Conflicts"),
       dashboardRow(9),

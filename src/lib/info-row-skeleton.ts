@@ -1,4 +1,4 @@
-import { collectPRRows } from "./pr-list-dom";
+import { collectPRRows, PR_DASHBOARD_SELECTOR } from "./pr-list-dom";
 import { isPRListPage, isCommitsListPage, getRepoInfo } from "./page-detect";
 import { collectCommitRows, MAIN_CONTENT_INNER_SELECTOR } from "./commit-dom";
 import { INFO_ROW_CLASS, insertInfoRowItem } from "./info-row";
@@ -15,9 +15,10 @@ const SKELETONS: Record<SkeletonKind, { skeleton: string; real: string }> = {
 };
 
 const SKELETON_BASE_CLASS = "bg-skeleton-pill";
+const SKELETON_TIMEOUT = 5000;
 const reservedPRSkeletons = {
-  branch: new WeakSet<Element>(),
-  prDiff: new WeakSet<Element>(),
+  branch: new WeakMap<Element, Set<number>>(),
+  prDiff: new WeakMap<Element, Set<number>>(),
 };
 
 export interface SkeletonFlags {
@@ -61,27 +62,35 @@ function reservePRListSkeletons(flags: SkeletonFlags): void {
   const info = getRepoInfo();
   if (!info) return;
 
-  for (const row of collectPRRows(info.owner, info.repo).values()) {
+  for (const [number, row] of collectPRRows(info.owner, info.repo)) {
+    // Keep the reservation across row replacements within the same React app.
+    const scope = row.closest(PR_DASHBOARD_SELECTOR) || row;
+    const reservedBranch = reservedPRSkeletons.branch.get(scope) ?? new Set<number>();
+    const reservedDiff = reservedPRSkeletons.prDiff.get(scope) ?? new Set<number>();
     const present = new Set(
       [...row.querySelectorAll(probeSelector)].flatMap((el) => [...el.classList]),
     );
     const needBranch =
       wantBranch &&
-      !reservedPRSkeletons.branch.has(row) &&
+      !reservedBranch.has(number) &&
       !present.has(branch.real) &&
       !present.has(branch.skeleton);
     const needDiff =
       wantDiff &&
-      !reservedPRSkeletons.prDiff.has(row) &&
+      !reservedDiff.has(number) &&
       !present.has(prDiff.real) &&
       !present.has(prDiff.skeleton);
     if (!needBranch && !needDiff) continue;
 
     if (needBranch && insertInfoRowItem(row, "branch", buildPill(branch.skeleton))) {
-      reservedPRSkeletons.branch.add(row);
+      reservedBranch.add(number);
+      reservedPRSkeletons.branch.set(scope, reservedBranch);
+      expireSkeleton(row.querySelector(`.${branch.skeleton}`)!);
     }
     if (needDiff && insertInfoRowItem(row, "diff", buildPill(prDiff.skeleton))) {
-      reservedPRSkeletons.prDiff.add(row);
+      reservedDiff.add(number);
+      reservedPRSkeletons.prDiff.set(scope, reservedDiff);
+      expireSkeleton(row.querySelector(`.${prDiff.skeleton}`)!);
     }
   }
 }
@@ -101,10 +110,19 @@ function reserveCommitsListSkeletons(flags: SkeletonFlags): void {
   }
 }
 
+function removeSkeleton(skeleton: Element): void {
+  const infoRow = skeleton.closest(`.${INFO_ROW_CLASS}`);
+  skeleton.remove();
+  if (infoRow?.childElementCount === 0) infoRow.remove();
+}
+
+function expireSkeleton(skeleton: Element): void {
+  // Remove only this placeholder: a late response may already have replaced it.
+  setTimeout(() => removeSkeleton(skeleton), SKELETON_TIMEOUT);
+}
+
 export function clearSkeletons(kind: SkeletonKind): void {
   for (const skeleton of document.querySelectorAll(`.${SKELETONS[kind].skeleton}`)) {
-    const infoRow = skeleton.closest(`.${INFO_ROW_CLASS}`);
-    skeleton.remove();
-    if (infoRow?.childElementCount === 0) infoRow.remove();
+    removeSkeleton(skeleton);
   }
 }

@@ -1,4 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { injectPRBranchNames } from "./features/pr-branch-names";
+
+vi.mock("./features/pr-branch-names", () => ({ injectPRBranchNames: vi.fn() }));
 
 let removeFeatureElements: typeof import("./content").removeFeatureElements;
 
@@ -33,5 +36,45 @@ describe("removeFeatureElements", () => {
     expect(document.getElementById("watch-counter")).not.toBeNull();
     expect(document.getElementById("fork-counter")).not.toBeNull();
     expect(document.querySelectorAll(".bg-wfs-popup")).toHaveLength(0);
+  });
+});
+
+describe("content preferences", () => {
+  afterEach(() => {
+    vi.clearAllTimers();
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+    vi.clearAllMocks();
+  });
+
+  it("reuses preferences during polling and keeps toggle changes effective", async () => {
+    vi.useFakeTimers();
+    vi.resetModules();
+    vi.clearAllMocks();
+    document.body.innerHTML = "";
+    const get = vi.fn((keys: string[], callback: (value: Record<string, unknown>) => void) => {
+      callback(Object.fromEntries(keys.map((key) => [key, key === "locale" ? "en" : false])));
+    });
+    const addListener = vi.fn();
+    vi.stubGlobal("chrome", {
+      runtime: { id: "test" },
+      storage: { local: { get }, onChanged: { addListener } },
+    });
+    await import("./content");
+    await vi.advanceTimersByTimeAsync(0);
+    expect(get).toHaveBeenCalledTimes(2);
+    expect(injectPRBranchNames).not.toHaveBeenCalled();
+
+    const onChanged = addListener.mock.calls[0][0];
+    await onChanged({ "feature-pr-branch-names": { newValue: true } }, "local");
+    expect(injectPRBranchNames).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(2000);
+    expect(injectPRBranchNames).toHaveBeenCalledTimes(2);
+    expect(get).toHaveBeenCalledTimes(2);
+
+    await onChanged({ "feature-pr-branch-names": { newValue: false } }, "local");
+    await vi.advanceTimersByTimeAsync(2000);
+    expect(injectPRBranchNames).toHaveBeenCalledTimes(2);
+    expect(get).toHaveBeenCalledTimes(2);
   });
 });

@@ -160,10 +160,15 @@ function injectFeature(key: FeatureKey): void {
   }
 }
 
+// Load once per document; onChanged keeps these preferences current. A React
+// re-render should not wait for storage again before restoring the badges.
+const preferences = Promise.all([initLocale(), getFeatureFlags()]);
+
 // React to toggle changes in real-time (no refresh needed)
 if (isExtensionValid()) {
-  chrome.storage.onChanged.addListener((changes, area) => {
+  chrome.storage.onChanged.addListener(async (changes, area) => {
     if (area !== "local") return;
+    const [, flags] = await preferences;
     // Picked-up on the next injection/navigation; a refresh re-renders all text.
     if (LOCALE_KEY in changes) {
       setLocale((changes[LOCALE_KEY].newValue as LocalePref) ?? "en");
@@ -171,6 +176,7 @@ if (isExtensionValid()) {
     for (const key of FEATURE_KEYS) {
       if (!(key in changes)) continue;
       const enabled = changes[key].newValue !== false;
+      flags[key] = enabled;
       if (enabled) {
         injectFeature(key);
       } else {
@@ -187,14 +193,10 @@ onPageReady(async () => {
   // skeleton-reserve.css matches the right row selector after SPA navs.
   applyPageMarker();
 
-  // Resolve the stored language preference before any UI text is injected.
-  await initLocale();
+  const [, flags] = await preferences;
 
   // Always-on features
   injectFileAgeColor();
-
-  // Toggleable features
-  const flags = await getFeatureFlags();
 
   // Reserve row height with skeleton placeholders before any async fetch starts
   // — avoids layout-shift "flash" when real badges arrive.
