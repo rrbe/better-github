@@ -169,6 +169,7 @@
   },
   "copied": { "message": "Copied!" },
   "branchCopyTitle": { "message": "Click to copy branch name" },
+  "prNumberCopyTitle": { "message": "Click to copy PR number" },
 
   "pinRepository": { "message": "Pin repository" },
   "unpinRepository": { "message": "Unpin repository" },

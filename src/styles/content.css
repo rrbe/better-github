@@ -14,6 +14,55 @@ react-app:is([app-name="pull-requests"], [app-name="repo"])
   display: none;
 }
 
+/* PR number keeps the native metadata appearance until hovered. */
+.better-github-pr-number-host {
+  position: relative;
+}
+
+.better-github-pr-number-host > .better-github-pr-number-copy {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+}
+
+.better-github-pr-number-copy {
+  position: relative;
+  appearance: none;
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+
+.better-github-pr-number-copy:hover,
+.better-github-pr-number-copy:focus-visible {
+  background: var(--bgColor-neutral-muted, var(--color-neutral-muted, #afb8c133));
+  box-shadow: 0 0 0 2px var(--bgColor-neutral-muted, var(--color-neutral-muted, #afb8c133));
+}
+
+.better-github-pr-number-copy:focus-visible {
+  outline: 2px solid var(--fgColor-accent, #0969da);
+  outline-offset: 2px;
+}
+
+.better-github-pr-number-host:has(> .better-github-pr-number-copied),
+.better-github-pr-number-copy.better-github-pr-number-copied {
+  color: transparent;
+}
+
+.better-github-pr-number-copied::after {
+  content: "✓";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fgColor-success, var(--color-success-fg, #1a7f37));
+}
+
 /* PR Branch Name Badge */
 .better-github-branch-badge {
   display: inline-block;

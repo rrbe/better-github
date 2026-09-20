@@ -1,6 +1,7 @@
 import { onPageReady, startNavigation } from "./lib/navigation";
 import { initLocale, setLocale, LOCALE_KEY, type LocalePref } from "./lib/i18n";
 import { injectPRBranchNames } from "./features/pr-branch-names";
+import { injectPRNumberCopy } from "./features/pr-number-copy";
 import {
   cleanupPRConflictIndicator,
   injectPRConflictIndicator,
@@ -197,6 +198,7 @@ onPageReady(async () => {
 
   // Always-on features
   injectFileAgeColor();
+  injectPRNumberCopy();
 
   // Reserve row height with skeleton placeholders before any async fetch starts
   // — avoids layout-shift "flash" when real badges arrive.

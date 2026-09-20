@@ -169,6 +169,7 @@
   },
   "copied": { "message": "已复制！" },
   "branchCopyTitle": { "message": "点击复制分支名" },
+  "prNumberCopyTitle": { "message": "点击复制 PR 编号" },
 
   "pinRepository": { "message": "置顶仓库" },
   "unpinRepository": { "message": "取消置顶" },
