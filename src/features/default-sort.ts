@@ -62,6 +62,7 @@ function ensureTrailingSpaceOnFocus(target: EventTarget | null): void {
   if (!isIssueOrPRListPage()) return;
   if (
     !target.matches('[name="q"], [name="query"]') &&
+    target.id !== "repo-pulls-dashboard-filter-input" &&
     !target.closest("query-builder")
   ) {
     return;

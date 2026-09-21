@@ -45,4 +45,16 @@ describe("applyDefaultSort", () => {
     expect(input.value).toBe("is:issue is:open sort:updated-desc ");
     expect(input.selectionStart).toBe(input.value.length);
   });
+
+  it("adds a trailing space to the PR dashboard search input", () => {
+    setUrl(`${GH}/owner/repo/pulls?q=is%3Apr+is%3Aopen+sort%3Aupdated-desc`);
+    document.body.innerHTML = `<input id="repo-pulls-dashboard-filter-input" name="repo-pulls-dashboard-filter-inputname" value="is:pr is:open sort:updated-desc" />`;
+
+    applyDefaultSort();
+    const input = document.querySelector("input")!;
+    input.dispatchEvent(new FocusEvent("focusin", { bubbles: true }));
+
+    expect(input.value).toBe("is:pr is:open sort:updated-desc ");
+    expect(input.selectionStart).toBe(input.value.length);
+  });
 });
