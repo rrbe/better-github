@@ -4,13 +4,9 @@
 
 [![Chrome Web Store](https://img.shields.io/chrome-web-store/v/annimelofpkbcphbdikipjlconehbnpb)](https://chromewebstore.google.com/detail/better-github/annimelofpkbcphbdikipjlconehbnpb)
 
-Better GitHub 是一个增强 GitHub 使用体验的 Chrome 插件，灵感源自 [Refined GitHub](https://github.com/refined-github/refined-github)，但精简掉了上百个繁杂的开关。保持轻量，专注重要的体验优化，以便长期维护。
+Better GitHub 是一个增强 GitHub 使用体验的 Chrome 插件，灵感源自 [Refined GitHub](https://github.com/refined-github/refined-github)，但只专注于最常用到的体验优化，不会对 github 做太多侵入式修改，保持简单，有助于长期维护。
 
-**开源且零追踪**——无数据分析，无遥测，所有数据均保留在您的浏览器中。（部分功能需要具有 `repo` 权限的 GitHub Token。）
-
-|                                                      未使用 Better GitHub                                                      |                                                     使用 Better GitHub                                                      |
-| :----------------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------: |
-| <img src="docs/screenshots/main_screenshot_without_better_github.png" alt="未使用 Better GitHub 的 GitHub 页面" width="600" /> | <img src="docs/screenshots/main_screenshot_with_better_github.png" alt="使用 Better GitHub 后的 GitHub 页面" width="600" /> |
+**开源且零追踪**——无数据分析，无遥测，所有数据均保留在您的浏览器中。（部分功能需要具有 `repo` 权限的 GitHub Token）
 
 ### 功能概览
 
@@ -18,11 +14,11 @@ Better GitHub 是一个增强 GitHub 使用体验的 Chrome 插件，灵感源�
 - **更好的 PR（拉取请求）与 Issue（问题）列表** —— 支持按最近更新排序，分支名称、冲突警告、评审状态及代码差异统计（diff stats）一目了然。
 - **仓库额外扩展** —— 展示 Release 资源下载量，提供专门的 Releases 标签页、对关注者/分叉/点赞数（watchers/forks/stars）悬停预览，以及提交标签（commit tags）和代码差异统计。
 
-所有功能均可在设置中单独开启或关闭。
+> **注意：** 由于 GitHub 经常灰度测试功能，有些甚至不会出现在 Feature Preview 开关中，为了保持可维护性，本项目不会集成过多功能，如果碰到使用上的问题，请提交一个 issue 反馈。
 
-> **注意：** 由于 GitHub 经常灰度测试功能，并且在 Feature Preview 中还有一些额外的功能开关，一些难以维护或经常变动的功能可能就不会加了，尽量控制项目在一个可维护的复杂度。
-
-欢迎随时[提交 Issue](https://github.com/rrbe/better-github/issues)，分享你的建议或报告 Bug。
+|                                                      未使用 Better GitHub                                                      |                                                     使用 Better GitHub                                                      |
+| :----------------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------: |
+| <img src="docs/screenshots/main_screenshot_without_better_github.png" alt="未使用 Better GitHub 的 GitHub 页面" width="600" /> | <img src="docs/screenshots/main_screenshot_with_better_github.png" alt="使用 Better GitHub 后的 GitHub 页面" width="600" /> |
 
 ## 功能详情
 
@@ -141,9 +137,20 @@ Better GitHub 是一个增强 GitHub 使用体验的 Chrome 插件，灵感源�
       <img src="docs/screenshots/file-age-color.png" alt="最近修改文件颜色" width="600" />
    </details>
 
-除"最近提交 Commit Message 颜色"外，所有功能均可在扩展选项中单独开关。
+### 无法关闭的功能
 
-## 自行打包安装
+有一些小功能，对页面体验没有太多实质影响，我不想设置太多开关，于是装上插件后他们总是保持开启
+
+- 最近提交 Commit Message 颜色
+- PR/Issue number copy
+
+## 安装
+
+### 通过 Chrome Web Store
+
+[Chrome Web Store - Better Github](https://chromewebstore.google.com/detail/better-github/annimelofpkbcphbdikipjlconehbnpb)
+
+### 自行打包安装
 
 1. 克隆仓库并构建：
 
@@ -153,10 +160,6 @@ Better GitHub 是一个增强 GitHub 使用体验的 Chrome 插件，灵感源�
    ```
 
 2. 打开 `chrome://extensions`，开启**开发者模式**，点击**加载已解压的扩展程序**，选择 `dist` 目录。
-
-## Chrome Web Store 中安装
-
-[Chrome Web Store - Better Github](https://chromewebstore.google.com/detail/better-github/annimelofpkbcphbdikipjlconehbnpb)
 
 ## 配置
 

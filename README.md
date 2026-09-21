@@ -4,13 +4,9 @@
 
 [![Chrome Web Store](https://img.shields.io/chrome-web-store/v/annimelofpkbcphbdikipjlconehbnpb)](https://chromewebstore.google.com/detail/better-github/annimelofpkbcphbdikipjlconehbnpb)
 
-Better GitHub is a Chrome extension that enhances the GitHub experience. Inspired by [Refined GitHub](https://github.com/refined-github/refined-github), but with hundreds of fiddly toggles trimmed away. It stays lightweight and focuses on the experience improvements that matter, so it's maintainable for the long haul.
+Better GitHub is a Chrome extension that enhances the GitHub experience. Inspired by [Refined GitHub](https://github.com/refined-github/refined-github), it focuses on the improvements people use most without making too many intrusive changes to GitHub. Keeping it simple makes it easier to maintain in the long run.
 
 **Open source and zero-tracking** — no analytics, no telemetry; all your data stays in your browser. (Some features require a GitHub token with the `repo` scope.)
-
-| Without Better GitHub | With Better GitHub |
-| :---: | :---: |
-| <img src="docs/screenshots/main_screenshot_without_better_github.png" alt="GitHub without Better GitHub" width="600" /> | <img src="docs/screenshots/main_screenshot_with_better_github.png" alt="GitHub with Better GitHub" width="600" /> |
 
 ### Features Overview
 
@@ -18,11 +14,11 @@ Better GitHub is a Chrome extension that enhances the GitHub experience. Inspire
 - **Better PR and issue lists** — sort by most recently updated, with branch names, conflict warnings, review status, and diff stats all at a glance.
 - **Repository extras** — release asset download counts, a dedicated Releases tab, hover previews for watcher/fork/star counts, plus commit tags and diff stats.
 
-Every feature can be individually toggled on or off in the settings.
+> **Note:** GitHub frequently A/B tests features, some of which do not even appear under Feature Preview. To keep the project maintainable, we will limit the number of features we add. If you run into a problem, please file an issue.
 
-> **Note:** Because GitHub frequently A/B tests features and offers extra toggles under Feature Preview, features that are hard to maintain or change often may not be added — the goal is to keep the project at a manageable complexity.
-
-Please feel free to [file an issue](https://github.com/rrbe/better-github/issues) to share your suggestions and bug reports.
+| Without Better GitHub | With Better GitHub |
+| :---: | :---: |
+| <img src="docs/screenshots/main_screenshot_without_better_github.png" alt="GitHub without Better GitHub" width="600" /> | <img src="docs/screenshots/main_screenshot_with_better_github.png" alt="GitHub with Better GitHub" width="600" /> |
 
 ## Feature Details
 
@@ -141,9 +137,20 @@ Please feel free to [file an issue](https://github.com/rrbe/better-github/issues
       <img src="docs/screenshots/file-age-color.png" alt="Recent Commit Message Color" width="600" />
    </details>
 
-All features except Recent Commit Message Color can be individually toggled on/off in the extension options.
+### Features that cannot be disabled
 
-## Build from Source
+A few small features have little impact on the page experience. To avoid adding too many settings, they stay enabled after you install the extension:
+
+- Recent Commit Message Color
+- Copy PR/Issue numbers
+
+## Installation
+
+### Chrome Web Store
+
+[Chrome Web Store - Better GitHub](https://chromewebstore.google.com/detail/better-github/annimelofpkbcphbdikipjlconehbnpb)
+
+### Build from Source
 
 1. Clone the repo and build:
 
@@ -153,10 +160,6 @@ All features except Recent Commit Message Color can be individually toggled on/o
    ```
 
 2. Open `chrome://extensions`, enable **Developer mode**, click **Load unpacked**, and select the `dist` folder.
-
-## Install from Chrome Web Store
-
-[Chrome Web Store - Better GitHub](https://chromewebstore.google.com/detail/better-github/annimelofpkbcphbdikipjlconehbnpb)
 
 ## Configuration
 
