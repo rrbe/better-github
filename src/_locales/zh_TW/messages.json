@@ -170,6 +170,7 @@
   "copied": { "message": "已複製！" },
   "branchCopyTitle": { "message": "點擊複製分支名稱" },
   "prNumberCopyTitle": { "message": "點擊複製 PR 編號" },
+  "issueNumberCopyTitle": { "message": "點擊複製 Issue 編號" },
 
   "pinRepository": { "message": "置頂儲存庫" },
   "unpinRepository": { "message": "取消置頂" },

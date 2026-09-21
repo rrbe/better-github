@@ -14,18 +14,18 @@ react-app:is([app-name="pull-requests"], [app-name="repo"])
   display: none;
 }
 
-/* PR number keeps the native metadata appearance until hovered. */
-.better-github-pr-number-host {
+/* Issue and PR numbers keep the native metadata appearance until hovered. */
+.better-github-number-host {
   position: relative;
 }
 
-.better-github-pr-number-host > .better-github-pr-number-copy {
+.better-github-number-host > .better-github-number-copy {
   position: absolute;
   inset: 0;
   width: 100%;
 }
 
-.better-github-pr-number-copy {
+.better-github-number-copy {
   position: relative;
   appearance: none;
   padding: 0;
@@ -37,23 +37,23 @@ react-app:is([app-name="pull-requests"], [app-name="repo"])
   cursor: pointer;
 }
 
-.better-github-pr-number-copy:hover,
-.better-github-pr-number-copy:focus-visible {
+.better-github-number-copy:hover,
+.better-github-number-copy:focus-visible {
   background: var(--bgColor-neutral-muted, var(--color-neutral-muted, #afb8c133));
   box-shadow: 0 0 0 2px var(--bgColor-neutral-muted, var(--color-neutral-muted, #afb8c133));
 }
 
-.better-github-pr-number-copy:focus-visible {
+.better-github-number-copy:focus-visible {
   outline: 2px solid var(--fgColor-accent, #0969da);
   outline-offset: 2px;
 }
 
-.better-github-pr-number-host:has(> .better-github-pr-number-copied),
-.better-github-pr-number-copy.better-github-pr-number-copied {
+.better-github-number-host:has(> .better-github-number-copied),
+.better-github-number-copy.better-github-number-copied {
   color: transparent;
 }
 
-.better-github-pr-number-copied::after {
+.better-github-number-copied::after {
   content: "✓";
   position: absolute;
   inset: 0;

@@ -134,7 +134,7 @@ describe("navigation", () => {
     expect(handler).toHaveBeenCalledTimes(3);
   });
 
-  it("handles late classic PR rows but ignores row additions outside PR lists", async () => {
+  it("handles late classic PR and issue rows but ignores detail pages", async () => {
     const { onPageReady, startNavigation } = await loadNavigation();
     const handler = vi.fn();
     onPageReady(handler);
@@ -145,6 +145,25 @@ describe("navigation", () => {
 
     setUrl("https://github.com/owner/repo/issues");
     document.body.innerHTML = '<div id="issue_8"></div>';
+    await vi.advanceTimersByTimeAsync(50);
+    expect(handler).toHaveBeenCalledTimes(3);
+
+    setUrl("https://github.com/owner/repo/issues/8");
+    document.body.innerHTML = '<div id="issue_9"></div>';
+    await vi.advanceTimersByTimeAsync(50);
+    expect(handler).toHaveBeenCalledTimes(3);
+  });
+
+  it("handles late React issue rows in one frame", async () => {
+    const { onPageReady, startNavigation } = await loadNavigation();
+    const handler = vi.fn();
+    onPageReady(handler);
+    setUrl("https://github.com/owner/repo/issues");
+    startNavigation();
+
+    document.body.innerHTML = `<react-app app-name="issues-react"><ul><li>
+      <a data-testid="issue-pr-title-link" href="/owner/repo/issues/7">Issue</a>
+    </li></ul></react-app>`;
     await vi.advanceTimersByTimeAsync(50);
     expect(handler).toHaveBeenCalledTimes(2);
   });

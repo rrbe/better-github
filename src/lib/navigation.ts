@@ -1,4 +1,4 @@
-import { isPRListPage } from "./page-detect";
+import { isIssueOrPRListPage } from "./page-detect";
 import { PR_DASHBOARD_SELECTOR, PR_TITLE_SELECTOR } from "./pr-list-dom";
 import { watchPRListReady } from "./pr-list-ready";
 
@@ -11,7 +11,7 @@ export function onPageReady(handler: PageHandler): void {
 }
 
 function runHandlers(): void {
-  if (isPRListPage()) watchPRListReady(scheduleHandlers);
+  if (isIssueOrPRListPage()) watchPRListReady(scheduleHandlers);
   for (const handler of handlers) {
     try {
       handler();
@@ -52,12 +52,12 @@ let pollInterval: ReturnType<typeof setInterval> | null = null;
 let rowObserver: MutationObserver | null = null;
 let rowFrame: number | null = null;
 
-function observePRRows(): void {
+function observeListRows(): void {
   if (rowObserver) return;
-  const selector = `[id^="issue_"]:not([id$="_link"]), ${PR_DASHBOARD_SELECTOR} ${PR_TITLE_SELECTOR}`;
+  const selector = `[id^="issue_"]:not([id$="_link"]), ${PR_DASHBOARD_SELECTOR} ${PR_TITLE_SELECTOR}, react-app[app-name="issues-react"] a[data-testid="issue-pr-title-link"]`;
   rowObserver = new MutationObserver((mutations) => {
-    if (!isPRListPage() || rowFrame !== null) return;
-    // Inspect only added subtrees. Our badges contain no PR title links, so
+    if (!isIssueOrPRListPage() || rowFrame !== null) return;
+    // Inspect only added subtrees. Our badges contain no list title links, so
     // injecting them does not schedule another pass.
     const hasRows = mutations.some((mutation) =>
       [...mutation.addedNodes].some(
@@ -68,14 +68,14 @@ function observePRRows(): void {
     if (!hasRows) return;
     rowFrame = requestAnimationFrame(() => {
       rowFrame = null;
-      if (isPRListPage()) runHandlers();
+      if (isIssueOrPRListPage()) runHandlers();
     });
   });
   rowObserver.observe(document.body, { childList: true, subtree: true });
 }
 
 export function startNavigation(): void {
-  observePRRows();
+  observeListRows();
   runHandlers();
 
   if (!pollInterval) {

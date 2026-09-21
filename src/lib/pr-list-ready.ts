@@ -1,13 +1,14 @@
 import { PR_DASHBOARD_SELECTOR } from "./pr-list-dom";
-import { isPRListPage } from "./page-detect";
+import { isIssueOrPRListPage } from "./page-detect";
 
 const READY_TIMEOUT = 5000;
+const LIST_APP_SELECTOR = `${PR_DASHBOARD_SELECTOR}, react-app[app-name="issues-react"]`;
 const watching = new WeakSet<Element>();
 const timedOut = new WeakSet<Element>();
 
 export function isPRListReady(row: Element): boolean {
-  if (!isPRListPage()) return true;
-  const app = row.closest(PR_DASHBOARD_SELECTOR);
+  if (!isIssueOrPRListPage()) return true;
+  const app = row.closest(LIST_APP_SELECTOR);
   // GitHub adds loaded after React's first commit. Classic lists and apps
   // without server-rendered content do not need the hydration gate.
   return (
@@ -19,7 +20,7 @@ export function isPRListReady(row: Element): boolean {
 }
 
 export function watchPRListReady(onReady: () => void): void {
-  for (const app of document.querySelectorAll(PR_DASHBOARD_SELECTOR)) {
+  for (const app of document.querySelectorAll(LIST_APP_SELECTOR)) {
     if (isPRListReady(app) || watching.has(app)) continue;
     watching.add(app);
     const finish = () => {

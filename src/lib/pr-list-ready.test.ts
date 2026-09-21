@@ -56,4 +56,19 @@ describe("PR list hydration", () => {
     await vi.advanceTimersByTimeAsync(5000);
     expect(onReady).not.toHaveBeenCalled();
   });
+
+  it("waits for issue list hydration before changing SSR rows", async () => {
+    setUrl("https://github.com/owner/repo/issues");
+    const app = document.querySelector("react-app")!;
+    app.setAttribute("app-name", "issues-react");
+    const onReady = vi.fn();
+    const row = document.querySelector("li")!;
+
+    watchPRListReady(onReady);
+    expect(isPRListReady(row)).toBe(false);
+    app.classList.add("loaded");
+    await vi.advanceTimersByTimeAsync(0);
+    expect(isPRListReady(row)).toBe(true);
+    expect(onReady).toHaveBeenCalledTimes(1);
+  });
 });
