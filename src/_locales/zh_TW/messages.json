@@ -109,6 +109,10 @@
   "featCommitDiffStatsDesc": {
     "message": "在 Commits 清單頁顯示新增、刪除行數和檔案數（如 +223 −114 · 5 files）。需要權杖。"
   },
+  "featActionsInProgressCountName": { "message": "Actions 進行中數量" },
+  "featActionsInProgressCountDesc": {
+    "message": "在 Actions 分頁旁顯示目前正在執行的工作流程數量。"
+  },
   "featReleaseTabName": { "message": "Releases 分頁" },
   "featReleaseTabDesc": {
     "message": "在儲存庫導覽列新增一個 Releases 分頁，方便快速存取。"

@@ -629,6 +629,43 @@ describe("service worker", () => {
     expect(body.query).toContain("totalCount");
   });
 
+  it("fetches and briefly caches the in-progress Actions count", async () => {
+    vi.spyOn(Date, "now").mockReturnValue(1_000);
+    const state = await loadWorker("token");
+    vi.mocked(fetch)
+      .mockResolvedValueOnce(jsonResponse({ total_count: 7, workflow_runs: [] }))
+      .mockResolvedValueOnce(jsonResponse({ total_count: 4, workflow_runs: [] }));
+    const request: ServiceWorkerRequest = {
+      type: "FETCH_ACTIONS_IN_PROGRESS_COUNT",
+      owner: "owner",
+      repo: "repo",
+    };
+
+    expect(await sendMessage(state.messageListeners[0], request)).toEqual({ ok: true, data: 7 });
+    expect(await sendMessage(state.messageListeners[0], request)).toEqual({ ok: true, data: 7 });
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(fetch).mock.calls[0][0]).toBe(
+      "https://api.github.com/repos/owner/repo/actions/runs?status=in_progress&per_page=1",
+    );
+
+    vi.mocked(Date.now).mockReturnValue(61_001);
+    expect(await sendMessage(state.messageListeners[0], request)).toEqual({ ok: true, data: 4 });
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it("returns null for an invalid Actions count response", async () => {
+    const state = await loadWorker();
+    vi.mocked(fetch).mockResolvedValue(jsonResponse({ total_count: "7" }));
+
+    const response = await sendMessage(state.messageListeners[0], {
+      type: "FETCH_ACTIONS_IN_PROGRESS_COUNT",
+      owner: "owner",
+      repo: "repo",
+    });
+
+    expect(response).toEqual({ ok: true, data: null });
+  });
+
   it("derives anonymous release counts from REST pagination", async () => {
     const state = await loadWorker();
     vi.mocked(fetch).mockResolvedValue(

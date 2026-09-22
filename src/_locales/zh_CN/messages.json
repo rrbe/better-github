@@ -109,6 +109,10 @@
   "featCommitDiffStatsDesc": {
     "message": "在 Commits 列表页显示新增、删除行数和文件数（如 +223 −114 · 5 files）。需要令牌。"
   },
+  "featActionsInProgressCountName": { "message": "Actions 进行中数量" },
+  "featActionsInProgressCountDesc": {
+    "message": "在 Actions 标签页旁显示当前正在运行的工作流数量。"
+  },
   "featReleaseTabName": { "message": "Releases 标签页" },
   "featReleaseTabDesc": {
     "message": "在仓库导航栏添加一个 Releases 标签页，方便快速访问。"
