@@ -18,6 +18,7 @@ import type {
 } from "./lib/messages";
 
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const LIVE_COUNT_CACHE_TTL = 60 * 1000; // 1 minute
 const CACHE_MISS = Symbol("cache-miss");
 
 // In-memory map of in-flight fetches to coalesce concurrent requests for the same key
@@ -28,11 +29,11 @@ interface CacheEntry<T> {
   timestamp: number;
 }
 
-async function getCached<T>(key: string): Promise<T | typeof CACHE_MISS> {
+async function getCached<T>(key: string, ttl = CACHE_TTL): Promise<T | typeof CACHE_MISS> {
   const result = await chrome.storage.session.get(key);
   const entry = result[key] as CacheEntry<T> | undefined;
   if (!entry) return CACHE_MISS;
-  if (Date.now() - entry.timestamp > CACHE_TTL) {
+  if (Date.now() - entry.timestamp > ttl) {
     chrome.storage.session.remove(key);
     return CACHE_MISS;
   }
@@ -43,8 +44,8 @@ async function setCache<T>(key: string, data: T): Promise<void> {
   await chrome.storage.session.set({ [key]: { data, timestamp: Date.now() } });
 }
 
-async function cachedFetch<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
-  const cached = await getCached<T>(key);
+async function cachedFetch<T>(key: string, fetcher: () => Promise<T>, ttl = CACHE_TTL): Promise<T> {
+  const cached = await getCached<T>(key, ttl);
   if (cached !== CACHE_MISS) return cached;
 
   const existing = inflight.get(key);
@@ -749,6 +750,26 @@ async function fetchReleaseCount(owner: string, repo: string): Promise<number | 
   });
 }
 
+async function fetchActionsInProgressCount(owner: string, repo: string): Promise<number | null> {
+  const cacheKey = `cache:actions-in-progress:${owner}/${repo}`;
+  return cachedFetch<number | null>(
+    cacheKey,
+    async () => {
+      const token = await getToken();
+      const response = await fetch(
+        `https://api.github.com/repos/${owner}/${repo}/actions/runs?status=in_progress&per_page=1`,
+        { headers: restHeaders(token, "application/vnd.github+json") },
+      );
+      if (!response.ok) return null;
+
+      const data = (await response.json()) as { total_count?: unknown };
+      const count = data.total_count;
+      return typeof count === "number" && Number.isInteger(count) && count >= 0 ? count : null;
+    },
+    LIVE_COUNT_CACHE_TTL,
+  );
+}
+
 async function fetchReleaseDownloads(
   owner: string,
   repo: string,
@@ -959,6 +980,11 @@ async function handleMessage(
       return { ok: true, data: await fetchWatchers(request.owner, request.repo) };
     case "FETCH_FORKS":
       return { ok: true, data: await fetchForks(request.owner, request.repo) };
+    case "FETCH_ACTIONS_IN_PROGRESS_COUNT":
+      return {
+        ok: true,
+        data: await fetchActionsInProgressCount(request.owner, request.repo),
+      };
     case "FETCH_RELEASE_COUNT":
       return { ok: true, data: await fetchReleaseCount(request.owner, request.repo) };
     case "FETCH_RELEASE_DOWNLOADS":
