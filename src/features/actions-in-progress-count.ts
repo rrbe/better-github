@@ -3,8 +3,23 @@ import { createNavCounter } from "../lib/nav-counter";
 import { getRepoInfo, isRepoPage } from "../lib/page-detect";
 
 const COUNTER_CLASS = "better-github-actions-in-progress-count";
+const REFRESH_INTERVAL = 61 * 1000; // Longer than the service worker's 60-second cache.
 const processedLinks = new WeakSet<HTMLAnchorElement>();
 const pendingRequests = new WeakMap<HTMLAnchorElement, object>();
+let activeLink: HTMLAnchorElement | null = null;
+let activeRepo: string | null = null;
+let refreshTimer: ReturnType<typeof setTimeout> | null = null;
+
+function stopRefreshing(): void {
+  if (refreshTimer) clearTimeout(refreshTimer);
+  refreshTimer = null;
+  if (activeLink) {
+    processedLinks.delete(activeLink);
+    pendingRequests.delete(activeLink);
+  }
+  activeLink = null;
+  activeRepo = null;
+}
 
 function findActionsLink(owner: string, repo: string): HTMLAnchorElement | null {
   const nav =
@@ -21,14 +36,25 @@ function findActionsLink(owner: string, repo: string): HTMLAnchorElement | null 
 }
 
 export function injectActionsInProgressCount(): void {
-  if (!isRepoPage()) return;
+  if (!isRepoPage()) {
+    stopRefreshing();
+    return;
+  }
 
   const info = getRepoInfo();
   if (!info) return;
 
   const link = findActionsLink(info.owner, info.repo);
-  if (!link || processedLinks.has(link)) return;
+  if (!link) {
+    stopRefreshing();
+    return;
+  }
+  const repo = `${info.owner}/${info.repo}`;
+  if (activeLink !== link || activeRepo !== repo) stopRefreshing();
+  if (processedLinks.has(link)) return;
 
+  activeLink = link;
+  activeRepo = repo;
   processedLinks.add(link);
   const request = {};
   pendingRequests.set(link, request);
@@ -45,34 +71,42 @@ async function appendCount(
   if (pendingRequests.get(link) !== request) return;
   pendingRequests.delete(link);
 
-  if (count === null || count === 0 || !link.isConnected) return;
-
   const currentRepo = getRepoInfo();
-  if (currentRepo?.owner !== owner || currentRepo.repo !== repo) return;
+  if (!link.isConnected || currentRepo?.owner !== owner || currentRepo.repo !== repo) {
+    stopRefreshing();
+    return;
+  }
 
-  const nav = link.closest<HTMLElement>(".UnderlineNav-body, nav[aria-label='Repository'] ul");
-  const nativeCounterTemplate = nav
-    ?.querySelector<HTMLElement>('[data-component="counter"]')
-    ?.cloneNode(true) as HTMLElement | undefined;
-  const counter = createNavCounter(nativeCounterTemplate, count);
-  counter.classList.add(COUNTER_CLASS);
-  link.appendChild(counter);
+  const existingCounter = link.querySelector<HTMLElement>(`.${COUNTER_CLASS}`);
+  if (count === null || count === 0) {
+    existingCounter?.remove();
+  } else if (existingCounter) {
+    const label = existingCounter.querySelector<HTMLElement>('[data-component="CounterLabel"]');
+    if (label) label.textContent = String(count);
+    const hiddenLabel = existingCounter.querySelector<HTMLElement>(
+      '[class*="VisuallyHidden"], .sr-only',
+    );
+    if (hiddenLabel) hiddenLabel.textContent = `\u00a0(${count})`;
+  } else {
+    const nav = link.closest<HTMLElement>(".UnderlineNav-body, nav[aria-label='Repository'] ul");
+    const nativeCounterTemplate = nav
+      ?.querySelector<HTMLElement>('[data-component="counter"]')
+      ?.cloneNode(true) as HTMLElement | undefined;
+    const counter = createNavCounter(nativeCounterTemplate, count);
+    counter.classList.add(COUNTER_CLASS);
+    link.appendChild(counter);
+  }
+
+  refreshTimer = setTimeout(() => {
+    const nextRequest = {};
+    pendingRequests.set(link, nextRequest);
+    void appendCount(link, nextRequest, owner, repo);
+  }, REFRESH_INTERVAL);
 }
 
 export function cleanupActionsInProgressCount(): void {
+  stopRefreshing();
   document.querySelectorAll<HTMLElement>(`.${COUNTER_CLASS}`).forEach((counter) => {
-    const link = counter.closest<HTMLAnchorElement>("a");
-    if (link) {
-      processedLinks.delete(link);
-      pendingRequests.delete(link);
-    }
     counter.remove();
   });
-
-  const info = getRepoInfo();
-  if (!info) return;
-  const link = findActionsLink(info.owner, info.repo);
-  if (!link) return;
-  processedLinks.delete(link);
-  pendingRequests.delete(link);
 }

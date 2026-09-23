@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fetchActionsInProgressCount } from "../lib/github-api";
 import { setUrl } from "../test-utils/url";
 import {
@@ -9,6 +9,11 @@ import {
 vi.mock("../lib/github-api");
 
 describe("injectActionsInProgressCount", () => {
+  afterEach(() => {
+    cleanupActionsInProgressCount();
+    vi.useRealTimers();
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(fetchActionsInProgressCount).mockResolvedValue(null);
@@ -81,5 +86,31 @@ describe("injectActionsInProgressCount", () => {
     injectActionsInProgressCount();
     await vi.waitFor(() => expect(fetchActionsInProgressCount).toHaveBeenCalledTimes(2));
     expect(document.querySelector(".better-github-actions-in-progress-count")).not.toBeNull();
+  });
+
+  it("refreshes the count and removes the badge when runs finish", async () => {
+    vi.useFakeTimers();
+    vi.mocked(fetchActionsInProgressCount)
+      .mockResolvedValueOnce(2)
+      .mockResolvedValueOnce(1)
+      .mockResolvedValueOnce(0);
+
+    injectActionsInProgressCount();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(
+      document.querySelector(
+        '.better-github-actions-in-progress-count [data-component="CounterLabel"]',
+      )?.textContent,
+    ).toBe("2");
+
+    await vi.advanceTimersByTimeAsync(61_000);
+    expect(
+      document.querySelector(
+        '.better-github-actions-in-progress-count [data-component="CounterLabel"]',
+      )?.textContent,
+    ).toBe("1");
+    await vi.advanceTimersByTimeAsync(61_000);
+    expect(document.querySelector(".better-github-actions-in-progress-count")).toBeNull();
+    expect(fetchActionsInProgressCount).toHaveBeenCalledTimes(3);
   });
 });
