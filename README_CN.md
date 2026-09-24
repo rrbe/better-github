@@ -20,6 +20,8 @@ Better GitHub 是一个增强 GitHub 使用体验的 Chrome 插件，灵感源�
 | :----------------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------: |
 | <img src="docs/screenshots/main_screenshot_without_better_github.png" alt="未使用 Better GitHub 的 GitHub 页面" width="600" /> | <img src="docs/screenshots/main_screenshot_with_better_github.png" alt="使用 Better GitHub 后的 GitHub 页面" width="600" /> |
 
+以下截图基于扩展界面制作示例场景，统一使用 `rrbe/better-github` 仓库。
+
 ## 功能详情
 
 ### 首页
@@ -28,7 +30,7 @@ Better GitHub 是一个增强 GitHub 使用体验的 Chrome 插件，灵感源�
 
    <details>
       <summary>示例截图</summary>
-      <img src="docs/screenshots/better-top-repositories.png" alt="Better Top Repositories" width="300" />
+      <img src="docs/screenshots/better-top-repositories.png" alt="Better Top Repositories" width="800" />
    </details>
 
 ### PR 和 Issue
@@ -37,37 +39,42 @@ Better GitHub 是一个增强 GitHub 使用体验的 Chrome 插件，灵感源�
 
    <details>
       <summary>示例截图</summary>
-      <img src="docs/screenshots/pr-issue-default-sort.png" alt="默认按更新时间排序" width="600" />
+      <img src="docs/screenshots/pr-issue-default-sort.png" alt="默认按更新时间排序" width="800" />
    </details>
 
 - **PR 分支名显示** — 在 PR 标题旁显示源分支名，点击即可复制。
 
    <details>
       <summary>示例截图</summary>
-      <img src="docs/screenshots/pr-branch-name.png" alt="PR 分支名与 Review 状态" width="600" />
+      <img src="docs/screenshots/pr-branch-name.png" alt="PR 分支名与 Review 状态" width="800" />
    </details>
 
 - **PR 冲突标识** — 在存在合并冲突的 PR 列表项上显示警告。只读取状态，不会创建或修改仓库 Label。需要 token。
+
+   <details>
+      <summary>示例截图</summary>
+      <img src="docs/screenshots/pr-conflict-indicator.png" alt="PR 冲突标识" width="800" />
+   </details>
 
 - **PR Review 状态** — 在 PR 列表展示 review thread 的解决状态（已解决 / 未解决）。仅在 PR 存在 review thread 时显示，没有 review 评论的 PR 不会出现标记，draft PR 也不会。
 
    <details>
       <summary>示例截图</summary>
-      <img src="docs/screenshots/pr-review-status.png" alt="PR Review 状态" width="430" />
+      <img src="docs/screenshots/pr-review-status.png" alt="PR Review 状态" width="800" />
    </details>
 
 - **PR Diff 统计** — 在 PR 列表的每一行展示新增行数、删除行数与变更文件数（例如 `+223 −114 · 5 files`）。需要 token。
 
    <details>
       <summary>示例截图</summary>
-      <img src="docs/screenshots/pr-commit-diff-stats.png" alt="PR Diff 统计" width="430" />
+      <img src="docs/screenshots/pr-diff-stats.png" alt="PR Diff 统计" width="800" />
    </details>
 
 - **PR Label 前置** — 将 PR 标签移到标题前方，提升可读性和浏览效率。
 
    <details>
       <summary>示例截图</summary>
-      <img src="docs/screenshots/pr-label-position.png" alt="PR Label 前置" width="500" />
+      <img src="docs/screenshots/pr-label-position.png" alt="PR Label 前置" width="800" />
    </details>
 
 ### PR 详情页
@@ -76,15 +83,14 @@ Better GitHub 是一个增强 GitHub 使用体验的 Chrome 插件，灵感源�
 
    <details>
       <summary>示例截图</summary>
-      <img src="docs/screenshots/pr-quick-approve.png" alt="PR 快速 Approve" width="300" />
+      <img src="docs/screenshots/pr-quick-approve.png" alt="PR 快速 Approve" width="800" />
    </details>
 
 - **一键折叠/展开所有文件** — 在 diff 工具栏添加按钮，一键折叠或展开所有文件 diff；同时在文件树侧边栏添加按钮，一键折叠或展开所有目录。适用于 PR、commit 和 compare 页面，兼容新旧两种 "Files changed" 体验。
 
    <details>
       <summary>示例截图</summary>
-      <img src="docs/screenshots/pr-collapse-expand-1.png" alt="一键折叠/展开所有文件" width="600" />
-      <img src="docs/screenshots/pr-collapse-expand-2.png" alt="一键折叠/展开所有文件" width="300" />
+      <img src="docs/screenshots/pr-collapse-expand.png" alt="一键折叠/展开所有文件" width="800" />
    </details>
 
 ### 用户
@@ -93,7 +99,7 @@ Better GitHub 是一个增强 GitHub 使用体验的 Chrome 插件，灵感源�
 
    <details>
       <summary>示例截图</summary>
-      <img src="docs/screenshots/contributor-card.png" alt="贡献者背景卡" width="430" />
+      <img src="docs/screenshots/contributor-card.png" alt="贡献者背景卡" width="800" />
    </details>
 
 ### Commits
@@ -102,19 +108,24 @@ Better GitHub 是一个增强 GitHub 使用体验的 Chrome 插件，灵感源�
 
    <details>
       <summary>示例截图</summary>
-      <img src="docs/screenshots/commit-tags.png" alt="Commit 标签显示" width="300" />
+      <img src="docs/screenshots/commit-tags.png" alt="Commit 标签显示" width="800" />
    </details>
 
 - **Commit Diff 统计** — 在 commits 列表页的每一行展示新增行数、删除行数与变更文件数（例如 `+223 −114 · 5 files`）。需要 token。
 
    <details>
       <summary>示例截图</summary>
-      <img src="docs/screenshots/pr-commit-diff-stats.png" alt="Commit Diff 统计" width="430" />
+      <img src="docs/screenshots/commit-diff-stats.png" alt="Commit Diff 统计" width="800" />
    </details>
 
 ### 仓库页面
 
 - **Release 资源下载量** — 显示每个 Release 资源的下载次数，包括 GitHub 可能留空的零下载资源。GitHub 原生下载量仍在灰度中；如果页面同时出现两份下载量，可在扩展选项中关闭此功能。
+
+   <details>
+      <summary>示例截图</summary>
+      <img src="docs/screenshots/release-asset-downloads.png" alt="Release 资源下载量" width="800" />
+   </details>
 
 - **Releases Tab** — 在仓库导航栏添加 Releases 标签页，快速访问。
 
@@ -127,22 +138,27 @@ Better GitHub 是一个增强 GitHub 使用体验的 Chrome 插件，灵感源�
 
    <details>
       <summary>示例截图</summary>
-      <img src="docs/screenshots/watch-fork-star-popup.png" alt="Watch/Fork/Star 悬浮预览" width="400" />
+      <img src="docs/screenshots/watch-fork-star-popup.png" alt="Watch/Fork/Star 悬浮预览" width="800" />
    </details>
 
-- **最近提交 Commit Message 颜色** — 根据提交时间为最近的几个 commit message 添加颜色，帮助快速定位最新提交。常驻开启。
+- **最近提交时间着色** — 根据提交时间为仓库文件列表中的相对时间着色，帮助快速定位最近更新的文件。常驻开启。
 
    <details>
       <summary>示例截图</summary>
-      <img src="docs/screenshots/file-age-color.png" alt="最近修改文件颜色" width="600" />
+      <img src="docs/screenshots/file-age-color.png" alt="最近提交时间着色" width="800" />
    </details>
 
 ### 无法关闭的功能
 
 有一些小功能，对页面体验没有太多实质影响，我不想设置太多开关，于是装上插件后他们总是保持开启
 
-- 最近提交 Commit Message 颜色
+- 最近提交时间着色
 - PR/Issue number copy
+
+   <details>
+      <summary>示例截图</summary>
+      <img src="docs/screenshots/number-copy.png" alt="复制 PR 和 Issue 编号" width="800" />
+   </details>
 
 ## 安装
 

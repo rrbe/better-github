@@ -2,8 +2,8 @@
   
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#0d1117"/>
-      <stop offset="1" stop-color="#161b22"/>
+      <stop offset="0" stop-color="#101821"/>
+      <stop offset="1" stop-color="#12382f"/>
     </linearGradient>
     <radialGradient id="glow" cx="220" cy="150" r="300" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#2ea043" stop-opacity="0.5"/>
@@ -16,6 +16,6 @@
   <g font-family="-apple-system, 'Helvetica Neue', 'Segoe UI', Arial, sans-serif" text-anchor="middle">
     <text x="220" y="276" font-size="40" font-weight="800" fill="#ffffff" letter-spacing="-1">Better GitHub</text>
     <rect x="186" y="294" width="68" height="5" rx="2.5" fill="#2ea043"/>
-    <text x="220" y="328" font-size="16" font-weight="400" fill="#8b949e">Improve GitHub PR &amp; issue pages</text>
+    <text x="220" y="328" font-size="16" font-weight="400" fill="#c1d4cf">Clearer pull requests and repos</text>
   </g>
 </svg>

@@ -20,6 +20,8 @@ Better GitHub is a Chrome extension that enhances the GitHub experience. Inspire
 | :---: | :---: |
 | <img src="docs/screenshots/main_screenshot_without_better_github.png" alt="GitHub without Better GitHub" width="600" /> | <img src="docs/screenshots/main_screenshot_with_better_github.png" alt="GitHub with Better GitHub" width="600" /> |
 
+Screenshots below are illustrative scenarios based on the extension UI, using `rrbe/better-github` throughout.
+
 ## Feature Details
 
 ### Home
@@ -28,7 +30,7 @@ Better GitHub is a Chrome extension that enhances the GitHub experience. Inspire
 
    <details>
       <summary>Screenshot</summary>
-      <img src="docs/screenshots/better-top-repositories.png" alt="Better Top Repositories" width="300" />
+      <img src="docs/screenshots/better-top-repositories.png" alt="Better Top Repositories" width="800" />
    </details>
 
 ### PRs and issues
@@ -37,37 +39,42 @@ Better GitHub is a Chrome extension that enhances the GitHub experience. Inspire
 
    <details>
       <summary>Screenshot</summary>
-      <img src="docs/screenshots/pr-issue-default-sort.png" alt="Default Sort by Updated" width="600" />
+      <img src="docs/screenshots/pr-issue-default-sort.png" alt="Default Sort by Updated" width="800" />
    </details>
 
 - **PR Branch Names** — Display source branch name next to each PR title. Click to copy.
 
    <details>
       <summary>Screenshot</summary>
-      <img src="docs/screenshots/pr-branch-name.png" alt="PR Branch Names" width="600" />
+      <img src="docs/screenshots/pr-branch-name.png" alt="PR Branch Names" width="800" />
    </details>
 
 - **PR Conflict Indicator** — Show a warning on PR list items that have merge conflicts. This is a read-only status and does not create or modify repository labels. Requires a token.
+
+   <details>
+      <summary>Screenshot</summary>
+      <img src="docs/screenshots/pr-conflict-indicator.png" alt="PR Conflict Indicator" width="800" />
+   </details>
 
 - **PR Review Status** — Show review thread resolution status (resolved / unresolved) on the PR list. Only appears on PRs that have review threads; PRs without any review comments won't show a badge. Draft PRs are also excluded.
 
    <details>
       <summary>Screenshot</summary>
-      <img src="docs/screenshots/pr-review-status.png" alt="PR Review Status" width="430" />
+      <img src="docs/screenshots/pr-review-status.png" alt="PR Review Status" width="800" />
    </details>
 
 - **PR Diff Stats** — Show additions, deletions, and changed file count (e.g. `+223 −114 · 5 files`) on each row of the PR list. Requires a token.
 
    <details>
       <summary>Screenshot</summary>
-      <img src="docs/screenshots/pr-commit-diff-stats.png" alt="PR Diff Stats" width="430" />
+      <img src="docs/screenshots/pr-diff-stats.png" alt="PR Diff Stats" width="800" />
    </details>
 
 - **PR Label Position** — Move labels to the front of PR titles for better visibility and scanning.
 
    <details>
       <summary>Screenshot</summary>
-      <img src="docs/screenshots/pr-label-position.png" alt="PR Label Position" width="500" />
+      <img src="docs/screenshots/pr-label-position.png" alt="PR Label Position" width="800" />
    </details>
 
 ### PR details
@@ -76,15 +83,14 @@ Better GitHub is a Chrome extension that enhances the GitHub experience. Inspire
 
    <details>
       <summary>Screenshot</summary>
-      <img src="docs/screenshots/pr-quick-approve.png" alt="PR Approve Now" width="300" />
+      <img src="docs/screenshots/pr-quick-approve.png" alt="PR Approve Now" width="800" />
    </details>
 
 - **Collapse/Expand All Files** — Add buttons to the diff toolbar to collapse or expand all file diffs in one click, plus a button inside the file tree to collapse or expand all folders. Works on PR, commit, and compare pages, and compatible with both the old and the new "Files changed" experience.
 
    <details>
       <summary>Screenshot</summary>
-      <img src="docs/screenshots/pr-collapse-expand-1.png" alt="Collapse/Expand All Files" width="600" />
-      <img src="docs/screenshots/pr-collapse-expand-2.png" alt="Collapse/Expand All Files" width="300" />
+      <img src="docs/screenshots/pr-collapse-expand.png" alt="Collapse/Expand All Files" width="800" />
    </details>
 
 ### Profile
@@ -93,7 +99,7 @@ Better GitHub is a Chrome extension that enhances the GitHub experience. Inspire
 
    <details>
       <summary>Screenshot</summary>
-      <img src="docs/screenshots/contributor-card.png" alt="Contributor Card" width="430" />
+      <img src="docs/screenshots/contributor-card.png" alt="Contributor Card" width="800" />
    </details>
 
 ### Commits
@@ -102,19 +108,24 @@ Better GitHub is a Chrome extension that enhances the GitHub experience. Inspire
 
    <details>
       <summary>Screenshot</summary>
-      <img src="docs/screenshots/commit-tags.png" alt="Commit Tags" width="300" />
+      <img src="docs/screenshots/commit-tags.png" alt="Commit Tags" width="800" />
    </details>
 
 - **Commit Diff Stats** — Show additions, deletions, and changed file count (e.g. `+223 −114 · 5 files`) on each row of the commits list page. Requires a token.
 
    <details>
       <summary>Screenshot</summary>
-      <img src="docs/screenshots/pr-commit-diff-stats.png" alt="Commit Diff Stats" width="430" />
+      <img src="docs/screenshots/commit-diff-stats.png" alt="Commit Diff Stats" width="800" />
    </details>
 
 ### Repository
 
 - **Release Asset Downloads** — Show the download count for every release asset, including zero-download assets that GitHub may leave blank. GitHub's native counts are still rolling out; disable this feature in the extension options if both counts appear.
+
+   <details>
+      <summary>Screenshot</summary>
+      <img src="docs/screenshots/release-asset-downloads.png" alt="Release Asset Downloads" width="800" />
+   </details>
 
 - **Releases Tab** — Add a Releases tab to the repository navigation bar for quick access.
 
@@ -127,22 +138,27 @@ Better GitHub is a Chrome extension that enhances the GitHub experience. Inspire
 
    <details>
       <summary>Screenshot</summary>
-      <img src="docs/screenshots/watch-fork-star-popup.png" alt="Watch/Fork/Star Popup" width="400" />
+      <img src="docs/screenshots/watch-fork-star-popup.png" alt="Watch/Fork/Star Popup" width="800" />
    </details>
 
-- **Recent Commit Message Color** — Highlight recent commits with color based on their age, making it easy to spot the latest changes. Always on.
+- **Recent Commit Age Color** — Color the relative commit times in the repository file list by age, making recent changes easier to spot. Always on.
 
    <details>
       <summary>Screenshot</summary>
-      <img src="docs/screenshots/file-age-color.png" alt="Recent Commit Message Color" width="600" />
+      <img src="docs/screenshots/file-age-color.png" alt="Recent Commit Age Color" width="800" />
    </details>
 
 ### Features that cannot be disabled
 
 A few small features have little impact on the page experience. To avoid adding too many settings, they stay enabled after you install the extension:
 
-- Recent Commit Message Color
+- Recent Commit Age Color
 - Copy PR/Issue numbers
+
+   <details>
+      <summary>Screenshot</summary>
+      <img src="docs/screenshots/number-copy.png" alt="Copy PR and issue numbers" width="800" />
+   </details>
 
 ## Installation
 
