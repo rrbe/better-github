@@ -129,6 +129,34 @@ describe("service worker", () => {
     vi.restoreAllMocks();
   });
 
+  it("returns follower and following counts from the cached user profile request", async () => {
+    const state = await loadWorker();
+    const fetchMock = vi.mocked(fetch);
+    fetchMock.mockImplementation(async (input) => {
+      if (String(input) === "https://api.github.com/users/octocat") {
+        return jsonResponse({
+          created_at: "2020-01-01T00:00:00Z",
+          followers: 30000,
+          following: 100000,
+          public_repos: 5,
+        });
+      }
+      return jsonResponse({ total_count: 0 });
+    });
+    const request: ServiceWorkerRequest = { type: "FETCH_CONTRIBUTOR_INFO", login: "octocat" };
+
+    const first = await sendMessage(state.messageListeners[0], request);
+    const second = await sendMessage(state.messageListeners[0], request);
+
+    expect(first).toMatchObject({
+      ok: true,
+      data: { followers: 30000, following: 100000, hasToken: false },
+    });
+    expect(second).toEqual(first);
+    expect(fetchMock).toHaveBeenCalledTimes(4); // one user profile and three existing PR searches
+    expect(fetchMock.mock.calls.filter(([url]) => String(url).includes("/users/"))).toHaveLength(1);
+  });
+
   it("coalesces concurrent requests and caches successful PR branch responses", async () => {
     const state = await loadWorker();
     const fetchDeferred = deferred<Response>();

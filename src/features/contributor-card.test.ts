@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { setUrl } from "../test-utils/url";
 import type { ContributorInfo } from "../lib/messages";
+import { setLocale } from "../lib/i18n";
 
 // The card fetches via the service-worker bridge; stub it so tests are pure DOM.
 const fetchContributorInfo =
@@ -21,6 +22,7 @@ function baseInfo(over: Partial<ContributorInfo> = {}): ContributorInfo {
     login: "octocat",
     createdAt: "2026-06-13T00:00:00Z", // 3 days before NOW
     followers: 10,
+    following: 5,
     publicRepos: 5,
     prTotal: 8,
     prMerged: 2,
@@ -56,6 +58,7 @@ describe("injectContributorCard", () => {
     setUrl(`${GH}/owner/repo/pull/1`);
     document.body.innerHTML = "";
     fetchContributorInfo.mockReset();
+    setLocale("en");
   });
 
   afterEach(() => {
@@ -79,6 +82,78 @@ describe("injectContributorCard", () => {
     expect(text).toContain("8 PR · 2 merged · 5 closed"); // history: total/merged/rejected
     expect(text).toContain("1240 contributions in the past year"); // token activity
   });
+
+  it.each([
+    [
+      "en",
+      "Follow",
+      "30k followers · 100k following ⚠",
+      "This is not a follow-back rate",
+      "Possible mass-following",
+    ],
+    ["zh_CN", "关注", "30k 粉丝 · 关注 100k 人 ⚠", "不代表回关率", "疑似批量关注"],
+    ["zh_TW", "關注", "30k 粉絲 · 關注 100k 人 ⚠", "不代表回關率", "疑似批量關注"],
+  ] as const)(
+    "shows follower and following counts in one row in %s",
+    async (locale, label, counts, help, warningText) => {
+      setLocale(locale);
+      fetchContributorInfo.mockResolvedValue(baseInfo({ followers: 30000, following: 100000 }));
+      injectContributorCard();
+      document.body.appendChild(hovercard("octocat"));
+      await flush();
+
+      const rows = [...document.querySelectorAll<HTMLElement>(`${BLOCK}-row`)];
+      const connections = rows.find((r) => r.textContent?.startsWith(label));
+      expect(connections?.querySelector(`${BLOCK}-label`)?.textContent).toBe(label);
+      expect(connections?.querySelector(`${BLOCK}-value`)?.textContent).toBe(counts);
+      expect(connections?.title).toContain("3.33×");
+      expect(connections?.title).toContain(help);
+      const warning = connections?.querySelector<HTMLElement>(`${BLOCK}-warning`);
+      expect(warning?.title).toContain(warningText);
+      expect(warning?.getAttribute("aria-label")).toBe(warning?.title);
+      expect(rows).toHaveLength(5);
+    },
+  );
+
+  it.each([
+    [0, 100, "—"],
+    [0, 0, "—"],
+    [10, 0, "0×"],
+    [10, 5, "0.5×"],
+    [92, 7, "0.08×"],
+  ])("handles %i followers and %i following", async (followers, following, ratio) => {
+    fetchContributorInfo.mockResolvedValue(baseInfo({ followers, following }));
+    injectContributorCard();
+    document.body.appendChild(hovercard("octocat"));
+    await flush();
+
+    const connections = [...document.querySelectorAll<HTMLElement>(`${BLOCK}-row`)].find((r) =>
+      r.textContent?.startsWith("Follow"),
+    );
+    expect(connections?.textContent).toBe(`Follow${followers} followers · ${following} following`);
+    expect(connections?.title).toContain(`Following ÷ followers: ${ratio}.`);
+  });
+
+  it.each([
+    [30000, 19999, "30k followers · 20k following", false],
+    [30000, 20000, "30k followers · 20k following ⚠", true],
+    [0, 20000, "0 followers · 20k following ⚠", true],
+    [1000000, 7, "1m followers · 7 following", false],
+  ])(
+    "checks the actual following count for %i followers and %i following",
+    async (followers, following, counts, flagged) => {
+      fetchContributorInfo.mockResolvedValue(baseInfo({ followers, following }));
+      injectContributorCard();
+      document.body.appendChild(hovercard("octocat"));
+      await flush();
+
+      const connections = [...document.querySelectorAll<HTMLElement>(`${BLOCK}-row`)].find((r) =>
+        r.textContent?.startsWith("Follow"),
+      );
+      expect(connections?.querySelector(`${BLOCK}-value`)?.textContent).toBe(counts);
+      expect(connections?.querySelector(`${BLOCK}-warning`) != null).toBe(flagged);
+    },
+  );
 
   it("passes the current repo context to the fetch", async () => {
     fetchContributorInfo.mockResolvedValue(baseInfo());
@@ -305,6 +380,11 @@ describe("injectContributorCard", () => {
     expect(loading!.dataset.skeleton).toBe("true"); // a skeleton while pending
     expect(loading!.querySelector(`${BLOCK}-skeleton`)).not.toBeNull();
     expect(loading!.textContent).not.toContain("days"); // no real data yet
+    const loadingLabels = [...loading!.querySelectorAll(`${BLOCK}-label`)].map(
+      (el) => el.textContent,
+    );
+    expect(loadingLabels).toContain("Follow");
+    expect(loadingLabels).toHaveLength(5);
 
     resolve(baseInfo());
     await flush();
@@ -313,6 +393,9 @@ describe("injectContributorCard", () => {
     expect(panels).toHaveLength(1); // skeleton replaced in place, not duplicated
     expect(panels[0].dataset.skeleton).toBeUndefined();
     expect(panels[0].textContent).toContain("3 days · 2026-06"); // real data
+    expect([...panels[0].querySelectorAll(`${BLOCK}-label`)].map((el) => el.textContent)).toEqual(
+      loadingLabels,
+    );
   });
 
   it("does not double-decorate the same populated card", async () => {

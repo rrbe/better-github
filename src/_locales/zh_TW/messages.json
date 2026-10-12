@@ -69,9 +69,25 @@
   },
   "featContributorCardName": { "message": "貢獻者背景卡" },
   "featContributorCardDesc": {
-    "message": "在 hover 使用者名稱彈出的卡片裡追加客觀事實（帳號年齡、與本儲存庫關係、歷史 merge 率、活躍度），幫你判斷帳號。只擺事實、不打分。活躍度需要權杖。"
+    "message": "在使用者名稱懸停卡片中展示帳號年齡、關注關係、本儲存庫關係、歷史 PR 和活躍度。關注數量過高時提示疑似批量關注。活躍度需要權杖。"
   },
   "ccAge": { "message": "帳號年齡" },
+  "ccFollow": { "message": "關注" },
+  "ccMassFollowingHelp": {
+    "message": "疑似批量關注，可能透過回關累積粉絲。僅根據關注數量達到 20,000 的情況提示。"
+  },
+  "ccFollowersCount": {
+    "message": "$count$ 粉絲",
+    "placeholders": { "count": { "content": "$1", "example": "91" } }
+  },
+  "ccFollowingCount": {
+    "message": "關注 $count$ 人",
+    "placeholders": { "count": { "content": "$1", "example": "7" } }
+  },
+  "ccFollowRatioHelp": {
+    "message": "關注數 ÷ 粉絲數：$ratio$，不代表回關率。— 表示該帳號沒有粉絲。",
+    "placeholders": { "ratio": { "content": "$1", "example": "0.08×" } }
+  },
   "ccRepo": { "message": "本儲存庫" },
   "ccHistory": { "message": "歷史 PR" },
   "ccActivity": { "message": "活躍度" },

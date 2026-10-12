@@ -69,9 +69,25 @@
   },
   "featContributorCardName": { "message": "Contributor Background Card" },
   "featContributorCardDesc": {
-    "message": "Add objective facts (account age, relation to this repo, historical merge rate, activity) to the hovercard shown when you hover a username. Facts only — no scoring. Activity needs a token."
+    "message": "Add account age, follow counts, repo relationship, PR history, and activity to user hovercards. High following counts show a possible mass-following hint. Activity needs a token."
   },
   "ccAge": { "message": "Account age" },
+  "ccFollow": { "message": "Follow" },
+  "ccMassFollowingHelp": {
+    "message": "Possible mass-following to gain followers through follow-backs. Based only on following count (20,000 or more)."
+  },
+  "ccFollowersCount": {
+    "message": "$count$ followers",
+    "placeholders": { "count": { "content": "$1", "example": "91" } }
+  },
+  "ccFollowingCount": {
+    "message": "$count$ following",
+    "placeholders": { "count": { "content": "$1", "example": "7" } }
+  },
+  "ccFollowRatioHelp": {
+    "message": "Following ÷ followers: $ratio$. This is not a follow-back rate. — means the account has no followers.",
+    "placeholders": { "ratio": { "content": "$1", "example": "0.08×" } }
+  },
   "ccRepo": { "message": "This repo" },
   "ccHistory": { "message": "PR history" },
   "ccActivity": { "message": "Activity" },
