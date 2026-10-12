@@ -69,9 +69,25 @@
   },
   "featContributorCardName": { "message": "贡献者背景卡" },
   "featContributorCardDesc": {
-    "message": "在 hover 用户名弹出的卡片里追加客观事实（账号年龄、与本仓库关系、历史 merge 率、活跃度），帮你判断账号。只摆事实、不打分。活跃度需要令牌。"
+    "message": "在用户名悬停卡片中展示账号年龄、关注关系、本仓库关系、历史 PR 和活跃度。关注数量过高时提示疑似批量关注。活跃度需要令牌。"
   },
   "ccAge": { "message": "账号年龄" },
+  "ccFollow": { "message": "关注" },
+  "ccMassFollowingHelp": {
+    "message": "疑似批量关注，可能通过回关积累粉丝。仅根据关注数量达到 20,000 的情况提示。"
+  },
+  "ccFollowersCount": {
+    "message": "$count$ 粉丝",
+    "placeholders": { "count": { "content": "$1", "example": "91" } }
+  },
+  "ccFollowingCount": {
+    "message": "关注 $count$ 人",
+    "placeholders": { "count": { "content": "$1", "example": "7" } }
+  },
+  "ccFollowRatioHelp": {
+    "message": "关注数 ÷ 粉丝数：$ratio$，不代表回关率。— 表示该账号没有粉丝。",
+    "placeholders": { "ratio": { "content": "$1", "example": "0.08×" } }
+  },
   "ccRepo": { "message": "本仓库" },
   "ccHistory": { "message": "历史 PR" },
   "ccActivity": { "message": "活跃度" },

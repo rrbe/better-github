@@ -802,21 +802,23 @@ async function searchCount(query: string, token: string): Promise<number> {
 interface UserProfile {
   createdAt: string;
   followers: number;
+  following: number;
   publicRepos: number;
 }
 
 async function fetchUserProfile(login: string, token: string): Promise<UserProfile | null> {
-  return cachedFetch<UserProfile | null>(`cache:contrib:user:${login}`, async () => {
+  return cachedFetch<UserProfile | null>(`cache:contrib:user:v2:${login}`, async () => {
     const response = await fetch(`https://api.github.com/users/${encodeURIComponent(login)}`, {
       headers: restHeaders(token),
     });
     if (!response.ok) return null;
-    const data: { created_at?: string; followers?: number; public_repos?: number } =
+    const data: { created_at?: string; followers?: number; following: number; public_repos?: number } =
       await response.json();
     if (!data.created_at) return null;
     return {
       createdAt: data.created_at,
       followers: data.followers ?? 0,
+      following: data.following,
       publicRepos: data.public_repos ?? 0,
     };
   });
@@ -902,6 +904,7 @@ async function fetchContributorInfo(
     login,
     createdAt: profile.createdAt,
     followers: profile.followers,
+    following: profile.following,
     publicRepos: profile.publicRepos,
     prTotal,
     prMerged,

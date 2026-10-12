@@ -1,20 +1,29 @@
 # Contributor Profile Card
 
 Contributor Profile Card 在 GitHub 原生用户 hovercard 底部追加一组贡献者资料，
-帮助用户快速了解不熟悉的贡献者。它只展示来自 GitHub 的客观信息，不打分、不贴
-标签，也不判断账号或贡献质量。
+帮助用户快速了解不熟悉的贡献者。资料来自 GitHub API，关注数量过高时追加
+疑似批量关注的提示。
 
 ## 展示内容
 
 | 项目       | 内容                                                               | 数据来源                                                                            |
 | ---------- | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
 | 账号年龄   | 账号创建至今的时间及创建月份                                       | REST `GET /users/{login}`                                                           |
+| 关注关系   | 粉丝数、关注数及关注数 / 粉丝数的倍数                              | 同一用户资料请求的 `followers`、`following`                                         |
 | 本仓库关系 | Owner、Member、Collaborator、Contributor 或 First-time contributor | REST `GET /repos/{owner}/{repo}/issues?creator={login}` 返回的 `author_association` |
 | 历史 PR    | PR 总数、已合并数、关闭但未合并数                                  | Search API                                                                          |
 | 活跃度     | 过去一年的贡献数                                                   | GraphQL `contributionsCollection`                                                   |
 
 本仓库关系仅在仓库页面且 GitHub 返回有效关系时展示。历史 PR 总数为零或查询失败
 时不展示该行。
+
+粉丝数和关注数合并在 Follow 行展示，大数字缩写为 `30k`、`100k` 等。悬停时
+显示关注数除以粉丝数的比例；没有粉丝时比例显示 `—`。
+
+实际关注数达到 20,000 时，在同一行追加 `⚠`；粉丝数量和关注比例不参与触发。
+图标的悬停说明为“疑似批量关注，可能通过回关积累粉丝”，并解释触发条件。
+20,000 是经验阈值，不是 GitHub 官方判定标准。关注比例不代表回关率，数量提示
+也不能单独证明账号动机。关注关系复用已有用户资料请求，不额外获取粉丝或关注列表。
 
 活跃度需要 GitHub token。未配置 token 时，卡片保留该行并提示用户连接 token；
 其他公开资料仍可匿名获取，但受 GitHub API 匿名限额约束。
@@ -41,8 +50,8 @@ Contributor Profile Card 在 GitHub 原生用户 hovercard 底部追加一组贡
 
 - 所有资料都直接从 GitHub API 获取，不发送给第三方服务。
 - GitHub token 保存在 Chrome 本地存储中，只用于请求 GitHub API。
-- 功能不生成风险分数、可疑标签或颜色警告。
-- Followers 和 public repository 数量虽然随用户资料一起返回，但当前不会展示。
+- 关注提示只基于公开的关注数量，不生成风险分数。
+- Public repository 数量虽然随用户资料一起返回，但当前不会展示。
 
 ## 代码位置
 

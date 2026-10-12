@@ -967,6 +967,10 @@ a.better-github-review-popover-item:hover {
   color: var(--fgColor-muted, var(--color-fg-muted, #59636e));
 }
 
+.better-github-contributor-card-warning {
+  color: var(--fgColor-attention, var(--color-attention-fg, #9a6700));
+}
+
 /* Loading skeleton — shown the instant the card opens so real data fills in
    rather than the panel popping into existence. Bars sit in the same row slots
    as the real label/value, so swapping in the data causes no layout shift.

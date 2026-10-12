@@ -89,7 +89,7 @@ Better GitHub is a Chrome extension that enhances the GitHub experience. Inspire
 
 ### Profile
 
-- **Contributor Card** — Hover a username to append a panel of objective facts to GitHub's native hovercard: account age, relation to the current repo (first-time vs. returning contributor), historical PR merge rate, and last-year activity. Helps you size up an unfamiliar contributor at a glance — for instance, spotting mass-generated low-effort PRs. Facts only: no scoring, no labels. The activity row requires a token.
+- **Contributor Card** — Hover a username to append account age, follower/following counts, relation to the current repo (first-time vs. returning contributor), PR history, and last-year activity to GitHub's native hovercard. Following 20,000 or more users shows a possible mass-following hint based only on that count. The activity row requires a token.
 
    <details>
       <summary>Screenshot</summary>

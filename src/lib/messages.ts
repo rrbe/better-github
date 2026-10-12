@@ -90,6 +90,7 @@ export interface ContributorInfo {
   /** ISO timestamp of account creation (REST `created_at`). */
   createdAt: string;
   followers: number;
+  following: number;
   publicRepos: number;
   /** Total PRs authored across GitHub (Search `type:pr author:X`). */
   prTotal: number;

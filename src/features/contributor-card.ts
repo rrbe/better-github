@@ -2,7 +2,8 @@
 //
 // GitHub shows a hovercard when you hover a username. We attach a panel of
 // *objective facts* to it — account age, relation to this repo, historical merge
-// history, and activity. Facts only: no score, labels, or warnings.
+// history, activity, and follower/following counts. A high following count gets
+// a possible mass-following hint.
 // See docs/contributor-profile-card.md.
 //
 // DOM verified against a live page (2026-06):
@@ -28,6 +29,11 @@ import type { ContributorInfo } from "../lib/messages";
 import { t } from "../lib/i18n";
 
 const PANEL_CLASS = "better-github-contributor-card";
+const FOLLOW_COUNT_FORMAT = new Intl.NumberFormat("en", {
+  notation: "compact",
+  maximumFractionDigits: 1,
+});
+const MASS_FOLLOWING_THRESHOLD = 20_000;
 
 /** Read the login from a hovercard content root's hydro-view payload, but only
  * when it's a *user* hovercard (repos/issues reuse the same container). */
@@ -134,6 +140,30 @@ function buildPanel(login: string, info: ContributorInfo): HTMLElement {
     row("ccAge", valueEl([{ strong: `${age.value} ${ageUnitWord(age)}` }, { dim: ` · ${created}` }])),
   );
 
+  const followers = FOLLOW_COUNT_FORMAT.format(info.followers).toLowerCase();
+  const following = FOLLOW_COUNT_FORMAT.format(info.following).toLowerCase();
+  const followCounts = valueEl([
+    ...emphasizeToken(t("ccFollowersCount", followers), followers),
+    " · ",
+    ...emphasizeToken(t("ccFollowingCount", following), following),
+  ]);
+  const connections = row("ccFollow", followCounts);
+  const ratio =
+    info.followers === 0
+      ? "—"
+      : `${(info.following / info.followers).toLocaleString(undefined, { maximumFractionDigits: 2 })}×`;
+  connections.title = t("ccFollowRatioHelp", ratio);
+  if (info.following >= MASS_FOLLOWING_THRESHOLD) {
+    const warning = document.createElement("span");
+    warning.className = `${PANEL_CLASS}-warning`;
+    warning.textContent = "⚠";
+    warning.title = t("ccMassFollowingHelp");
+    warning.setAttribute("role", "img");
+    warning.setAttribute("aria-label", warning.title);
+    followCounts.append(" ", warning);
+  }
+  panel.appendChild(connections);
+
   const rel = repoRelation(info.repoAssociation);
   if (rel) {
     panel.appendChild(row("ccRepo", valueEl([{ strong: t(relationLabelKey(rel)) }])));
@@ -189,9 +219,10 @@ function buildSkeleton(login: string): HTMLElement {
   panel.dataset.login = login;
   panel.dataset.skeleton = "true";
   panel.appendChild(header());
-  // [label key, value-bar width] per row — mirrors age/repo/history/activity.
+  // [label key, value-bar width] per row — mirrors the loaded facts.
   for (const [labelKey, vw] of [
     ["ccAge", 92],
+    ["ccFollow", 132],
     ["ccRepo", 132],
     ["ccHistory", 108],
     ["ccActivity", 150],
