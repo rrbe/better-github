@@ -100,4 +100,25 @@ describe("reserveInfoRowSkeletons", () => {
       vi.useRealTimers();
     }
   });
+
+  it("reserves commit stats inside the unprefixed content wrapper instead of the grid row", () => {
+    setUrl(`${GH}/owner/repo/commits/main`);
+    document.body.innerHTML = `
+      <li data-testid="commit-row-item" id="row">
+        <div><h4><a href="/owner/repo/commit/${SHA}">commit</a></h4></div>
+        <div class="container__VGL_Vt"><div class="inner__Rm1Enx"><div id="metadata">author and checks</div></div></div>
+      </li>
+    `;
+
+    reserveInfoRowSkeletons({ "feature-commit-diff-stats": true });
+    reserveInfoRowSkeletons({ "feature-commit-diff-stats": true });
+
+    const skeleton = document.querySelector(".bg-skeleton-pill--commit-diff")!;
+    expect(skeleton.parentElement).toBe(document.querySelector(".inner__Rm1Enx"));
+    expect(skeleton.previousElementSibling).toBe(document.getElementById("metadata"));
+    expect(document.querySelectorAll(".bg-skeleton-pill--commit-diff")).toHaveLength(1);
+    expect(document.querySelector("#row > .bg-skeleton-pill--commit-diff")).toBeNull();
+    clearSkeletons("commitDiff");
+    expect(document.querySelector(".bg-skeleton-pill--commit-diff")).toBeNull();
+  });
 });

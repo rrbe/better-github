@@ -35,6 +35,21 @@ describe("getOrCreateInfoRow", () => {
     expect(meta.nextElementSibling).toBe(infoRow);
   });
 
+  it("uses the current content wrapper without mounting inside the status icon", () => {
+    document.body.innerHTML = `
+      <li>
+        <div class="container__Woawlr"><div><div class="inner__BgjhSm"><span>Open</span></div></div></div>
+        <div class="container__VGL_Vt"><div class="inner__Rm1Enx"><div>Metadata</div></div></div>
+      </li>
+    `;
+
+    const infoRow = getOrCreateInfoRow(document.querySelector("li")!);
+
+    expect(infoRow).not.toBeNull();
+    expect(infoRow?.parentElement).toBe(document.querySelector(".inner__Rm1Enx"));
+    expect(document.querySelector(".inner__BgjhSm .better-github-info-row")).toBeNull();
+  });
+
   it("falls back to inserting after the title link", () => {
     document.body.innerHTML = `
       <li id="issue_3">

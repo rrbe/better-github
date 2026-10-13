@@ -1,6 +1,7 @@
 import { isCommitsListPage, getRepoInfo } from "../lib/page-detect";
 import { fetchCommitDiffStats } from "../lib/github-api";
-import { collectCommitRows, MAIN_CONTENT_INNER_SELECTOR } from "../lib/commit-dom";
+import { collectCommitRows } from "../lib/commit-dom";
+import { MAIN_CONTENT_INNER_SELECTOR } from "../lib/list-view-dom";
 import { buildDiffStatsBadge } from "../lib/diff-stats-badge";
 import { clearSkeletons } from "../lib/info-row-skeleton";
 

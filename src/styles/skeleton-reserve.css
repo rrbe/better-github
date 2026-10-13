@@ -13,14 +13,25 @@
  */
 
 [data-bg-page="pr-list"] .js-issue-row::after,
-[data-bg-page="pr-list"] li[role="listitem"] [class*="MainContent-module__inner"]::after,
+[data-bg-page="pr-list"]
+  li[role="listitem"]
+  :is(
+    [class*="MainContent-module__inner"],
+    div[class^="container__"] > div[class^="inner__"]
+  )::after,
 [data-bg-page="pr-list"]
   react-app:is([app-name="pull-requests"], [app-name="repo"])
   li
-  [class*="MainContent-module__inner"]::after,
+  :is(
+    [class*="MainContent-module__inner"],
+    div[class^="container__"] > div[class^="inner__"]
+  )::after,
 [data-bg-page="commits-list"]
   li[data-testid="commit-row-item"]
-  [class*="MainContent-module__inner"]::after {
+  :is(
+    [class*="MainContent-module__inner"],
+    div[class^="container__"] > div[class^="inner__"]
+  )::after {
   content: "";
   display: block;
   height: 20px;
@@ -31,17 +42,24 @@
 [data-bg-page="pr-list"]
   react-app:is([app-name="pull-requests"], [app-name="repo"])
   [data-density="compact"]
-  [class*="MainContent-module__inner"]::after,
+  :is(
+    [class*="MainContent-module__inner"],
+    div[class^="container__"] > div[class^="inner__"]
+  )::after,
 [data-bg-page="pr-list"]
   li[role="listitem"]
-  [class*="MainContent-module__inner"]:has(.better-github-info-row)::after,
+  :is([class*="MainContent-module__inner"], div[class^="container__"] > div[class^="inner__"]):has(
+    .better-github-info-row
+  )::after,
 [data-bg-page="pr-list"]
   react-app:is([app-name="pull-requests"], [app-name="repo"])
   li
-  [class*="MainContent-module__inner"]:has(.better-github-info-row)::after,
+  :is([class*="MainContent-module__inner"], div[class^="container__"] > div[class^="inner__"]):has(
+    .better-github-info-row
+  )::after,
 [data-bg-page="commits-list"]
   li[data-testid="commit-row-item"]
-  [class*="MainContent-module__inner"]:has(
+  :is([class*="MainContent-module__inner"], div[class^="container__"] > div[class^="inner__"]):has(
     .better-github-commit-diff-stats,
     .bg-skeleton-pill--commit-diff
   )::after {

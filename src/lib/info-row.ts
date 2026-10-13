@@ -1,5 +1,6 @@
 import { isCompactPRRow } from "./pr-list-dom";
 import { isPRListReady } from "./pr-list-ready";
+import { MAIN_CONTENT_INNER_SELECTOR } from "./list-view-dom";
 
 /**
  * Shared "info row" below the meta line in PR/issue list items.
@@ -26,7 +27,7 @@ export function getOrCreateInfoRow(row: Element): HTMLElement | null {
   infoRow.className = INFO_ROW_CLASS;
 
   // New GitHub DOM: append inside MainContent inner container
-  const mainInner = row.querySelector<HTMLElement>("[class*='MainContent-module__inner']");
+  const mainInner = row.querySelector<HTMLElement>(MAIN_CONTENT_INNER_SELECTOR);
   if (mainInner) {
     mainInner.appendChild(infoRow);
     return infoRow;

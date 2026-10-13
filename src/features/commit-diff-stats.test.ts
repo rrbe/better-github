@@ -77,6 +77,32 @@ describe("injectCommitDiffStats", () => {
     expect(badge.title).toBe("10 additions, 2 deletions");
   });
 
+  it("keeps stats below the metadata in GitHub's grid rows with unprefixed CSS classes", async () => {
+    document.body.innerHTML = `
+      <li data-testid="commit-row-item" id="row-a" class="listItem__X41oTe">
+        <div class="container__mDVuhO">
+          <h4><a href="/owner/repo/commit/${SHA_A}">commit message</a></h4>
+        </div>
+        <div class="container__VGL_Vt">
+          <div class="inner__Rm1Enx"><div id="metadata">author and checks</div></div>
+        </div>
+        <div class="container__1MF1B1"><a href="/owner/repo/commit/${SHA_A}">short SHA</a></div>
+      </li>
+    `;
+    vi.mocked(fetchCommitDiffStats).mockResolvedValue([
+      { sha: SHA_A, additions: 24, deletions: 2, changedFiles: 5 },
+    ]);
+
+    await injectCommitDiffStats();
+    await injectCommitDiffStats();
+
+    const badge = document.querySelector(BADGE)!;
+    expect(badge.parentElement).toBe(document.querySelector(".inner__Rm1Enx"));
+    expect(badge.previousElementSibling).toBe(document.getElementById("metadata"));
+    expect(document.querySelectorAll(BADGE)).toHaveLength(1);
+    expect(document.querySelector(`#row-a > ${BADGE}`)).toBeNull();
+  });
+
   it("leaves rows whose SHA the API did not return without a badge", async () => {
     document.body.innerHTML = commitRow("row-a", SHA_A) + commitRow("row-b", SHA_B);
     vi.mocked(fetchCommitDiffStats).mockResolvedValue([

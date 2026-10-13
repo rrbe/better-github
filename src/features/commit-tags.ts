@@ -1,7 +1,8 @@
 import { isCommitsListPage, getRepoInfo } from "../lib/page-detect";
 import { fetchRepoTags } from "../lib/github-api";
 import { escapeHtml } from "../lib/utils";
-import { collectCommitRows, MAIN_CONTENT_INNER_SELECTOR } from "../lib/commit-dom";
+import { collectCommitRows } from "../lib/commit-dom";
+import { MAIN_CONTENT_INNER_SELECTOR } from "../lib/list-view-dom";
 import { t } from "../lib/i18n";
 
 const TAG_CLASS = "better-github-commit-tag";
