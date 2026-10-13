@@ -106,7 +106,7 @@ describe("reserveInfoRowSkeletons", () => {
     document.body.innerHTML = `
       <li data-testid="commit-row-item" id="row">
         <div><h4><a href="/owner/repo/commit/${SHA}">commit</a></h4></div>
-        <div><div class="inner__Rm1Enx"><div id="metadata">author and checks</div></div></div>
+        <div class="container__VGL_Vt"><div class="inner__Rm1Enx"><div id="metadata">author and checks</div></div></div>
       </li>
     `;
 

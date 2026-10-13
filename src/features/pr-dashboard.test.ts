@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { dashboardRow, repoDashboard } from "../test-utils/pr-dashboard";
+import { dashboardRow as buildDashboardRow, repoDashboard } from "../test-utils/pr-dashboard";
 import { setUrl } from "../test-utils/url";
 import { collectPRRows } from "../lib/pr-list-dom";
 import { reserveInfoRowSkeletons } from "../lib/info-row-skeleton";
@@ -23,7 +23,8 @@ async function injectBadges(): Promise<void> {
   await Promise.all([injectPRBranchNames(), injectPRDiffStats(), injectPRReviewStatus()]);
 }
 
-describe("repository PR dashboard preview", () => {
+describe.each(["prefixed", "current"] as const)("repository PR dashboard (%s DOM)", (dom) => {
+  const dashboardRow = (number: number, label?: string) => buildDashboardRow(number, label, dom);
   beforeEach(() => {
     vi.clearAllMocks();
     setUrl("https://github.com/owner/repo/pulls");
@@ -51,7 +52,8 @@ describe("repository PR dashboard preview", () => {
     expect(document.querySelectorAll(".bg-skeleton-pill")).toHaveLength(2);
     await injectBadges();
     const info = document.querySelector(".better-github-info-row")!;
-    expect(info.previousElementSibling?.className).toContain("Description-module__container");
+    expect(info.previousElementSibling?.textContent).toBe("#7 · author opened yesterday");
+    expect(document.querySelector(".inner__BgjhSm .better-github-info-row")).toBeNull();
     expect([...info.children].map((el) => (el as HTMLElement).dataset.bgInfoRowItem)).toEqual([
       "branch",
       "diff",

@@ -1,6 +1,7 @@
 import { collectPRRows, PR_DASHBOARD_SELECTOR } from "./pr-list-dom";
 import { isPRListPage, isCommitsListPage, getRepoInfo } from "./page-detect";
-import { collectCommitRows, MAIN_CONTENT_INNER_SELECTOR } from "./commit-dom";
+import { collectCommitRows } from "./commit-dom";
+import { MAIN_CONTENT_INNER_SELECTOR } from "./list-view-dom";
 import { INFO_ROW_CLASS, insertInfoRowItem } from "./info-row";
 
 export type SkeletonKind = "branch" | "prDiff" | "commitDiff";

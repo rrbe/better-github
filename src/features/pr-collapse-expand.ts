@@ -3,6 +3,7 @@ import { t } from "../lib/i18n";
 
 const TREE_BTN_CLASS = "better-github-toggle-tree";
 const DIFF_BTN_CLASS = "better-github-collapse-expand";
+const TREE_SIDEBAR_SELECTOR = "#pr-file-tree, [class*='PullRequestFileTree-module__sidebar']";
 
 // 16x16 Octicon SVG paths
 const ICON_FOLD_DOWN =
@@ -24,6 +25,7 @@ export function injectPRCollapseExpand(): void {
 // --- File tree folder collapse/expand (PR pages only) ---
 
 interface TreeFolder {
+  element: Element;
   isExpanded: boolean;
   level: number;
   toggle(): void;
@@ -31,13 +33,12 @@ interface TreeFolder {
 
 function getTreeFolders(): TreeFolder[] {
   // New experience: aria-expanded lives on the <li> itself
-  const newSidebar = document.querySelector(
-    '[class*="PullRequestFileTree-module__sidebar"]'
-  );
+  const newSidebar = document.querySelector(TREE_SIDEBAR_SELECTOR);
   if (newSidebar) {
     return Array.from(
       newSidebar.querySelectorAll('li[role="treeitem"][aria-expanded]')
     ).map((el) => ({
+      element: el,
       isExpanded: el.getAttribute("aria-expanded") === "true",
       level: parseInt(el.getAttribute("aria-level") || "0", 10),
       toggle: () =>
@@ -55,6 +56,7 @@ function getTreeFolders(): TreeFolder[] {
       "button.ActionList-content[aria-expanded]"
     );
     return {
+      element: el,
       isExpanded: btn?.getAttribute("aria-expanded") === "true",
       level: parseInt(el.getAttribute("aria-level") || "0", 10),
       toggle: () => btn?.click(),
@@ -67,9 +69,7 @@ function findTreeInjectionPoint(): {
   reference: Element;
 } | null {
   // New experience
-  const newSidebar = document.querySelector(
-    '[class*="PullRequestFileTree-module__sidebar"]'
-  );
+  const newSidebar = document.querySelector(TREE_SIDEBAR_SELECTOR);
   if (newSidebar) {
     const scrollable = newSidebar.querySelector(
       '[class*="FileTreeScrollable"]'
@@ -119,23 +119,44 @@ function injectTreeToggle(): void {
 
   updateLabel();
 
+  let expansionFrame: number | null = null;
   btn.addEventListener("click", () => {
     // Release focus so Space keeps scrolling the PR instead of re-triggering the button.
     btn.blur();
+    if (expansionFrame !== null) cancelAnimationFrame(expansionFrame);
+    expansionFrame = null;
     const folders = getTreeFolders();
     const shouldCollapse = areMajorityExpanded();
 
-    // Sort by depth: collapse deepest first, expand shallowest first
-    const sorted = [...folders].sort((a, b) =>
-      shouldCollapse ? b.level - a.level : a.level - b.level
-    );
+    if (!shouldCollapse) {
+      // React unmounts children of collapsed folders. Expand one depth per frame
+      // so the next pass sees the newly rendered child folders.
+      const attempted = new WeakSet<Element>();
+      const expandNextLevel = () => {
+        expansionFrame = null;
+        if (!btn.isConnected) return;
+        const collapsed = getTreeFolders().filter(
+          (folder) => !folder.isExpanded && !attempted.has(folder.element)
+        );
+        if (collapsed.length === 0) {
+          updateLabel();
+          return;
+        }
+        const level = Math.min(...collapsed.map((folder) => folder.level));
+        for (const folder of collapsed.filter((folder) => folder.level === level)) {
+          attempted.add(folder.element);
+          folder.toggle();
+        }
+        expansionFrame = requestAnimationFrame(expandNextLevel);
+      };
+      expandNextLevel();
+      return;
+    }
 
+    // Collapse deepest first, before React unmounts child folders.
+    const sorted = [...folders].sort((a, b) => b.level - a.level);
     for (const folder of sorted) {
-      if (shouldCollapse && folder.isExpanded) {
-        folder.toggle();
-      } else if (!shouldCollapse && !folder.isExpanded) {
-        folder.toggle();
-      }
+      if (folder.isExpanded) folder.toggle();
     }
 
     setTimeout(updateLabel, 100);
@@ -155,7 +176,7 @@ interface DiffFile {
 function getDiffFiles(): DiffFile[] {
   // New experience
   const newHeaders = document.querySelectorAll(
-    '[class*="DiffFileHeader-module__diff-file-header"]'
+    '[class*="diff-file-header"]'
   );
   if (newHeaders.length > 0) {
     return Array.from(newHeaders).map((header) => ({
@@ -184,7 +205,7 @@ function findDiffInjectionPoint(): {
 } | null {
   // New experience: prepend inside the right controls area
   const prToolbar = document.querySelector(
-    'section[class*="PullRequestFilesToolbar-module__toolbar"]'
+    'section[class*="toolbar__"]'
   );
   if (prToolbar) {
     const rightControls = prToolbar.children[2];
