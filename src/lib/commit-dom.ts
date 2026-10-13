@@ -3,8 +3,9 @@
 // Covers both classic GitHub DOM (<li>) and new React DOM (div.TimelineItem-body / div[data-testid]).
 export const COMMIT_ROW_SELECTOR = "li, div.TimelineItem-body, div[data-testid]";
 
-// Hashed CSS-module class on new GitHub's commit-row inner content wrapper.
-export const MAIN_CONTENT_INNER_SELECTOR = "[class*='MainContent-module__inner']";
+// GitHub's commit content wrapper now omits the CSS-module name prefix.
+export const MAIN_CONTENT_INNER_SELECTOR =
+  "[class*='MainContent-module__inner'], [class^='inner__']";
 
 export function collectCommitRows(owner: string, repo: string): Map<string, Element> {
   const pattern = new RegExp(`^/${owner}/${repo}/commit/([0-9a-f]{40})$`, "i");
