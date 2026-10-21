@@ -32,7 +32,10 @@ export async function injectPRDiffStats(): Promise<void> {
 
       if (row.querySelector(`.${BADGE_CLASS}`)) continue;
 
-      insertInfoRowItem(row, "diff", buildDiffStatsBadge(stat, BADGE_CLASS));
+      const link = document.createElement("a");
+      link.href = `/${info.owner}/${info.repo}/pull/${prNumber}/changes`;
+      link.appendChild(buildDiffStatsBadge(stat, BADGE_CLASS));
+      insertInfoRowItem(row, "diff", link);
     }
   } finally {
     clearSkeletons("prDiff");
