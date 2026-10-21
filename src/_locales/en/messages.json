@@ -245,6 +245,9 @@
     "message": "$count$ files",
     "placeholders": { "count": { "content": "$1", "example": "5" } }
   },
+  "prDiffStatsLinkHint": {
+    "message": "Click to view file changes"
+  },
   "diffStatsTitle": {
     "message": "$add$ additions, $del$ deletions",
     "placeholders": {

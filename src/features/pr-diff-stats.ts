@@ -4,6 +4,7 @@ import { fetchPRDiffStats } from "../lib/github-api";
 import { insertInfoRowItem } from "../lib/info-row";
 import { buildDiffStatsBadge } from "../lib/diff-stats-badge";
 import { clearSkeletons } from "../lib/info-row-skeleton";
+import { t } from "../lib/i18n";
 
 const BADGE_CLASS = "better-github-diff-stats";
 
@@ -32,7 +33,12 @@ export async function injectPRDiffStats(): Promise<void> {
 
       if (row.querySelector(`.${BADGE_CLASS}`)) continue;
 
-      insertInfoRowItem(row, "diff", buildDiffStatsBadge(stat, BADGE_CLASS));
+      const link = document.createElement("a");
+      link.href = `/${info.owner}/${info.repo}/pull/${prNumber}/changes`;
+      const badge = buildDiffStatsBadge(stat, BADGE_CLASS);
+      badge.title += `\n${t("prDiffStatsLinkHint")}`;
+      link.appendChild(badge);
+      insertInfoRowItem(row, "diff", link);
     }
   } finally {
     clearSkeletons("prDiff");

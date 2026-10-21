@@ -50,7 +50,7 @@ describe("injectPRDiffStats", () => {
     expect(badge7.querySelector(".better-github-diff-stats-add")?.textContent).toBe("+1,234");
     expect(badge7.querySelector(".better-github-diff-stats-del")?.textContent).toBe("−56");
     expect(badge7.querySelector(".better-github-diff-stats-files")?.textContent).toBe("3 files");
-    expect(badge7.title).toBe("1,234 additions, 56 deletions across 3 files");
+    expect(badge7.title).toBe("1,234 additions, 56 deletions across 3 files\nClick to view file changes");
 
     // changedFiles === 1 → singular "file".
     const badge8 = document.querySelector("#issue_8 .better-github-diff-stats") as HTMLElement;
