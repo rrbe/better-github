@@ -245,6 +245,9 @@
     "message": "$count$ 个文件",
     "placeholders": { "count": { "content": "$1", "example": "5" } }
   },
+  "prDiffStatsLinkHint": {
+    "message": "点击查看文件变更"
+  },
   "diffStatsTitle": {
     "message": "新增 $add$ 行，删除 $del$ 行",
     "placeholders": {
