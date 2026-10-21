@@ -28,6 +28,7 @@ import { injectPRCollapseExpand } from "./features/pr-collapse-expand";
 import { injectContributorCard, cleanupContributorCard } from "./features/contributor-card";
 import { reserveInfoRowSkeletons } from "./lib/info-row-skeleton";
 import { applyPageMarker } from "./lib/page-marker";
+import { injectTrendingLink } from "./features/trending-link";
 
 const FEATURE_KEYS = [
   "feature-pr-branch-names",
@@ -42,6 +43,7 @@ const FEATURE_KEYS = [
   "feature-commit-tags",
   "feature-commit-diff-stats",
   "feature-better-top-repos",
+  "feature-trending-link",
   "feature-watch-fork-star-popup",
   "feature-pr-collapse-expand",
   "feature-contributor-card",
@@ -63,6 +65,7 @@ const FEATURE_CLASSES: Record<FeatureKey, string[]> = {
   "feature-commit-tags": ["better-github-commit-tag"],
   "feature-commit-diff-stats": ["better-github-commit-diff-stats", "bg-skeleton-pill--commit-diff"],
   "feature-better-top-repos": [],
+  "feature-trending-link": ["better-github-trending-nav"],
   "feature-watch-fork-star-popup": ["bg-wfs-popup"],
   "feature-pr-collapse-expand": ["better-github-toggle-tree", "better-github-collapse-expand"],
   "feature-contributor-card": ["better-github-contributor-card"],
@@ -148,6 +151,9 @@ function injectFeature(key: FeatureKey): void {
       break;
     case "feature-better-top-repos":
       injectBetterTopRepos();
+      break;
+    case "feature-trending-link":
+      injectTrendingLink();
       break;
     case "feature-watch-fork-star-popup":
       injectWatchForkStarPopup();
