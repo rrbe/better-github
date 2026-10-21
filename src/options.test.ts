@@ -13,6 +13,7 @@ const FEATURE_KEYS = [
   "feature-commit-tags",
   "feature-commit-diff-stats",
   "feature-better-top-repos",
+  "feature-trending-link",
   "feature-watch-fork-star-popup",
   "feature-pr-collapse-expand",
   "feature-contributor-card",

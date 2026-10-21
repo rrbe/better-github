@@ -37,6 +37,10 @@
   "groupRepository": { "message": "仓库" },
   "groupProfile": { "message": "用户" },
 
+  "featTrendingLinkName": { "message": "Trending 入口" },
+  "featTrendingLinkDesc": {
+    "message": "在首页侧栏的 Feed 下方添加 Trending 快捷入口。"
+  },
   "featBetterTopReposName": { "message": "增强的热门仓库" },
   "featBetterTopReposDesc": {
     "message": "自动展开「热门仓库」列表，并将你喜爱的仓库置顶。"

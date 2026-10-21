@@ -37,6 +37,10 @@
   "groupRepository": { "message": "Repository" },
   "groupProfile": { "message": "Profile" },
 
+  "featTrendingLinkName": { "message": "Trending Link" },
+  "featTrendingLinkDesc": {
+    "message": "Add a Trending shortcut below Feed in the home sidebar."
+  },
   "featBetterTopReposName": { "message": "Better Top Repositories" },
   "featBetterTopReposDesc": {
     "message": "Auto-expand the \"Top repositories\" list and pin your favorite repos to the top."

@@ -37,6 +37,10 @@
   "groupRepository": { "message": "儲存庫" },
   "groupProfile": { "message": "使用者" },
 
+  "featTrendingLinkName": { "message": "Trending 入口" },
+  "featTrendingLinkDesc": {
+    "message": "在首頁側欄的 Feed 下方加入 Trending 快捷入口。"
+  },
   "featBetterTopReposName": { "message": "增強的熱門儲存庫" },
   "featBetterTopReposDesc": {
     "message": "自動展開「熱門儲存庫」清單，並將你喜愛的儲存庫置頂。"
