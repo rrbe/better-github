@@ -12,18 +12,14 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@types/chrome": "^0.2.5",
-    "@vitest/coverage-v8": "4.1.11",
-    "esbuild": "^0.28.1",
-    "happy-dom": "^20.11.1",
-    "oxfmt": "^0.62.0",
-    "oxlint": "^1.77.0",
+    "@types/chrome": "^0.3.6",
+    "@vitest/coverage-v8": "5.0.5",
+    "esbuild": "^0.28.2",
+    "happy-dom": "^21.0.4",
+    "oxfmt": "^0.74.0",
+    "oxlint": "^1.89.0",
     "typescript": "^7.0.2",
-    "vitest": "^4.1.11"
-  },
-  "pnpm": {
-    "overrides": {
-      "oxfmt>tinypool": "2.1.2"
-    }
+    "vite": "8.3.5",
+    "vitest": "^5.0.5"
   }
 }
