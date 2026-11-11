@@ -229,7 +229,7 @@ describe("injectBetterTopRepos", () => {
     expect(pinButtons()).toHaveLength(0);
   });
 
-  it("stops clicking Show more after the click cap and falls through to pinning", async () => {
+  it("auto-expands once even when Show more is replaced and still injects pins", async () => {
     stubChrome();
     let clicks = 0;
     document.body.innerHTML = `
@@ -247,13 +247,22 @@ describe("injectBetterTopRepos", () => {
       clicks++;
     };
 
-    // MAX_SHOW_MORE_CLICKS is 5; the 6th call must give up and inject pins.
+    injectBetterTopRepos();
+    await flush();
+    expect(clicks).toBe(1);
+
+    const replacement = showMore.cloneNode(true) as HTMLButtonElement;
+    replacement.click = () => {
+      clicks++;
+    };
+    showMore.replaceWith(replacement);
+
     for (let i = 0; i < 6; i++) {
       injectBetterTopRepos();
       await flush();
     }
 
-    expect(clicks).toBe(5);
+    expect(clicks).toBe(1);
     expect(pinButtons()).toHaveLength(1);
   });
 });

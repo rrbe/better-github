@@ -1,7 +1,6 @@
 import { t } from "../lib/i18n";
 
 const MIN_REPOS = 20;
-const MAX_SHOW_MORE_CLICKS = 5;
 const PIN_INJECTED_ATTR = "data-better-github-pin-injected";
 const STORAGE_KEY = "pinned-repos";
 
@@ -13,8 +12,7 @@ const PIN_SVG_FILLED = `<svg xmlns="http://www.w3.org/2000/svg" width="12" heigh
   <path d="M4.456.734a1.75 1.75 0 0 1 2.826.504l.613 1.327a3.08 3.08 0 0 0 2.084 1.707l2.454.584c1.332.317 1.8 1.972.832 2.94L11.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06L10 11.06l-2.204 2.205c-.968.968-2.623.5-2.94-.832l-.584-2.454a3.08 3.08 0 0 0-1.707-2.084l-1.327-.613a1.75 1.75 0 0 1-.504-2.826Z"/>
 </svg>`;
 
-// Track click count per "Show more" button to avoid infinite loops
-const clickCounts = new WeakMap<HTMLElement, number>();
+const expandedLists = new WeakSet<HTMLUListElement>();
 
 // GitHub renders the dashboard "Top repositories" list in two different layouts
 // depending on the "New Dashboard Experience" feature flag:
@@ -31,17 +29,14 @@ export function injectBetterTopRepos(): void {
   const list = findRepoList();
   if (!list) return;
 
-  // Auto-expand: keep clicking "Show more" until >= MIN_REPOS or no more
+  // Auto-expand once when fewer than MIN_REPOS are loaded.
   const items = getRepoItems(list);
-  if (items.length < MIN_REPOS) {
+  if (items.length < MIN_REPOS && !expandedLists.has(list.ul)) {
     const showMoreBtn = getShowMore(list);
     if (showMoreBtn) {
-      const clicks = clickCounts.get(showMoreBtn) || 0;
-      if (clicks < MAX_SHOW_MORE_CLICKS) {
-        clickCounts.set(showMoreBtn, clicks + 1);
-        showMoreBtn.click();
-        return; // Wait for next poll to inject pins after new items load
-      }
+      expandedLists.add(list.ul);
+      showMoreBtn.click();
+      return; // Wait for next poll to inject pins after new items load
     }
   }
 
