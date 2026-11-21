@@ -24,10 +24,10 @@ Better GitHub 是一个增强 GitHub 使用体验的 Chrome 插件，灵感源�
 
 ### 首页
 
-- **Better Top Repositories** — 自动展开侧边栏 "Top repositories" 列表，并支持将常用仓库置顶。适用于 Dashboard、Feed 页面和导航抽屉。
+- ~~**Better Top Repositories** — 自动展开侧边栏 "Top repositories" 列表，并支持将常用仓库置顶。适用于 Dashboard、Feed 页面和导航抽屉。~~ 在 GitHub 新版首页，点击侧边栏的 **Edit repositories** 即可选择要置顶的仓库。[GitHub 更新公告](https://github.blog/changelog/2026-11-20-pin-your-favorite-repositories-to-your-dashboard/)
 
    <details>
-      <summary>示例截图</summary>
+      <summary>原扩展功能截图</summary>
       <img src="docs/screenshots/better-top-repositories.png" alt="Better Top Repositories" width="300" />
    </details>
 

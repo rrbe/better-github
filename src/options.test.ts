@@ -12,7 +12,6 @@ const FEATURE_KEYS = [
   "feature-default-sort",
   "feature-commit-tags",
   "feature-commit-diff-stats",
-  "feature-better-top-repos",
   "feature-trending-link",
   "feature-watch-fork-star-popup",
   "feature-pr-collapse-expand",
@@ -37,7 +36,7 @@ function buildDom(): void {
     <div id="footer"></div>
     ${checkboxes}
     <details class="feature-group" open>
-      <li class="feature-item"><div class="feature-name">Better Top Repositories</div></li>
+      <li class="feature-item"><div class="feature-name">Trending Link</div></li>
     </details>
     <details class="feature-group">
       <li class="feature-item"><div class="feature-name">Default Sort</div></li>
@@ -164,12 +163,11 @@ describe("options page", () => {
     await loadOptions({});
     const input = $<HTMLInputElement>("searchInput");
 
-    input.value = "top";
+    input.value = "trending";
     input.dispatchEvent(new Event("input"));
 
     const groups = document.querySelectorAll<HTMLElement>(".feature-group");
     const items = document.querySelectorAll<HTMLElement>(".feature-item");
-    // "Better Top Repositories" matches; "Default Sort" does not.
     expect(items[0].style.display).toBe("");
     expect(items[1].style.display).toBe("none");
     expect(groups[1].style.display).toBe("none");

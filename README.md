@@ -24,10 +24,10 @@ Better GitHub is a Chrome extension that enhances the GitHub experience. Inspire
 
 ### Home
 
-- **Better Top Repositories** — Auto-expand the "Top repositories" sidebar list and pin your favorite repos to the top. Works on the dashboard, feed page, and navigation drawer.
+- ~~**Better Top Repositories** — Auto-expand the "Top repositories" sidebar list and pin your favorite repos to the top. Works on the dashboard, feed page, and navigation drawer.~~ On GitHub’s new dashboard, use **Edit repositories** in the sidebar to choose your favorites. [GitHub changelog](https://github.blog/changelog/2026-11-20-pin-your-favorite-repositories-to-your-dashboard/)
 
    <details>
-      <summary>Screenshot</summary>
+      <summary>Former extension UI</summary>
       <img src="docs/screenshots/better-top-repositories.png" alt="Better Top Repositories" width="300" />
    </details>
 

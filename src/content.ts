@@ -19,7 +19,6 @@ import { injectPRApproveNow } from "./features/pr-approve-now";
 import { applyDefaultSort } from "./features/default-sort";
 import { injectCommitTags } from "./features/commit-tags";
 import { injectCommitDiffStats } from "./features/commit-diff-stats";
-import { injectBetterTopRepos } from "./features/better-top-repos";
 import {
   cleanupWatchForkStarPopup,
   injectWatchForkStarPopup,
@@ -42,7 +41,6 @@ const FEATURE_KEYS = [
   "feature-default-sort",
   "feature-commit-tags",
   "feature-commit-diff-stats",
-  "feature-better-top-repos",
   "feature-trending-link",
   "feature-watch-fork-star-popup",
   "feature-pr-collapse-expand",
@@ -64,7 +62,6 @@ const FEATURE_CLASSES: Record<FeatureKey, string[]> = {
   "feature-default-sort": [],
   "feature-commit-tags": ["better-github-commit-tag"],
   "feature-commit-diff-stats": ["better-github-commit-diff-stats", "bg-skeleton-pill--commit-diff"],
-  "feature-better-top-repos": [],
   "feature-trending-link": ["better-github-trending-nav"],
   "feature-watch-fork-star-popup": ["bg-wfs-popup"],
   "feature-pr-collapse-expand": ["better-github-toggle-tree", "better-github-collapse-expand"],
@@ -148,9 +145,6 @@ function injectFeature(key: FeatureKey): void {
       break;
     case "feature-commit-diff-stats":
       injectCommitDiffStats();
-      break;
-    case "feature-better-top-repos":
-      injectBetterTopRepos();
       break;
     case "feature-trending-link":
       injectTrendingLink();

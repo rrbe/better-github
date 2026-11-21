@@ -41,10 +41,6 @@
   "featTrendingLinkDesc": {
     "message": "在首頁側欄的 Feed 下方加入 Trending 快捷入口。"
   },
-  "featBetterTopReposName": { "message": "增強的熱門儲存庫" },
-  "featBetterTopReposDesc": {
-    "message": "自動展開「熱門儲存庫」清單，並將你喜愛的儲存庫置頂。"
-  },
   "featDefaultSortName": { "message": "預設依更新時間排序" },
   "featDefaultSortDesc": {
     "message": "PR 和 Issue 清單依最近更新排序，而非建立時間。"
@@ -191,9 +187,6 @@
   "branchCopyTitle": { "message": "點擊複製分支名稱" },
   "prNumberCopyTitle": { "message": "點擊複製 PR 編號" },
   "issueNumberCopyTitle": { "message": "點擊複製 Issue 編號" },
-
-  "pinRepository": { "message": "置頂儲存庫" },
-  "unpinRepository": { "message": "取消置頂" },
 
   "watchers": { "message": "Watchers" },
   "forks": { "message": "Forks" },

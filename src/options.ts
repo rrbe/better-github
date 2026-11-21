@@ -36,7 +36,6 @@ const FEATURE_KEYS = [
   "feature-default-sort",
   "feature-commit-tags",
   "feature-commit-diff-stats",
-  "feature-better-top-repos",
   "feature-trending-link",
   "feature-watch-fork-star-popup",
   "feature-pr-collapse-expand",

@@ -41,10 +41,6 @@
   "featTrendingLinkDesc": {
     "message": "在首页侧栏的 Feed 下方添加 Trending 快捷入口。"
   },
-  "featBetterTopReposName": { "message": "增强的热门仓库" },
-  "featBetterTopReposDesc": {
-    "message": "自动展开「热门仓库」列表，并将你喜爱的仓库置顶。"
-  },
   "featDefaultSortName": { "message": "默认按更新时间排序" },
   "featDefaultSortDesc": {
     "message": "PR 和 Issue 列表按最近更新排序，而非创建时间。"
@@ -191,9 +187,6 @@
   "branchCopyTitle": { "message": "点击复制分支名" },
   "prNumberCopyTitle": { "message": "点击复制 PR 编号" },
   "issueNumberCopyTitle": { "message": "点击复制 Issue 编号" },
-
-  "pinRepository": { "message": "置顶仓库" },
-  "unpinRepository": { "message": "取消置顶" },
 
   "watchers": { "message": "Watchers" },
   "forks": { "message": "Forks" },
