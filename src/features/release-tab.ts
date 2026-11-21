@@ -1,6 +1,7 @@
 import { isRepoPage, getRepoInfo, isReleasesPage } from "../lib/page-detect";
 import { t } from "../lib/i18n";
 import { fetchReleaseCount } from "../lib/github-api";
+import { createNavCounter } from "../lib/nav-counter";
 
 const TAB_CLASS = "better-github-releases-tab";
 
@@ -129,36 +130,7 @@ async function appendReleaseCount(
   const currentRepo = getRepoInfo();
   if (currentRepo?.owner !== owner || currentRepo.repo !== repo) return;
 
-  link.appendChild(createCounter(nativeCounterTemplate, count));
-}
-
-function createCounter(nativeCounterTemplate: HTMLElement | undefined, count: number): HTMLElement {
-  if (nativeCounterTemplate) {
-    const counter = nativeCounterTemplate.cloneNode(true) as HTMLElement;
-    const label = counter.querySelector<HTMLElement>('[data-component="CounterLabel"]');
-    if (label) label.textContent = String(count);
-
-    const hiddenLabel = counter.querySelector<HTMLElement>('[class*="VisuallyHidden"]');
-    if (hiddenLabel) hiddenLabel.textContent = `\u00a0(${count})`;
-    return counter;
-  }
-
-  const counter = document.createElement("span");
-  counter.dataset.component = "counter";
-
-  const label = document.createElement("span");
-  label.className = "Counter";
-  label.dataset.component = "CounterLabel";
-  label.dataset.variant = "secondary";
-  label.ariaHidden = "true";
-  label.textContent = String(count);
-
-  const hiddenLabel = document.createElement("span");
-  hiddenLabel.className = "sr-only";
-  hiddenLabel.textContent = `\u00a0(${count})`;
-
-  counter.append(label, hiddenLabel);
-  return counter;
+  link.appendChild(createNavCounter(nativeCounterTemplate, count));
 }
 
 function findReferenceTab(nav: HTMLElement): HTMLElement | null {

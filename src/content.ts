@@ -10,6 +10,10 @@ import { injectPRReviewStatus } from "./features/pr-review-status";
 import { injectPRDiffStats } from "./features/pr-diff-stats";
 import { injectReleasesTab } from "./features/release-tab";
 import {
+  cleanupActionsInProgressCount,
+  injectActionsInProgressCount,
+} from "./features/actions-in-progress-count";
+import {
   cleanupReleaseAssetDownloads,
   injectReleaseAssetDownloads,
 } from "./features/release-asset-downloads";
@@ -35,6 +39,7 @@ const FEATURE_KEYS = [
   "feature-pr-review-status",
   "feature-pr-diff-stats",
   "feature-release-tab",
+  "feature-actions-in-progress-count",
   "feature-release-downloads-count",
   "feature-pr-label-position",
   "feature-pr-approve-now",
@@ -56,6 +61,7 @@ const FEATURE_CLASSES: Record<FeatureKey, string[]> = {
   "feature-pr-review-status": ["better-github-review-status"],
   "feature-pr-diff-stats": ["better-github-diff-stats", "bg-skeleton-pill--pr-diff"],
   "feature-release-tab": ["better-github-releases-tab"],
+  "feature-actions-in-progress-count": ["better-github-actions-in-progress-count"],
   "feature-release-downloads-count": ["better-github-asset-downloads"],
   "feature-pr-label-position": ["better-github-label-prefix"],
   "feature-pr-approve-now": ["better-github-approve-now", "better-github-approve-dialog-overlay"],
@@ -77,6 +83,7 @@ const FEATURE_CLEANUPS: Partial<Record<FeatureKey, () => void>> = {
   "feature-watch-fork-star-popup": cleanupWatchForkStarPopup,
   "feature-release-downloads-count": cleanupReleaseAssetDownloads,
   "feature-contributor-card": cleanupContributorCard,
+  "feature-actions-in-progress-count": cleanupActionsInProgressCount,
 };
 
 function isExtensionValid(): boolean {
@@ -127,6 +134,9 @@ function injectFeature(key: FeatureKey): void {
       break;
     case "feature-release-tab":
       injectReleasesTab();
+      break;
+    case "feature-actions-in-progress-count":
+      injectActionsInProgressCount();
       break;
     case "feature-release-downloads-count":
       void injectReleaseAssetDownloads();

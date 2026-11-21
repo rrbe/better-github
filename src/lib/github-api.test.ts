@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   approvePR,
+  fetchActionsInProgressCount,
   fetchCommitDiffStats,
   fetchForks,
   fetchPRBranches,
@@ -90,6 +91,20 @@ describe("github-api bridge", () => {
 
     mockRuntime({ response: { ok: false, error: "down" } });
     expect(await fetchReleaseCount("owner", "repo")).toBeNull();
+    expect(console.error).not.toHaveBeenCalled();
+  });
+
+  it("forwards Actions in-progress count requests and silently returns null on failure", async () => {
+    const runtime = mockRuntime({ response: { ok: true, data: 7 } });
+
+    expect(await fetchActionsInProgressCount("owner", "repo")).toBe(7);
+    expect(runtime.sendMessage).toHaveBeenCalledWith(
+      { type: "FETCH_ACTIONS_IN_PROGRESS_COUNT", owner: "owner", repo: "repo" },
+      expect.any(Function),
+    );
+
+    mockRuntime({ response: { ok: false, error: "down" } });
+    expect(await fetchActionsInProgressCount("owner", "repo")).toBeNull();
     expect(console.error).not.toHaveBeenCalled();
   });
 
