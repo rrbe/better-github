@@ -8,6 +8,10 @@ import {
 } from "./features/pr-conflict-indicator";
 import { injectPRReviewStatus } from "./features/pr-review-status";
 import { injectPRDiffStats } from "./features/pr-diff-stats";
+import {
+  injectPRFileTreeDiffStats,
+  cleanupPRFileTreeDiffStats,
+} from "./features/pr-file-tree-diff-stats";
 import { injectReleasesTab } from "./features/release-tab";
 import {
   cleanupReleaseAssetDownloads,
@@ -34,6 +38,7 @@ const FEATURE_KEYS = [
   "feature-pr-conflict-indicator",
   "feature-pr-review-status",
   "feature-pr-diff-stats",
+  "feature-pr-file-tree-diff-stats",
   "feature-release-tab",
   "feature-release-downloads-count",
   "feature-pr-label-position",
@@ -51,6 +56,7 @@ type FeatureKey = (typeof FEATURE_KEYS)[number];
 
 // CSS classes used by each feature's injected elements
 const FEATURE_CLASSES: Record<FeatureKey, string[]> = {
+  "feature-pr-file-tree-diff-stats": ["better-github-file-tree-diff-stats"],
   "feature-pr-branch-names": ["better-github-branch-badge", "bg-skeleton-pill--branch"],
   "feature-pr-conflict-indicator": ["better-github-conflict-indicator"],
   "feature-pr-review-status": ["better-github-review-status"],
@@ -72,6 +78,7 @@ const FEATURE_CLASSES: Record<FeatureKey, string[]> = {
 // DOM run a cleanup hook on disable, before removeFeatureElements() strips their
 // elements by class.
 const FEATURE_CLEANUPS: Partial<Record<FeatureKey, () => void>> = {
+  "feature-pr-file-tree-diff-stats": cleanupPRFileTreeDiffStats,
   "feature-pr-conflict-indicator": cleanupPRConflictIndicator,
   "feature-pr-label-position": cleanupPRLabelPosition,
   "feature-watch-fork-star-popup": cleanupWatchForkStarPopup,
@@ -113,6 +120,9 @@ export function removeFeatureElements(key: FeatureKey): void {
 
 function injectFeature(key: FeatureKey): void {
   switch (key) {
+    case "feature-pr-file-tree-diff-stats":
+      injectPRFileTreeDiffStats();
+      break;
     case "feature-pr-branch-names":
       injectPRBranchNames();
       break;

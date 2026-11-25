@@ -113,6 +113,10 @@
   "featPrApproveNowDesc": {
     "message": "Add an \"approve now\" shortcut to the Reviewers sidebar on PR detail pages. Requires a token."
   },
+  "featPrFileTreeDiffStatsName": { "message": "File Tree Diff Stats" },
+  "featPrFileTreeDiffStatsDesc": {
+    "message": "Show additions and deletions beside files in the PR file tree. Works with classic and preview pages. No token required."
+  },
   "featPrCollapseExpandName": { "message": "Collapse/Expand All Files" },
   "featPrCollapseExpandDesc": {
     "message": "Add a button to collapse or expand all file diffs on PR, commit, and compare pages."
