@@ -115,7 +115,7 @@
   },
   "featPrFileTreeDiffStatsName": { "message": "File Tree Diff Stats" },
   "featPrFileTreeDiffStatsDesc": {
-    "message": "Show additions and deletions beside files in the PR file tree. Works with classic and preview pages. No token required."
+    "message": "Show additions and deletions beside folders in the first three levels of the PR file tree. Totals include all descendants."
   },
   "featPrCollapseExpandName": { "message": "Collapse/Expand All Files" },
   "featPrCollapseExpandDesc": {

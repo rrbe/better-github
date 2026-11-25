@@ -304,18 +304,26 @@ a.better-github-review-popover-item:hover {
   align-items: center;
   gap: 4px;
   margin-left: auto;
-  padding-left: 8px;
-  font-size: 11px;
+  padding-inline-start: 8px;
+  font-size: 12px;
+  font-weight: 500;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
-file-tree .ActionList-item-visual--trailing:has(> .better-github-file-tree-diff-stats) {
-  width: auto;
-  gap: 4px;
+[class*="TreeViewItemContentText"]:has(> .better-github-file-tree-diff-stats) {
+  display: flex;
+  align-items: center;
+  min-width: 0;
 }
 
-file-tree a > .better-github-file-tree-diff-stats {
+[class*="TreeViewItemContentText"]:has(> .better-github-file-tree-diff-stats) > :first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+file-tree button > .better-github-file-tree-diff-stats {
   grid-area: trailingVisual;
 }
 

@@ -3,18 +3,16 @@ import { buildDiffStatsBadge, type DiffStats } from "../lib/diff-stats-badge";
 
 const BADGE_CLASS = "better-github-file-tree-diff-stats";
 const TREE_SELECTOR = '#pr-file-tree, [class*="PullRequestFileTree-module__sidebar"], file-tree';
-const HEADER_SELECTOR = '.js-file-header, [class*="diff-file-header"]';
+const DISPLAYED_LEVELS = ':is([aria-level="1"], [aria-level="2"], [aria-level="3"])';
+const HEADER_SELECTOR = ".js-file-header[data-anchor]";
 const DATA_SELECTOR = 'script[data-target="react-app.embeddedData"]';
 const RELEVANT_SELECTOR = `${TREE_SELECTOR}, ${HEADER_SELECTOR}, ${DATA_SELECTOR}`;
 
 let root: Element | null = null;
 let observer: MutationObserver | null = null;
 let frame: number | null = null;
-let view = "";
-let source = "";
-let summariesValid = false;
-const summaries = new Map<string, DiffStats>();
-const renderedStats = new Map<string, DiffStats>();
+let summarySource: Node | null = null;
+const directoryTotals = new Map<string, DiffStats>();
 
 export function cleanupPRFileTreeDiffStats(): void {
   observer?.disconnect();
@@ -22,45 +20,100 @@ export function cleanupPRFileTreeDiffStats(): void {
   root = null;
   if (frame !== null) cancelAnimationFrame(frame);
   frame = null;
-  view = "";
-  source = "";
-  summariesValid = false;
-  summaries.clear();
-  renderedStats.clear();
+  summarySource = null;
+  directoryTotals.clear();
   document.querySelectorAll(`.${BADGE_CLASS}`).forEach((badge) => badge.remove());
 }
 
-function readSummaries(): void {
-  const script = document.querySelector(DATA_SELECTOR);
-  const text = script?.textContent ?? "";
-  if (text === source) return;
-  source = text;
-  summaries.clear();
-  summariesValid = false;
-  if (!text) return;
-  const initialPath = script?.closest("react-app")?.getAttribute("initial-path");
-  if (initialPath !== view) return;
+function updateBadge(container: Element, stats?: DiffStats): void {
+  const existing = container.querySelector<HTMLElement>(`.${BADGE_CLASS}`);
+  if (!stats) {
+    existing?.remove();
+    return;
+  }
+  const key = `${stats.additions}:${stats.deletions}`;
+  if (existing?.dataset.stats === key) return;
+  const badge = buildDiffStatsBadge(stats, BADGE_CLASS);
+  badge.dataset.stats = key;
+  if (existing) existing.replaceWith(badge);
+  else container.append(badge);
+}
+
+function readDirectoryTotals(tree: Element): void {
+  const app = tree.closest("react-app");
+  const currentView = location.pathname + location.search;
+  const source =
+    app?.getAttribute("initial-path") === currentView
+      ? (app.querySelector(DATA_SELECTOR)?.firstChild ?? null)
+      : null;
+  if (source === summarySource) return;
+  summarySource = source;
+  directoryTotals.clear();
+  if (!source?.textContent) return;
+
+  let entries;
   try {
-    const entries = JSON.parse(text).payload?.pullRequestsChangesRoute?.diffSummaries;
-    if (!Array.isArray(entries)) return;
-    for (const entry of entries) {
-      if (
-        typeof entry.pathDigest !== "string" ||
-        !Number.isInteger(entry.linesAdded) ||
-        entry.linesAdded < 0 ||
-        !Number.isInteger(entry.linesDeleted) ||
-        entry.linesDeleted < 0
-      )
-        continue;
-      summaries.set(`#diff-${entry.pathDigest}`, {
-        additions: entry.linesAdded,
-        deletions: entry.linesDeleted,
+    const { payload } = JSON.parse(source.textContent);
+    const route = payload?.pullRequestsChangesWithRangeRoute ?? payload?.pullRequestsChangesRoute;
+    entries = route?.diffSummaries;
+  } catch {
+    return;
+  }
+  if (!Array.isArray(entries)) return;
+  for (const entry of entries) {
+    if (
+      typeof entry?.path !== "string" ||
+      !Number.isInteger(entry.linesAdded) ||
+      !Number.isInteger(entry.linesDeleted) ||
+      entry.linesAdded < 0 ||
+      entry.linesDeleted < 0
+    )
+      return;
+  }
+  for (const { path, linesAdded, linesDeleted } of entries) {
+    for (let slash = path.indexOf("/"); slash >= 0; slash = path.indexOf("/", slash + 1)) {
+      const directory = path.slice(0, slash);
+      const total = directoryTotals.get(directory) ?? {
+        additions: 0,
+        deletions: 0,
+        changedFiles: null,
+      };
+      total.additions += linesAdded;
+      total.deletions += linesDeleted;
+      directoryTotals.set(directory, total);
+    }
+  }
+}
+
+function updateClassicTree(tree: Element): void {
+  const files = new Map<string, DiffStats>();
+  for (const header of document.querySelectorAll(HEADER_SELECTOR)) {
+    const match = header
+      .querySelector(".file-info .sr-only")
+      ?.textContent?.match(/([\d,]+) additions?\s*&\s*([\d,]+) deletions?/);
+    if (match)
+      files.set(`#${header.getAttribute("data-anchor")}`, {
+        additions: Number(match[1].replaceAll(",", "")),
+        deletions: Number(match[2].replaceAll(",", "")),
         changedFiles: null,
       });
+  }
+  for (const folder of tree.querySelectorAll(
+    `[data-tree-entry-type="directory"]${DISPLAYED_LEVELS}`,
+  )) {
+    const button = folder.querySelector(":scope > button.ActionList-content");
+    if (!button) continue;
+    const links = folder.querySelectorAll('[data-tree-entry-type="file"] > a[href^="#diff-"]');
+    const total = { additions: 0, deletions: 0, changedFiles: null };
+    let counted = 0;
+    for (const link of links) {
+      const stats = files.get(link.getAttribute("href")!);
+      if (!stats) break;
+      total.additions += stats.additions;
+      total.deletions += stats.deletions;
+      counted++;
     }
-    summariesValid = true;
-  } catch {
-    // GitHub's embedded JSON is an external input; headers remain usable.
+    updateBadge(button, counted && counted === links.length ? total : undefined);
   }
 }
 
@@ -69,64 +122,18 @@ function updateStats(): void {
     cleanupPRFileTreeDiffStats();
     return;
   }
-  const currentView = location.pathname + location.search;
-  if (view !== currentView) {
-    view = currentView;
-    summariesValid = false;
-    renderedStats.clear();
+  const tree = document.querySelector(TREE_SELECTOR);
+  if (!tree) return;
+  if (tree.matches("file-tree")) {
+    updateClassicTree(tree);
+    return;
   }
-  readSummaries();
-
-  const headers = new Map<string, DiffStats>();
-  for (const header of document.querySelectorAll(HEADER_SELECTOR)) {
-    const anchor = header.getAttribute("data-anchor");
-    const href = anchor
-      ? `#${anchor}`
-      : header.querySelector('a[href^="#diff-"]')?.getAttribute("href");
-    if (!href) continue;
-    const match = [...header.querySelectorAll(".sr-only")]
-      .map((el) => el.textContent?.match(/([\d,]+) additions?\s*&\s*([\d,]+) deletions?/))
-      .find(Boolean);
-    if (!match) continue;
-    const stats = {
-      additions: Number(match[1].replaceAll(",", "")),
-      deletions: Number(match[2].replaceAll(",", "")),
-      changedFiles: null,
-    };
-    const initial = summaries.get(href);
-    if (
-      summariesValid &&
-      initial &&
-      (initial.additions !== stats.additions || initial.deletions !== stats.deletions)
-    ) {
-      summariesValid = false;
-      renderedStats.clear();
-    }
-    headers.set(href, stats);
-  }
-  for (const [href, stats] of headers) renderedStats.set(href, stats);
-
-  for (const tree of document.querySelectorAll(TREE_SELECTOR)) {
-    for (const link of tree.querySelectorAll<HTMLAnchorElement>('a[href^="#diff-"]')) {
-      const href = link.getAttribute("href")!;
-      const stats = renderedStats.get(href) ?? (summariesValid ? summaries.get(href) : undefined);
-      const container =
-        link.closest(".PRIVATE_TreeView-item-content") ??
-        link.querySelector(".ActionList-item-visual--trailing") ??
-        link;
-      const existing = container.querySelector<HTMLElement>(`.${BADGE_CLASS}`);
-      if (!stats) {
-        existing?.remove();
-        continue;
-      }
-      const key = `${stats.additions}:${stats.deletions}`;
-      if (existing?.dataset.stats === key) continue;
-      existing?.remove();
-      const badge = buildDiffStatsBadge(stats, BADGE_CLASS);
-      badge.dataset.stats = key;
-      if (container.matches(".ActionList-item-visual--trailing")) container.prepend(badge);
-      else container.appendChild(badge);
-    }
+  readDirectoryTotals(tree);
+  for (const folder of tree.querySelectorAll(
+    `li[role="treeitem"][aria-expanded]${DISPLAYED_LEVELS}`,
+  )) {
+    const label = folder.firstElementChild?.querySelector('[class*="TreeViewItemContentText"]');
+    if (label) updateBadge(label, directoryTotals.get(folder.id));
   }
 }
 

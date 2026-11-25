@@ -115,7 +115,7 @@
   },
   "featPrFileTreeDiffStatsName": { "message": "檔案樹增刪行數" },
   "featPrFileTreeDiffStatsDesc": {
-    "message": "在 PR 檔案樹的檔名旁顯示新增和刪除行數，支援經典版和預覽版頁面，無需 token。"
+    "message": "在 PR 檔案樹前三層目錄的右側顯示增刪行數，包含所有子目錄的變更。"
   },
   "featPrCollapseExpandName": { "message": "摺疊/展開所有檔案" },
   "featPrCollapseExpandDesc": {

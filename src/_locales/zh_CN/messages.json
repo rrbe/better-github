@@ -115,7 +115,7 @@
   },
   "featPrFileTreeDiffStatsName": { "message": "文件树增删行数" },
   "featPrFileTreeDiffStatsDesc": {
-    "message": "在 PR 文件树的文件名旁显示新增和删除行数，支持经典版和预览版页面，无需 token。"
+    "message": "在 PR 文件树前三层目录的右侧显示增删行数，包含所有子目录的改动。"
   },
   "featPrCollapseExpandName": { "message": "折叠/展开所有文件" },
   "featPrCollapseExpandDesc": {
