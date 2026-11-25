@@ -113,6 +113,10 @@
   "featPrApproveNowDesc": {
     "message": "在 PR 詳情頁的 Reviewers 側邊欄新增「立即核准」快速入口。需要權杖。"
   },
+  "featPrFileTreeDiffStatsName": { "message": "檔案樹增刪行數" },
+  "featPrFileTreeDiffStatsDesc": {
+    "message": "在 PR 檔案樹前三層目錄的右側顯示增刪行數，包含所有子目錄的變更。"
+  },
   "featPrCollapseExpandName": { "message": "摺疊/展開所有檔案" },
   "featPrCollapseExpandDesc": {
     "message": "在 PR、Commit 和比較頁面新增一個摺疊或展開所有檔案差異的按鈕。"

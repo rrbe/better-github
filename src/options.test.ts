@@ -5,6 +5,7 @@ const FEATURE_KEYS = [
   "feature-pr-conflict-indicator",
   "feature-pr-review-status",
   "feature-pr-diff-stats",
+  "feature-pr-file-tree-diff-stats",
   "feature-release-tab",
   "feature-release-downloads-count",
   "feature-pr-label-position",
