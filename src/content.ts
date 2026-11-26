@@ -26,7 +26,7 @@ import {
 import { injectPRCollapseExpand } from "./features/pr-collapse-expand";
 import { injectContributorCard, cleanupContributorCard } from "./features/contributor-card";
 import { reserveInfoRowSkeletons } from "./lib/info-row-skeleton";
-import { applyPageMarker } from "./lib/page-marker";
+import { applyPageMarker, syncListLayout } from "./lib/page-marker";
 import { injectTrendingLink } from "./features/trending-link";
 
 const FEATURE_KEYS = [
@@ -100,6 +100,7 @@ function getFeatureFlags(): Promise<Record<FeatureKey, boolean>> {
       for (const key of FEATURE_KEYS) {
         flags[key] = result[key] !== false;
       }
+      syncListLayout(flags);
       resolve(flags);
     });
   });
@@ -107,7 +108,12 @@ function getFeatureFlags(): Promise<Record<FeatureKey, boolean>> {
 
 export function removeFeatureElements(key: FeatureKey): void {
   for (const cls of FEATURE_CLASSES[key]) {
-    document.querySelectorAll(`.${cls}`).forEach((el) => el.remove());
+    document.querySelectorAll(`.${cls}`).forEach((el) => {
+      const item = el.closest("[data-bg-info-row-item]") ?? el;
+      const row = item.parentElement;
+      item.remove();
+      if (row?.classList.contains("better-github-info-row") && !row.childElementCount) row.remove();
+    });
   }
 }
 
@@ -174,17 +180,17 @@ if (isExtensionValid()) {
     if (LOCALE_KEY in changes) {
       setLocale((changes[LOCALE_KEY].newValue as LocalePref) ?? "en");
     }
-    for (const key of FEATURE_KEYS) {
-      if (!(key in changes)) continue;
-      const enabled = changes[key].newValue !== false;
-      flags[key] = enabled;
-      if (enabled) {
+    const changedKeys = FEATURE_KEYS.filter((key) => key in changes);
+    for (const key of changedKeys) {
+      flags[key] = changes[key].newValue !== false;
+      if (flags[key]) {
         injectFeature(key);
       } else {
         FEATURE_CLEANUPS[key]?.();
         removeFeatureElements(key);
       }
     }
+    if (changedKeys.length) syncListLayout(flags);
   });
 }
 

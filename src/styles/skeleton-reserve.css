@@ -1,36 +1,18 @@
-/*
- * Pre-reserve info-row height on PR list and commits list pages.
- *
- * content.js runs at document_idle — AFTER GitHub's first paint. When it
- * then mounts the info-row + skeleton, the row grows by 20px, visible as
- * a layout-shift flicker. This file is loaded at document_start with the
- * `<html data-bg-page>` marker (set sync by applyPageMarker), so GitHub's
- * first paint already includes the slot. `:has()` hides the pseudo once
- * the real info-row / commit-diff badge mounts.
- *
- * Reserved height = real badges' outer box: line-height 18px + 1px
- * border × 2 = 20px. Using 18px caused a 2px shift on swap.
- */
-
-[data-bg-page="pr-list"] .js-issue-row::after,
-[data-bg-page="pr-list"]
-  li[role="listitem"]
-  :is(
-    [class*="MainContent-module__inner"],
-    div[class^="container__"] > div[class^="inner__"]
+/* Reserve one badge line until the real info row takes its place. */
+[data-bg-page="pr-list"][data-bg-layout~="pr-row"]
+  .js-issue-row:not(:has(.better-github-info-row))::after,
+[data-bg-page="pr-list"][data-bg-layout~="labels"]
+  .js-issue-row:has(a.IssueLabel):not(:has(.better-github-info-row))::after,
+[data-bg-page="pr-list"][data-bg-layout~="pr-row"]
+  :is(li[role="listitem"], react-app:is([app-name="pull-requests"], [app-name="repo"]) li)
+  :is([class*="MainContent-module__inner"], div[class^="container__"] > div[class^="inner__"]):not(
+    [data-density="compact"] *,
+    :has(.better-github-info-row)
   )::after,
-[data-bg-page="pr-list"]
-  react-app:is([app-name="pull-requests"], [app-name="repo"])
-  li
-  :is(
-    [class*="MainContent-module__inner"],
-    div[class^="container__"] > div[class^="inner__"]
-  )::after,
-[data-bg-page="commits-list"]
+[data-bg-page="commits-list"][data-bg-layout~="commit-row"]
   li[data-testid="commit-row-item"]
-  :is(
-    [class*="MainContent-module__inner"],
-    div[class^="container__"] > div[class^="inner__"]
+  :is([class*="MainContent-module__inner"], div[class^="container__"] > div[class^="inner__"]):not(
+    :has(.better-github-commit-diff-stats, .bg-skeleton-pill--commit-diff)
   )::after {
   content: "";
   display: block;
@@ -38,30 +20,53 @@
   margin-top: 4px;
 }
 
-[data-bg-page="pr-list"] .js-issue-row:has(.better-github-info-row)::after,
-[data-bg-page="pr-list"]
+/* GitHub's React list is a grid. Place its own, clickable labels below the
+   metadata while React hydrates, then let the populated info row take over. */
+[data-bg-page="pr-list"][data-bg-layout~="labels"]
   react-app:is([app-name="pull-requests"], [app-name="repo"])
-  [data-density="compact"]
-  :is(
-    [class*="MainContent-module__inner"],
-    div[class^="container__"] > div[class^="inner__"]
-  )::after,
-[data-bg-page="pr-list"]
-  li[role="listitem"]
-  :is([class*="MainContent-module__inner"], div[class^="container__"] > div[class^="inner__"]):has(
-    .better-github-info-row
-  )::after,
-[data-bg-page="pr-list"]
-  react-app:is([app-name="pull-requests"], [app-name="repo"])
-  li
-  :is([class*="MainContent-module__inner"], div[class^="container__"] > div[class^="inner__"]):has(
-    .better-github-info-row
-  )::after,
-[data-bg-page="commits-list"]
-  li[data-testid="commit-row-item"]
-  :is([class*="MainContent-module__inner"], div[class^="container__"] > div[class^="inner__"]):has(
-    .better-github-commit-diff-stats,
-    .bg-skeleton-pill--commit-diff
-  )::after {
-  display: none;
+  li:not([data-density="compact"] *):has(
+    > [data-listview-item-title-container]
+      > [class*="trailingBadgesContainer"]:not(.better-github-labels-hidden)
+      :is(button, a)
+  ) {
+  grid-template-areas:
+    "selection status primary      metadata actions"
+    "selection status main-content metadata actions"
+    "selection status labels       metadata actions";
+
+  @media (width < 544px) {
+    grid-template-areas:
+      "selection status primary      actions"
+      "selection status main-content actions"
+      "selection status labels       actions"
+      "selection status metadata     actions";
+  }
+
+  > [data-listview-item-title-container] {
+    display: contents;
+
+    > :is(h3, h4) {
+      grid-area: primary;
+      padding-top: var(--listItem-title-paddingTop);
+    }
+    > [class*="trailingBadgesSpacer"] {
+      display: none;
+    }
+    > [class*="trailingBadgesContainer"] {
+      grid-area: labels;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      top: 0;
+      padding: 0 var(--base-size-8, 8px) 10px 0;
+    }
+  }
+
+  :is([class*="MainContent-module__inner"], div[class^="container__"] > div[class^="inner__"]) {
+    padding-bottom: 0;
+
+    &::after {
+      display: none;
+    }
+  }
 }

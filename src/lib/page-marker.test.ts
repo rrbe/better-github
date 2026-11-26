@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { detectPageMarker } from "./page-marker";
+import { detectPageMarker, restoreListLayout, syncListLayout } from "./page-marker";
 
 describe("detectPageMarker", () => {
   it("marks the PR list page", () => {
@@ -17,5 +17,23 @@ describe("detectPageMarker", () => {
     expect(detectPageMarker("/owner/repo/issues")).toBeNull();
     expect(detectPageMarker("/owner/repo")).toBeNull();
     expect(detectPageMarker("/")).toBeNull();
+  });
+});
+
+describe("first-paint list layout", () => {
+  it("restores enabled and fully disabled layouts across document loads", () => {
+    localStorage.clear();
+    restoreListLayout();
+    expect(document.documentElement.dataset.bgLayout).toBe("pr-row labels commit-row");
+    for (const [flags, expected] of [
+      [{ "feature-pr-label-position": true }, "labels"],
+      [{ "feature-pr-branch-names": true, "feature-commit-diff-stats": true }, "pr-row commit-row"],
+      [{}, ""],
+    ] as const) {
+      syncListLayout(flags);
+      delete document.documentElement.dataset.bgLayout;
+      restoreListLayout();
+      expect(document.documentElement.dataset.bgLayout).toBe(expected);
+    }
   });
 });

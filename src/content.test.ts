@@ -19,6 +19,18 @@ describe("removeFeatureElements", () => {
     vi.useRealTimers();
   });
 
+  it("releases the row after its last enabled badge is removed", () => {
+    document.body.innerHTML = `
+      <div class="better-github-info-row">
+        <a data-bg-info-row-item="diff"><span class="better-github-diff-stats"></span></a>
+        <span data-bg-info-row-item="labels" class="better-github-label-prefix">bug</span>
+      </div>`;
+    removeFeatureElements("feature-pr-diff-stats");
+    expect(document.querySelector(".better-github-info-row")?.childElementCount).toBe(1);
+    removeFeatureElements("feature-pr-label-position");
+    expect(document.querySelector(".better-github-info-row")).toBeNull();
+  });
+
   // Guards the original bug: FEATURE_CLASSES for watch-fork-star once listed
   // "bg-wfs-counter-wrap" — the class we add to GitHub's *own* counters — so
   // disabling the feature ran el.remove() on GitHub's native watch/fork/star
@@ -63,16 +75,19 @@ describe("content preferences", () => {
     await import("./content");
     await vi.advanceTimersByTimeAsync(0);
     expect(get).toHaveBeenCalledTimes(2);
+    expect(document.documentElement.dataset.bgLayout).toBe("");
     expect(injectPRBranchNames).not.toHaveBeenCalled();
 
     const onChanged = addListener.mock.calls[0][0];
     await onChanged({ "feature-pr-branch-names": { newValue: true } }, "local");
+    expect(document.documentElement.dataset.bgLayout).toBe("pr-row");
     expect(injectPRBranchNames).toHaveBeenCalledTimes(1);
     await vi.advanceTimersByTimeAsync(2000);
     expect(injectPRBranchNames).toHaveBeenCalledTimes(2);
     expect(get).toHaveBeenCalledTimes(2);
 
     await onChanged({ "feature-pr-branch-names": { newValue: false } }, "local");
+    expect(document.documentElement.dataset.bgLayout).toBe("");
     await vi.advanceTimersByTimeAsync(2000);
     expect(injectPRBranchNames).toHaveBeenCalledTimes(2);
     expect(get).toHaveBeenCalledTimes(2);
